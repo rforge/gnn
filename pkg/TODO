@@ -1,0 +1,5 @@
+- KL(): If an analytical (differentiable) form exits for K-L divergence
+        between copulas, we could propose an interesting extension.
+        (Simpler) extensions to consider first: encoder maps to non-diagonal
+        covariance matrix, Kendall matrix (which we then transform to covariance
+        matrix for use in KL()).

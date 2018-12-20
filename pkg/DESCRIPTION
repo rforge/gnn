@@ -1,0 +1,20 @@
+Package: gnn
+Version: 0.0-1
+Title: Dependence with Neural Networks
+Description: Tools to set-up, investigate and analyze dependence questions with neural networks.
+Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
+                    email = "marius.hofert@uwaterloo.ca"),
+             person(given = "Avinash", family = "Prasad", role = "aut",
+                    email = "a2prasad@uwaterloo.ca"))
+Author: Marius Hofert [aut, cre], Avinash Prasad [aut]
+Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
+Depends: R (>= 3.2.0)
+Imports: keras, tensorflow, qrng
+Suggests: knitr, copula, RColorBrewer
+Enhances:
+License: GPL (>= 3) | file LICENCE
+NeedsCompilation: yes
+VignetteBuilder: knitr
+Repository: CRAN
+Encoding: UTF-8
+Date/Publication: 2018-06-01 19:15:00

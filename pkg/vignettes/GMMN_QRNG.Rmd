@@ -1,0 +1,465 @@
+---
+title: Quasi-Random Number Generators for Multivariate Distributions Based on Generative Neural Networks
+author: Marius Hofert, Avinash Prasad, Mu Zhu
+date: '`r Sys.Date()`'
+output:
+  html_vignette:
+    css: style.css
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Quasi-Random Number Generators for Multivariate Distributions Based on Generative Neural Networks}
+  %\VignetteEncoding{UTF-8}
+---
+<!-- Train on Sharcnet's graham (GPU server) via sbatch start.sh, where the latter contains:
+#!/bin/bash
+#SBATCH --account=$USER
+#SBATCH --mail-user=$USER@uwaterloo.ca
+#SBATCH --mail-type=END
+#SBATCH --gres=gpu:1          # request GPU "generic resource"
+#SBATCH --cpus-per-task=16    # maximum CPU cores per GPU request (16 on Graham)
+#SBATCH --mem=32G             # memory per node
+#SBATCH --time=00-01:30       # time (DD-HH:MM)
+#SBATCH --output=system.out # if %N-%j.out then %N is the node name, %j the jobID
+module load gcc python/3.6 r/3.5.0
+source ~/soft/keras_r/bin/activate
+R CMD BATCH myscript.R
+-->
+
+## 1 Introduction
+
+This vignette accompanies the paper Hofert, Prasad and Zhu (2018, "Quasi-random
+number generators for multivariate distributions based on generative neural
+networks"). The aim is to demonstrate in the form of rather minimal examples how
+some results of this paper can, in principle, be reproduced; note that the paper
+contains many more examples and the corresponding neural networks (NNs) were trained
+on a GPU server (running this vignette from scratch on a GPU server with NVIDIA
+Tesla P100 GPUs takes roughly one hour).
+
+The aim of this project is to construct a general-purpose quasi-random number
+generator (QRNG) for multivariate distributions, say, up to 10 dimensions; note
+that higher dimensional multivariate distributions are extremely difficult to
+learn, more on that in the aforementioned paper. To this end, we utilize
+Sklar's Theorem, according to which any $d$-dimensional
+multivariate distribution function $F$ can be written as
+\begin{align*}
+	F(\mathbf{x})=C(F_1(x_1),\dots,F_d(x_d)),\quad \mathbf{x}\in\mathbb{R}^d,
+\end{align*}
+for a copula $C$ and the margins $F_1,\dots,F_d$ of $F$. Note that Cambou,
+Hofert and Lemieux (2016, "Quasi-random numbers for copula models") recently
+utilized the copula concept for constructing QRNGs for very specific $F$.  Our
+goal here is to construct QRNGs for much more general $F$.  In a nutshell, we
+train a Generative Moment Matching Network (GMMN; a specific type of NN considered
+here) on pseudo-random samples from the underlying copula $C$ to construct an
+approximate pseudo-random number generator (PRNG) from $F$ based on independent
+$\mathrm{U}(0,1)^d$; note that PRNGs are available for virtually any copula used
+in practice. Then, we feed the GMMN with $\mathrm{U}(0,1)^d$ quasi-random numbers
+to achieve a variance reduction effect of Monte Carlo-based estimators.  For
+(much) more details and many more examples, we refer to Hofert, Prasad and Zhu (2018)
+and focus here on the main steps and how to achieve them in R.
+
+We start by loading the R packages we need, sourcing auxiliary functions we
+use and specifying some variables which will remain the same for all examples
+considered.
+```{r setup, message = FALSE}
+## Packages
+library(keras) # R interface to Keras (high-level neural network API)
+library(tensorflow) # R interface to TensorFlow (numerical computation with tensors)
+library(qrng) # quasi-random number generators (QRNGs)
+library(copula) # contains example copulas considered here
+stopifnot(packageVersion("copula") >= "0.999.19") # install from R-Forge if necessary
+library(RColorBrewer) # color palettes
+library(gnn) # for the used GMMN models
+
+## Global training setup
+dim.hid <- 300L # dimension of (single) hidden layer
+ntrn <- 60000L # training dataset size (number of pseudo-random numbers from C)
+nbat <- 5000L # training batch size (number of samples per stochastic gradient step)
+nepo <- 300L # epochs (= passes through training dataset while updating NN parameters)
+stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1) # sanity checks
+```
+
+
+## 2 A bivariate copula example
+
+For illustration purposes, we first consider the bivariate case $d=2$.
+
+
+### 2.1 Visualizing GMMN samples
+
+As a first step, we define the copula of interest. Here, this is a mixture
+between a Clayton copula and a $t_4$ copula rotated by 90 degrees (with equal
+mixture weights). We then generated the training dataset from a PRNG from this
+copula.
+```{r 2.1_definition_training_dataset}
+## Define a Clayton-t(90) copula (a mixture of a Clayton and rotated t copula)
+dim.out <- 2 # dimension of the output layer of the GMMN (= copula dimension)
+tau <- 0.5 # Kendall's tau of the Clayton and the (rotated) t copula
+nu <- 4 # degrees of freedom of the (rotated) t copula
+C.cop <- claytonCopula(iTau(claytonCopula(), tau = tau), dim = dim.out) # Clayton copula
+t.cop <- tCopula(iTau(tCopula(), tau = tau), dim = dim.out, df = nu) # t copula
+t90.cop <- rotCopula(t.cop, flip = c(TRUE, FALSE)) # t copula rotated by 90 degrees
+w <- c(1/2, 1/2) # mixture weights
+mix.cop <- mixCopula(list(C.cop, t90.cop), w = w) # the mixture copula
+
+## Generate training samples from the Clayton-t(90) copula with a PRNG
+set.seed(271) # for reproducibility
+U.mix <- rCopula(ntrn, copula = mix.cop) # training dataset
+```
+
+Next, we set up the GMMN and train it based on the training dataset `U.mix`
+and a sample of equal size from the prior distribution. The GMMN thus
+contains the learned map from a sample from the prior distribution to the
+training dataset.
+```{r 2.1_training}
+## Train the GMMN
+dim.in <- 2 # dimension of the prior distribution which is fed into the GMMN
+objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
+                  "_nbat_",nbat,"_nepo_",nepo,"_mixCrt",nu)
+if(dataset_exists(objname)) { # get trained GMMN
+    GMMN.mix <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
+} else { # train the GMMN and save it
+    ## Generate a sample from the prior distribution that is fed into the GMMN
+    N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
+    ## Define the GMMN model
+    GMMN.mix <- GMMN_model(c(dim.in, dim.hid, dim.out))
+    ## Train the GMMN (caution: time-consuming)
+    print(system.time(GMMN.mix %>% fit(x = N01.prior, y = U.mix, epochs = nepo,
+                                       batch_size = nbat)))
+    ## Save the trained GMMN
+    save_rda(serialize_model(GMMN.mix), name = objname,
+             file = paste0(objname,".rda"))
+}
+```
+
+After training of the GMMN to the mixture copula data, we can use it as a PRNG
+from this mixture copula or, and this is a rather surprising result, as a QRNG
+from the mixture copula; note that the variance-reduction effect is presented
+later. To this end, we feed the GMMN with $\mathrm{N}(0,1)$ pseudo-random or
+quasi-random numbers, respectively, our prior distribution.
+```{r 2.1_sampling}
+ngen <- 1000L # sample size of the generated date
+## Sample from the prior distribution (pseudo-random and quasi-random numbers)
+N01.prior.PRNG <- matrix(rnorm(ngen * dim.in), ncol = dim.in) # N(0,1) PRNG
+N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in, randomize = TRUE)) # N(0,1) QRNG
+## Generate data from the fitted GMMN
+## Note: - predict() works for objects of class keras.engine.training.Model;
+##         see ?predict.keras.engine.training.Model
+##       - for pobs(), see Hofert, Prasad and Zhu (2018)
+U.mix.GMMN.PRNG <- pobs(predict(GMMN.mix, x = N01.prior.PRNG))
+U.mix.GMMN.QRNG <- pobs(predict(GMMN.mix, x = N01.prior.QRNG))
+```
+
+Let us now use these samples to reproduce the top row of Figure 7 of Hofert,
+Prasad and Zhu (2018), so a pseudo-random sample from the mixture copula,
+a pseudo-random sample from the trained GMMN and a quasi-random sample
+from the trained GMMN; note that we added titles here.
+```{r 2.1_plot, fig.align = "center", fig.width = 12, fig.height = 4.5, fig.show = "hold"}
+layout(t(1:3)) # 1 x 3 layout
+opar <- par(pty = "s") # square plots
+plot(U.mix[1:ngen,],  main = "PRNG sample",      xlab = bquote(U[1]), ylab = bquote(U[2]))
+plot(U.mix.GMMN.PRNG, main = "GMMN PRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
+plot(U.mix.GMMN.QRNG, main = "GMMN QRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
+par(opar) # restore graphical parameters
+layout(1) # restore layout
+```
+Note that Hofert, Prasad and Zhu (2018) even consider mixtures with singular
+components and the GMMN picks up such null sets well.
+
+
+### 2.2 Assessing the accuracy of GMMN samples
+
+We now quickly have a visual assessment whether the generated samples from the
+trained GMMN are indeed samples from the mixture copula considered; see Hofert,
+Prasad and Zhu (2018) for a more formal assessment. To this end, we compute the
+Rosenblatt transformation based on the GMMN PRNG samples (which, if the training
+worked well, should produce pseudo-random numbers from $\mathrm{U}(0,1)^2$)
+and also based on the GMMN QRNG samples.
+```{r, 2.2_Rosenblatt}
+## Rosenblatt transform of the Clayton-t(90) mixture copula from GMMN PRNG samples
+R.GMMN.PRNG <- cCopula(U.mix.GMMN.PRNG, copula = mix.cop)
+## Rosenblatt transform of the Clayton-t(90) mixture copula from GMMN QRNG samples
+R.GMMN.QRNG <- cCopula(U.mix.GMMN.QRNG, copula = mix.cop)
+```
+
+Let us now plot both Rosenblatt-transformed GMMN samples and visually check
+that we indeed see no departures from uniformity. For the GMMN PRNG samples, this
+reproduces the plot on the left-hand side of Figure 9 of Hofert, Prasad and Zhu (2018).
+```{r 2.2_plot, fig.align = "center", fig.width = 12, fig.height = 6, fig.show = "hold"}
+layout(t(1:2)) # 1 x 2 layout
+opar <- par(pty = "s") # square plots
+plot(R.GMMN.PRNG, main = "Rosenblatt-transformed GMMN PRNG sample",
+     xlab = bquote(R[1]), ylab = bquote(R[2]))
+plot(R.GMMN.QRNG, main = "Rosenblatt-transformed GMMN QRNG sample",
+     xlab = bquote(R[1]), ylab = bquote(R[2]))
+par(opar) # restore graphical parameters
+layout(1) # restore layout
+```
+
+
+## 3 Higher-dimensional copula examples
+
+In this section, we consider five-dimensional $t_4$ and nested Gumbel copulas.
+We start by defining the two copulas and generating the training datasets (via a PRNG)
+for them.
+```{r 3_definition_training_dataset}
+## Define a t_4 copula
+dim.out <- 5 # dimension of the output layer of the GMMN (= copula dimension)
+tau <- 0.5 # Kendall's tau
+nu <- 4 # degrees of freedom
+t.cop <- tCopula(iTau(tCopula(), tau = tau), dim = dim.out, df = nu) # t copula
+
+## Define a nested Gumbel copula
+family <- "Gumbel" # copula family
+taus <- c(0.25, 0.5, 0.75) # Kendall taus
+th <- iTau(archmCopula(family), tau = taus) # corresponding parameters
+ds <- c(2, 3) # sector dimensions
+nlist <- list(th[1], NULL, list(list(th[2], 1:ds[1]), # copula structure
+                                list(th[3], (ds[1]+1):sum(ds))))
+NG.cop <- onacopulaL(family, nacList = nlist) # nested Gumbel copula
+
+## Generate training samples from the t_4 and nested Gumbel copulas with a PRNG
+set.seed(271) # for reproducibility
+U.t  <- rCopula(ntrn, copula =  t.cop) # training dataset (t_4 copula)
+U.NG <- rCopula(ntrn, copula = NG.cop) # training dataset (nested Gumbel copula)
+```
+
+Next, we set up the GMMNs and train them based on the training datasets `U.t`
+and `U.NG` and samples of equal sizes from the prior distributions.
+```{r 3_training}
+## Train the GMMN based on the t_4 copula
+dim.in <- 5 # dimension of the prior distributions which are fed into the GMMNs
+objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
+                 "_nbat_",nbat,"_nepo_",nepo,"_t",nu)
+if(dataset_exists(objname)) { # get the saved trained GMMN
+    GMMN.t <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
+} else { # train the GMMN and save it
+    ## Generate a sample from the prior distribution that is fed into the GMMN
+    N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
+    ## Define the GMMN model
+    GMMN.t <- GMMN_model(c(dim.in, dim.hid, dim.out))
+    ## Train the GMMN (caution: time-consuming)
+    print(system.time(GMMN.t %>% fit(x = N01.prior, y = U.t, epochs = nepo,
+                                     batch_size = nbat)))
+    ## Save the trained GMMN
+    save_rda(serialize_model(GMMN.t), name = objname,
+             file = paste0(objname,".rda"))
+}
+
+## Train the GMMN based on the nested Gumbel copula
+objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
+                 "_nbat_",nbat,"_nepo_",nepo,"_NG",
+                 paste0(ds, collapse = ""))
+if(dataset_exists(objname)) { # get the saved trained GMMN
+    GMMN.NG <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
+} else { # train the GMMN and save it
+    ## Generate a sample from the prior distribution that is fed into the GMMN
+    N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
+    ## Define the GMMN model
+    GMMN.NG <- GMMN_model(c(dim.in, dim.hid, dim.out))
+    ## Train the GMMN (caution: time-consuming)
+    print(system.time(GMMN.NG %>% fit(x = N01.prior, y = U.NG, epochs = nepo,
+                                      batch_size = nbat)))
+    ## Save the trained GMMN
+    save_rda(serialize_model(GMMN.NG), name = objname,
+             file = paste0(objname,".rda"))
+}
+```
+
+
+### 3.1 Assessing the accuracy of GMMN samples
+
+To assess the accuracy of GMMN samples in higher dimensions, we consider
+box plots (based on $B=100$ replications) of Cramer-von Mises statistics for
+pseudo-random GMMN samples in comparison to copula samples generated from a
+PRNG.
+```{r 3.1_CvM}
+##' @title Cramer-von Mises Statistic for GMMN and Copula Samples
+##' @param n sample size of the generated GMMN and copula samples
+##' @param copula true copula
+##' @param GMMN GMMN trained to 'copula'
+##' @param dim.in dimension of the prior distribution which is fed into the GMMN
+##' @return numeric(2) containing the Cramer-von Mises statistics
+##'         evaluated based on the generated samples from the provided
+##'         copula and trained GMMN
+CvM <- function(n, copula, GMMN, dim.in)
+{
+    ## Generate from pseudo-observations of PRNG of the given copula
+    U.PRNG <- pobs(rCopula(n, copula = copula))
+    ## Generate from trained GMMN
+    U.GMMN.PRNG <- pobs(predict(GMMN, x = matrix(rnorm(n * dim.in), ncol = dim.in)))
+    ## Compute and return Cramer-von Mises statistics
+    c(CvM_PRNG      = gofTstat(U.PRNG,      copula = copula),
+      CvM_GMMN_PRNG = gofTstat(U.GMMN.PRNG, copula = copula))
+}
+
+## Compute B replications of the Cramver-von Mises statistics
+## for both copulas and their trained GMMNs
+objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
+                  "_nbat_",nbat,"_nepo_",nepo,"_CvM_est")
+if(dataset_exists(objname)) { # get the saved godness-of-fit statistics
+    CvMstat <- read_dataset(objname)
+} else {
+    B <- 100 # number of replications
+    CvMstat <- rbind( # (4, B) matrix
+        replicate(B, CvM(ngen, copula =  t.cop, GMMN = GMMN.t,  dim.in = dim.in)),
+        replicate(B, CvM(ngen, copula = NG.cop, GMMN = GMMN.NG, dim.in = dim.in)))
+    rownames(CvMstat) <- c("CvM.t.PRNG",  "CvM.t.GMMN.PRNG",
+                           "CvM.NG.PRNG", "CvM.NG.GMMN.PRNG")
+    save_rda(CvMstat, name = objname, file = paste0(objname,".rda"))
+}
+```
+
+We can now produce the box plots given on the top left of Figure 10 and the middle
+right of Figure 11 of Hofert, Prasad and Zhu (2018).
+```{r 3.1_plot, fig.align = "center", fig.width = 12, fig.height = 6, fig.show = "hold"}
+layout(t(1:2)) # 1 x 2 layout
+opar <- par(pty = "s") # square plots
+## Box plot for the t copula
+boxplot(list(CvMstat["CvM.t.PRNG",], CvMstat["CvM.t.GMMN.PRNG",]),
+        names = c("PRNG", "GMMN PRNG"), ylab = expression(S[n[gen]]))
+mtext(substitute("t, d ="~d, list(d = dim.out)), side = 4,line = 0.5, adj = 0.5)
+## Box plot for the nested Gumbel copula
+boxplot(list(CvMstat["CvM.NG.PRNG",], CvMstat["CvM.NG.GMMN.PRNG",]),
+        names = c("PRNG", "GMMN PRNG"), ylab = expression(S[n[gen]]))
+mtext(substitute("Nested Gumbel, d ="~d, list(d = dim.out)),
+      side = 4, line = 0.5, adj = 0.5)
+par(opar) # restore graphical parameters
+layout(1) # restore layout
+```
+
+
+### 3.2 Variance reduction capability
+
+We demonstrate the efficiency of our GMMN-based randomized quasi-Monte Carlo (RQMC)
+estimator by analyzing its variance reduction when estimating the risk measure
+expected shortfall of the aggregate loss at confidence level $0.99$. To this
+end, we first define a couple of auxillary functions.
+```{r 3.2_auxiliary_functions}
+##' @title Expected Shortfall Estimates of the Aggregate Loss
+##' @param n sample size of the generated GMMN and copula samples
+##' @param copula true copula
+##' @param GMMN GMMN trained to 'copula'
+##' @param dim.in dimension of the prior distribution which is fed into the GMMN
+##' @param alpha confidence level
+##' @param is.firstkind logical indicating whether the copula is of the first kind
+##' @return numeric(2) or numeric(3) containing expected shortfall estimates
+##'         of the aggregate loss based on a PRNG, the GMMN QRNG and,
+##'         if is.firstkind, of a (true) QRNG via the conditional distribution
+##'         method (CDM).
+##' @note For copulas of the first kind (see Hofert, Prasad and Zhu (2018)), we
+##'       can additionally compute  variance estimates for the CDM-based RQMC
+##'       estimator. The t copula is such an example, the nested Gumbel copula
+##'       is of the third kind, though.
+ES_aggregate_loss <- function(n, copula, GMMN, dim.in, alpha, is.firstkind = FALSE)
+{
+    ## PRNG based expected shortfall estimate
+    S.PRNG <- rowSums(qnorm(rCopula(n, copula = copula))) # (aggregate) loss (PRNG)
+    VaR.PRNG <- quantile(S.PRNG, probs = alpha, type = 1) # VaR estimate
+    ES.PRNG <- mean(S.PRNG[S.PRNG > VaR.PRNG]) # ES estimate
+    ## GMMN PRNG based expected shortfall estimate
+    N01.prior.QRNG <- qnorm(sobol(n, d = dim.in, randomize = TRUE)) # N(0,1) QRNG samples
+    S.GMMN.QRNG <- rowSums(qnorm(pobs(predict(GMMN, x = N01.prior.QRNG)))) # loss (QRNG)
+    VaR.GMMN.QRNG <- quantile(S.GMMN.QRNG, probs = alpha, type = 1) # VaR estimate
+    ES.GMMN.QRNG <- mean(S.GMMN.QRNG[S.GMMN.QRNG > VaR.GMMN.QRNG]) # ES estimate
+    ## QRNG based expected shortfall estimate (if available)
+    if (is.firstkind) { # as before but based on a QRNG via the CDM
+        S.QRNG <- rowSums(qnorm(cCopula(sobol(n, d = dim.in, randomize = TRUE),
+                                        copula = copula, inverse = TRUE)))
+        VaR.QRNG <- quantile(S.QRNG, probs = alpha, type = 1) # VaR estimate
+        ES.QRNG <- mean(S.QRNG[S.QRNG > VaR.QRNG]) # ES estimate
+        c(ES.PRNG = ES.PRNG, ES.GMMN.QRNG = ES.GMMN.QRNG, ES.QRNG = ES.QRNG)
+    } else c(ES.PRNG = ES.PRNG, ES.GMMN.QRNG = ES.GMMN.QRNG)
+}
+
+##' @title Variance Estimates of Expected Shortfall Estimates of the Aggregate Loss
+##' @param n sample size of the generated GMMN and copula samples
+##' @param copula true copula
+##' @param GMMN GMMN trained to 'copula'
+##' @param dim.in dimension of the prior distribution which is fed into the GMMN
+##' @param is.firstkind logical indicating whether the copula is of the first kind
+##' @param alpha confidence level
+##' @param B number of replications based on which the variance is estimated
+##' @return numeric(3) (if is.firstkind) or numeric(2) (if !is.firstkind)
+##'         containing the variance estimates of expected shortfall
+ES_variance <- function(n, copula, GMMN, dim.in, is.firstkind, alpha = 0.99, B = 25)
+{
+    ES <- replicate(B, ES_aggregate_loss(n, copula = copula, GMMN = GMMN,
+                                         dim.in = dim.in, alpha = alpha,
+                                         is.firstkind = is.firstkind))
+    apply(ES, 1, var) # compute variances
+}
+```
+
+We now estimate the variance of our GMMN-based RQMC estimator based on
+the sample sizes $n_{\text{gen}}=\{2^9,2^{9.5},\dots,2^{18}\}$. For
+each $n_{\text{gen}}$, the estimator is computed $B=25$ times and
+variance estimates are computed from these replications. We also
+compute regression coefficients as an approximation of the convergence
+rates.
+```{r 3.2_variance_estimation}
+## Estimate the variances for various n
+ns <- round(2^seq(9, 18, by = 0.5)) # sample sizes n for which ES estimates are computed
+objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
+                  "_nbat_",nbat,"_nepo_",nepo,"_ES99_var_est")
+if(dataset_exists(objname)) { # if it exist, get the saved variance estimates
+    vars <- read_dataset(objname)
+} else { # compute the variance estimates
+    vars <- rbind(sapply(ns, function(n)
+                      ES_variance(n, copula = t.cop, GMMN = GMMN.t,
+                                  dim.in = dim.in, is.firstkind = TRUE)),
+                  sapply(ns, function(n)
+                      ES_variance(n, copula = NG.cop, GMMN = GMMN.NG,
+                                  dim.in = dim.in, is.firstkind = FALSE)))
+    rownames(vars) <- c("Var.ES.t.PRNG", "Var.ES.t.GMMN.QRNG", "Var.ES.t.QRNG",
+                        "Var.ES.NG.PRNG", "Var.ES.NG.GMMN.QRNG")
+    save_rda(vars, name = objname, file = paste0(objname,".rda"))
+}
+
+## Compute the regression coefficients alpha
+alpha <- c(t.PRNG       = coef(lm(log(vars["Var.ES.t.PRNG",])       ~ log(ns)))[[2]],
+           t.GMMN.QRNG  = coef(lm(log(vars["Var.ES.t.GMMN.QRNG",])  ~ log(ns)))[[2]],
+           t.QRNG       = coef(lm(log(vars["Var.ES.t.QRNG",])       ~ log(ns)))[[2]],
+           NG.PRNG      = coef(lm(log(vars["Var.ES.NG.PRNG",])      ~ log(ns)))[[2]],
+           NG.GMMN.QRNG = coef(lm(log(vars["Var.ES.NG.GMMN.QRNG",]) ~ log(ns)))[[2]])
+alpha. <- abs(round(alpha, 2))
+```
+
+We can now produce the variance plots given on the top middle and on the bottom
+middle of Figure 15 of Hofert, Prasad and Zhu (2018).
+```{r 3.2_plot, fig.align = "center", fig.width = 12, fig.height = 6, fig.show = "hold"}
+layout(t(1:2)) # 1 x 2 layout
+opar <- par(pty = "s") # square plots
+ran <- range(vars) # plot range
+cols <- brewer.pal(8, name = "Dark2")[c(7, 3, 5, 4)] # colors
+
+## Plot of variance estimates of the Monte Carlo, RQMC (based on the CDM)
+## and GMMN-based RQMC estimator for the t copula
+plot(ns, vars["Var.ES.t.PRNG",], ylim = ran, log = "xy", type = "b", col = cols[1],
+     xlab = expression(n[gen]), ylab = "Variance estimates")
+lines(ns, vars["Var.ES.t.GMMN.QRNG",], type = "b", col = cols[2])
+lines(ns, vars["Var.ES.t.QRNG",],      type = "b", col = cols[3])
+legend("topright", bty = "n", lty = rep(1, 3), col = cols[1:3],
+       legend = as.expression(
+           c(substitute("PRNG,"~alpha == a,       list(a = alpha.["t.PRNG"])),
+             substitute("GMMN Sobol,"~alpha == a, list(a = alpha.["t.GMMN.QRNG"])),
+             substitute("CDM Sobol,"~alpha == a,  list(a = alpha.["t.QRNG"])))))
+mtext(substitute(paste("t,"~d == d.), list(d. = dim.out)), side = 4, line = 0.5, adj = 0.5)
+
+## Plot of variance estimates of the Monte Carlo and the GMMN-based RQMC
+## estimator for the nested Gumbel copula
+plot(ns, vars["Var.ES.NG.PRNG",], ylim = ran, log = "xy", type = "b", col = cols[1],
+     xlab = expression(n[gen]), ylab = "Variance estimates")
+lines(ns, vars["Var.ES.NG.GMMN.QRNG",], type = "b", col = cols[2])
+legend("topright", bty = "n", lty = rep(1, 2), col = cols[1:2],
+       legend = as.expression(
+           c(substitute("PRNG,"~alpha == a,       list(a = alpha.["NG.PRNG"])),
+             substitute("GMMN Sobol,"~alpha == a, list(a = alpha.["NG.GMMN.QRNG"])))))
+mtext(substitute(paste("Nested Gumbel,"~d == d.), list(d. = dim.out)),
+      side = 4, line = 0.5, adj = 0.5)
+
+par(opar) # restore graphical parameters
+layout(1) # restore layout
+```
+For more examples and details, see Hofert, Prasad and Zhu (2018). In particular,
+see the appendix for a misconception regarding the learning of the underlying
+probability distribution of popular generative neural networks.
