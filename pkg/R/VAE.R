@@ -139,7 +139,7 @@ VAE_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid
         ## decoder_1,..., decoder_{num.hidden}) with the appropriate dimensions
         ## and activation functions.
         assign(paste0("decoder", i, sep = "_"),
-               layer_dense(units = dim[1 + num.hidden - i],
+               layer_dense(units = dim[2 + num.hidden - i],
                            activation = activation[1+num.hidden - i]))
         ## We now instantiate these (hidden) layers by establishing the
         ## connection to the latent layer.
