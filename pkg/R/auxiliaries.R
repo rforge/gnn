@@ -48,7 +48,7 @@ read_dataset <- function(x, rm = TRUE, package = packageName(), envir = .GlobalE
 save_rda <- function(x, names = names(x),
                      file = paste0(paste0(names(x), collapse = "_"), ".rda"), ...)
 {
-    stopifnot(is.character(file), is.null(names))
+    stopifnot(is.character(file), !is.null(names))
     if(is.list(x) && !is.data.frame(x)) { # create objects with names 'names' containing the objects in x
         for(i in seq_len(length(x))) # note: fails with sapply()
             assign(names[i], value = x[[i]])

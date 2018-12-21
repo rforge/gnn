@@ -71,7 +71,7 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
     ##    Note: - Required to be provided like that as otherwise:
     ##            "Error in loss(x, y = out.lay, ...) : object 'x' not found"
     ##          - unserialize_model() calls need to provide 'custom_objects = c(loss = MMD)'
-    loss <- function(x, y = out.lay)
+    loss_fn <- function(x, y = out.lay)
         loss(x, y = y, type = "MMD", ...) # GMMNs need to have "MMD" (otherwise not GMMNs)
 
     ## 4) Compile the model

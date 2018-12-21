@@ -166,7 +166,7 @@ VAE_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid
     ## 3) Loss function
     ## Note: - Required to be provided like that; see GMMN_model()
     ##       - unserialize_model() calls need to provide 'custom_objects = c(loss = RKL)'
-    loss <- function(x, y = out.lay)
+    loss_fn <- function(x, y = out.lay)
         KL(mean = mean, log.var = log.var) +
             (dim[1]/1.0) * loss(x, y = y, type = loss.type, ...) # multiply reconstruction loss by dimension (of output dataset) to ensure the two losses are of the same order
 
