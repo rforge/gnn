@@ -116,7 +116,7 @@ dim.in <- 2 # dimension of the prior distribution which is fed into the GMMN
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                   "_nbat_",nbat,"_nepo_",nepo,"_mixCrt",nu)
 if(dataset_exists(objname)) { # get trained GMMN
-    GMMN.mix <- unserialize_model(read_dataset(objname), custom_objects = c(loss_fn = loss))
+    GMMN.mix <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
     ## Generate a sample from the prior distribution that is fed into the GMMN
     N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
@@ -231,7 +231,7 @@ dim.in <- 5 # dimension of the prior distributions which are fed into the GMMNs
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                  "_nbat_",nbat,"_nepo_",nepo,"_t",nu)
 if(dataset_exists(objname)) { # get the saved trained GMMN
-    GMMN.t <- unserialize_model(read_dataset(objname), custom_objects = c(loss_fn = loss))
+    GMMN.t <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
     ## Generate a sample from the prior distribution that is fed into the GMMN
     N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
@@ -250,7 +250,7 @@ objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                  "_nbat_",nbat,"_nepo_",nepo,"_NG",
                  paste0(ds, collapse = ""))
 if(dataset_exists(objname)) { # get the saved trained GMMN
-    GMMN.NG <- unserialize_model(read_dataset(objname), custom_objects = c(loss_fn = loss))
+    GMMN.NG <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
     ## Generate a sample from the prior distribution that is fed into the GMMN
     N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples

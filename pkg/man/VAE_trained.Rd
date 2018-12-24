@@ -1,8 +1,8 @@
-\name{GMMN_trained}
+\name{VAE_trained}
 % Trained neural networks
 \alias{VAE_gen_dim_2_300_560_ntrn_1965_nbat_100_nepo_300_freyfaces}
-\alias(VAE_gen_dim_2_3_300_784_ntrn_60000_nbat_100_nepo_100_fmnist}
-
+\alias{VAE_gen_dim_2_3_300_784_ntrn_60000_nbat_100_nepo_100_fmnist}
+\title{Trained Variational autoencoder (generator component)}
 \description{
 The generator component of trained variational autoencoders (VAEs). These VAE generators are used in the 
 the vignette \code{VAE}.

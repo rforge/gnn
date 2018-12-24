@@ -10,7 +10,7 @@ Author: Marius Hofert [aut, cre], Avinash Prasad [aut]
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.2.0)
 Imports: keras, tensorflow, qrng
-Suggests: knitr, copula, RColorBrewer
+Suggests: knitr, copula, RColorBrewer, RnavGraphImageData
 Enhances:
 License: GPL (>= 3) | file LICENCE
 NeedsCompilation: yes
