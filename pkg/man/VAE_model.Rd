@@ -41,8 +41,8 @@ VAE_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
 }
 \value{
   \code{VAE_model()} returns a \code{\link{list}} with components
-  \code{"model"}, \code{"encoder"} and \code{"generator"} containing the VAE model,
-  its encoder and generator.
+  \code{"model"}, \code{"encoder"} and \code{"generator"} containing the
+  VAE model, its encoder and generator.
 }
 \references{
   Kingma, D. P. and Welling, M. (2014).

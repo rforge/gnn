@@ -64,13 +64,13 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
                  with(tf$device("/cpu:0"), {
                      model. <- keras_model(in.lay, out.lay)
                  })
-                 multi_gpu_model(model., gpus = nGPUs) # replicated model on different GPUs
+                 multi_gpu_model(model., gpus = nGPUs) # replicated model on different GPUsy
              } else keras_model(in.lay, out.lay)
 
     ## 3) Loss function
     ##    Note: - Required to be provided like that as otherwise:
     ##            "Error in loss(x, y = out.lay, ...) : object 'x' not found"
-    ##          - unserialize_model() calls need to provide 'custom_objects = c(loss = MMD)'
+    ##          - unserialize_model() calls need to provide 'custom_objects = c(loss = loss)'
     loss_fn <- function(x, y = out.lay)
         loss(x, y = y, type = "MMD", ...) # GMMNs need to have "MMD" (otherwise not GMMNs)
 

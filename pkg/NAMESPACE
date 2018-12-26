@@ -7,7 +7,8 @@ importFrom("keras",
            "layer_dropout", "k_shape", "%>%", "layer_concatenate",
            "layer_lambda", "k_random_normal", "keras_model", "multi_gpu_model",
            "compile", "k_mean", "k_square", "k_exp",
-           "loss_mean_squared_error", "loss_binary_crossentropy")
+           "loss_mean_squared_error", "loss_binary_crossentropy",
+           "save_model_weights_hdf5", "load_model_weights_hdf5")
 importFrom("tensorflow",
            "tf")
 importFrom("utils",

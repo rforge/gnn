@@ -1,5 +1,6 @@
 ---
-title: Quasi-Random Number Generators for Multivariate Distributions Based on Generative Neural Networks
+title: Quasi-Random Number Generators for Multivariate Distributions
+       Based on Generative Neural Networks
 author: Marius Hofert, Avinash Prasad, Mu Zhu
 date: '`r Sys.Date()`'
 output:
