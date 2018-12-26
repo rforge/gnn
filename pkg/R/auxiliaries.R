@@ -56,39 +56,36 @@ save_rda <- function(x, names = names(x),
     save(list = names, file = file, ...) # save R object(s) 'names' in 'file'
 }
 
-## Auxiliary functions for converting keras model weights to R objects and vice versa
 
-##' @title Convert Keras model weights to R objects
+### Auxiliary functions for converting Keras model weights to R objects and vice versa
+
+##' @title Convert Keras Model Weights to R Objects
 ##' @param model A Keras model
 ##' @return R object containing 'model' weights
 ##' @author Avinash Prasad
-##' @note In the same vein as Keras function serialize_model() which serializes Keras models 
-##' (rather than model weights)  to R objects.
-serialize_weights<-function(model){
-  # Ensure model provided is a Keras model
-  stopifnot(inherits(model, "keras.engine.training.Model"))
-  ## create a temporary hdf5 file to which we write the Keras model weights
-  tmp <- tempfile(pattern = "file", fileext = ".h5")  
-  on.exit(unlink(tmp), add = TRUE)
-  save_model_weights_hdf5(model, tmp)
-  
-  # Convert saved temp hdf5 file back to an R object
-  readBin(tmp, what = "raw", n = file.size(tmp))
+##' @note Similar to keras::serialize_model() which serializes Keras models
+##'       (rather than model weights) to R objects.
+serialize_weights <- function(model)
+{
+    stopifnot(inherits(model, "keras.engine.training.Model"))
+    tmp <- tempfile(pattern = "file", fileext = ".h5") # create temporary hdf5 file to which we write the Keras model weights
+    on.exit(unlink(tmp), add = TRUE)
+    save_model_weights_hdf5(model, tmp)
+    readBin(tmp, what = "raw", n = file.size(tmp)) # convert saved temp hdf5 file back to an R object
 }
-##' @title Load model weights into a keras model from a R object
-##' @param model A Keras model
+
+##' @title Load Model Weights into a Keras Model from an R Object
+##' @param model a Keras model
 ##' @param model.weights R object containing model weights
 ##' @return Keras model with 'model.weights' loaded into 'model'.
 ##' @author Avinash Prasad
 ##' @note In the same vein as Keras function unserialize_model() which loads R objects
 ##' into keras models.
-unserialize_weights<-function(model,model.weights){
-  # Ensure model provided is a Keras model
-  stopifnot(inherits(model, "keras.engine.training.Model"))
-  ## Create a temp hdf5 file in which we place the model weights provided by the R object 
-  tmp <- tempfile(pattern = "file", fileext = ".h5")  
-  on.exit(unlink(tmp), add = TRUE)
-  writeBin(model.weights, tmp)
-  ## Load the model weights back into the model
-  load_model_weights_hdf5(model, tmp)
+unserialize_weights <- function(model, model.weights)
+{
+    stopifnot(inherits(model, "keras.engine.training.Model"))
+    tmp <- tempfile(pattern = "file", fileext = ".h5") # create temporary hdf5 file to which we write the model weights provided by the R object
+    on.exit(unlink(tmp), add = TRUE)
+    writeBin(model.weights, tmp)
+    load_model_weights_hdf5(model, tmp) # load the model weights back into the model
 }
