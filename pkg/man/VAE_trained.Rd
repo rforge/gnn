@@ -23,13 +23,13 @@ data("VAE_gen_dim_2_3_300_784_ntrn_60000_nbat_100_nepo_100_fmnist")
       code{\link{raw}} \R object representing the generator component of
       a VAE (output layer is 784-dimensional, the three hidden layers
       are each 300-dimensional and the latent layer is two-dimensional)
-      trained on 60000 fashion MNIST images (with batch size 100 and 100
+      trained on 60000 fashion-MNIST images (with batch size 100 and 100
       epochs).
     }
   }
 }
 \source{
-  GPU server with NVIDIA Tesla P100 GPUs.
+  GPU server with NVIDIA Tesla P100 GPUs. The Frey faces dataset was loaded from RnavGraphImageData R package. The original source for the dataset is https://cs.nyu.edu/~roweis/data.html. The fashion-MNIST dataset was loaded from keras R package. The original source for the dataset is https://github.com/zalandoresearch/fashion-mnist.
 }
 \author{Marius Hofert and Avinash Prasad}
 \seealso{
