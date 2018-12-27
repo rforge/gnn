@@ -76,15 +76,14 @@ dim.out <- dim.in
 
 Let us now visualize some images from the training dataset to get a picture of
 our target distribution for the VAE.
-```{r 2_plot, fig.align = "center", fig.width = 12, fig.height = 12, fig.show = "hold"}
-n.frey.disp <- 25 # number of frey faces to display
-dim.frey.row <- 20 # dimension of a single frey face (row)
-dim.frey.col <- 28 # dimension of a single frey face (column)
-# TODO: How to get rid of the white space?
-## Plot the 25 images in a 5*5 grid.
-par(mfrow = c(5,5), mar = c(0,0,0,0), oma = c(0, 0, 0, 0))
-for (i in 1:n.frey.disp)
-    plot(as.raster(t(matrix(x.frey[i,], nrow = dim.frey.row))))
+```{r 2_plot, fig.align = "center", fig.width = 10, fig.height = 5.6, fig.show = "hold"}
+## Plot
+n.frey <- 10 # number of frey faces to display
+nrow.frey <- 20 # number of rows of a single frey face
+layout(matrix(1:n.frey, ncol = 5, byrow = TRUE))
+for (i in 1:n.frey)
+    plot(as.raster(t(matrix(x.frey[i,], nrow = nrow.frey))))
+layout(1)
 ```
 
 Next, we set up the VAE and train it based on the training dataset `x.frey`. The
@@ -113,18 +112,17 @@ After training of the VAE, we can use it to generate Frey-type faces, that is,
 we feed the learned generator component of the VAE with $\mathrm{N}(0,1)$
 pseudo-random numbers (representing the latent layer). We then visualize the
 generated images.
-```{r 2_sampling_and_visualize, fig.align = "center", fig.width = 12, fig.height = 12, fig.show = "hold"}
+```{r 2_sampling_and_visualize, fig.align = "center", fig.width = 10, fig.height = 5.6, fig.show = "hold"}
 set.seed(271) # for reproducibility
-ngen.frey.disp <- 25 # number of generator images to display
 ## Sample from the latent distribution
-N01.latent <- matrix(rnorm(ngen.frey.disp * dim.lat), ncol = dim.lat)
+N01.latent <- matrix(rnorm(n.frey * dim.lat), ncol = dim.lat)
 ## Generate Frey faces from the fitted VAE
 x.frey.VAE <- predict(VAE.frey$generator, N01.latent)
-## TODO: How to get rid of the white space?
-## Plot the 25 images in a 5 * 5 grid
-par(mfrow = c(5,5), mar = c(0,0,0,0), oma = c(0, 0, 0, 0))
-for (i in 1:ngen.frey.disp)
-    plot(as.raster(t(matrix(x.frey.VAE[i,], nrow = dim.frey.row))))
+## Plot
+layout(matrix(1:n.frey, ncol = 5, byrow = TRUE))
+for (i in 1:n.frey)
+    plot(as.raster(t(matrix(x.frey.VAE[i,], nrow = nrow.frey))))
+layout(1)
 ```
 
 
@@ -142,13 +140,14 @@ dim.out <- dim.in
 
 Let us now visualize some images from the training dataset to get a picture of
 our target distribution for the variational autoencoder.
-```{r 3_plot, fig.align = "center", fig.width = 12, fig.height = 12, fig.show = "hold"}
-n.fmnist.disp <- 25 # number of fashion-MNIST images to display
-dim.fmnist.row <- 28 # number of rows of a single fashion-MNIST image
-## Plot the 25 images in a 5 * 5 grid
-par(mfrow = c(5,5), mar = c(0,0,0,0), oma = c(0, 0, 0, 0))
-for (i in 1:n.fmnist.disp)
-    plot(as.raster(matrix(x.fmnist[i,], nrow = dim.fmnist.row)))
+```{r 3_plot, fig.align = "center", fig.width = 8, fig.height = 4, fig.show = "hold"}
+## Plo
+n.fmnist <- 10 # number of fashion-MNIST images to display
+nrow.fmnist <- 28 # number of rows of a single fashion-MNIST image
+layout(matrix(1:n.fmnist, ncol = 5, byrow = TRUE))
+for (i in 1:n.fmnist)
+    plot(as.raster(matrix(x.fmnist[i,], nrow = nrow.fmnist)))
+layout(1)
 ```
 
 Next, we set up the VAE and train it based on the training dataset
@@ -178,15 +177,15 @@ After training of the VAE, we can use it to generate fashion-MNIST-type images,
 that is, we feed the learned generator component of the VAE with
 $\mathrm{N}(0,1)$ pseudo-random numbers (representing the latent layer).  We
 then visualize the generated images.
-```{r 3_sampling_and_visualize, fig.align = "center", fig.width = 12, fig.height = 12, fig.show = "hold"}
-ngen.fmnist.disp <- 25 # number of generator images to display
+```{r 3_sampling_and_visualize, fig.align = "center", fig.width = 8, fig.height = 4, fig.show = "hold"}
 ## Sample from the latent distribution
-N01.latent <- matrix(rnorm(ngen.fmnist.disp * dim.lat), ncol = dim.lat)
+N01.latent <- matrix(rnorm(n.fmnist * dim.lat), ncol = dim.lat)
 # Generate Frey faces from the fitted VAE
 x.fmnist.VAE <- predict(VAE.fmnist$generator, N01.latent)
-## Plot the 25 images in a 5 * 5 grid
-par(mfrow = c(5,5), mar = c(0,0,0,0), oma = c(0, 0, 0, 0))
-for (i in 1:ngen.fmnist.disp)
-    plot(as.raster(matrix(x.fmnist.VAE[i,], nrow = dim.fmnist.row)))
+## Plot
+layout(matrix(1:n.fmnist, ncol = 5, byrow = TRUE))
+for (i in 1:n.fmnist)
+    plot(as.raster(matrix(x.fmnist.VAE[i,], nrow = nrow.fmnist)))
+layout(1)
 ```
 

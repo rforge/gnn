@@ -29,7 +29,11 @@ data("VAE_gen_dim_2_3_300_784_ntrn_60000_nbat_100_nepo_100_fmnist")
   }
 }
 \source{
-  GPU server with NVIDIA Tesla P100 GPUs. The Frey faces dataset was loaded from RnavGraphImageData R package. The original source for the dataset is https://cs.nyu.edu/~roweis/data.html. The fashion-MNIST dataset was loaded from keras R package. The original source for the dataset is https://github.com/zalandoresearch/fashion-mnist.
+  GPU server with NVIDIA Tesla P100 GPUs. The Frey faces dataset was
+  loaded from the R package \pkg{RnavGraphImageData}; the original source
+  is \url{https://cs.nyu.edu/~roweis/data.html}. The fashion-MNIST
+  dataset was loaded from the R package \pkg{keras}. The original source
+  for the dataset is \url{https://github.com/zalandoresearch/fashion-mnist}.
 }
 \author{Marius Hofert and Avinash Prasad}
 \seealso{
