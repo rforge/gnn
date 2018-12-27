@@ -75,7 +75,7 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
         loss(x, y = y, type = "MMD", ...) # GMMNs need to have "MMD" (otherwise not GMMNs)
 
     ## 4) Compile the model
-    model %>% compile(optimizer = "adam", loss = loss)
+    model %>% compile(optimizer = "adam", loss = loss_fn)
 
     ## Return
     model
