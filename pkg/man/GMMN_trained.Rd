@@ -323,7 +323,8 @@ set.seed(271)
 U.mix.PRNG <- rCopula(ngen, copula = mix.cop)
 
 ## Get a trained GMMN
-NN <- read_dataset("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixCrt4")
+objname = "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixCrt4"
+NN <- read_rda(objname, file = objname, package = "gnn")
 library(keras)
 GMMN.mix <- unserialize_model(NN, custom_objects = c(loss = loss))
 
@@ -331,7 +332,7 @@ GMMN.mix <- unserialize_model(NN, custom_objects = c(loss = loss))
 ## First, sample from the prior distribution (pseudo-random and quasi-random numbers)
 N01.prior.PRNG <- matrix(rnorm(ngen * 2), ncol = 2) # N(0,1) PRNG
 library(qrng)
-N01.prior.QRNG <- qnorm(sobol(ngen, d = 2, randomize = TRUE)) # N(0,1) QRNG
+N01.prior.QRNG <- qnorm(sobol(ngen, d = 2, randomize = "digital.shift")) # N(0,1) QRNG
 ## Generate data from the fitted GMMN
 U.mix.GMMN.PRNG <- pobs(predict(GMMN.mix, x = N01.prior.PRNG))
 U.mix.GMMN.QRNG <- pobs(predict(GMMN.mix, x = N01.prior.QRNG))

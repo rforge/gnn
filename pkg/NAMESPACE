@@ -8,11 +8,18 @@ importFrom("keras",
            "layer_lambda", "k_random_normal", "keras_model", "multi_gpu_model",
            "compile", "k_mean", "k_square", "k_exp",
            "loss_mean_squared_error", "loss_binary_crossentropy",
-           "save_model_weights_hdf5", "load_model_weights_hdf5")
+           "save_model_weights_hdf5", "load_model_weights_hdf5",
+           "fit", "serialize_model", "unserialize_model")
 importFrom("tensorflow",
            "tf")
 importFrom("utils",
            "data", "packageName")
+importFrom("tools",
+           "file_ext", "file_path_sans_ext")
+importFrom("methods",
+           "hasArg")
+importFrom("stats",
+           "rnorm")
 
 
 ### Exports ####################################################################
@@ -20,4 +27,5 @@ importFrom("utils",
 export("GMMN_model")
 export("VAE_model")
 export("loss")
-export("dataset_exists", "read_dataset", "save_rda")
+export("train", "train_once")
+export("exists_rda", "read_rda", "save_rda", "rename_rda")

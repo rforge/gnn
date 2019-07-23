@@ -99,12 +99,12 @@ VAE.frey <- VAE_model(c(dim.in, dim.hidden, dim.lat)) # setup the VAE
 objname <- paste0("VAE_gen_dim_",dim.lat,"_",dim.hidden,"_",dim.out,"_ntrn_",ntrn,
                   "_nbat_",nbat,"_nepo_",nepo,"_freyfaces")
 ## Train the VAE
-if(dataset_exists(objname)) { # get trained VAE generator
-    VAE.frey$generator <- unserialize_model(read_dataset(objname),compile=FALSE)
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get trained VAE generator
+    VAE.frey$generator <- unserialize_model(read_rda(objname, file = objname, package = "gnn"),compile=FALSE)
 } else { # train the VAE and save the corresponding generator
     VAE.frey$model %>% fit(x.frey, x.frey, epochs = nepo, batch_size = nbat)
-    save_rda(serialize_model(VAE.frey$generator), name = objname,
-             file = paste0(objname,".rda"))
+    save_rda(serialize_model(VAE.frey$generator),
+             file = paste0(objname,".rda"), names = objname)
 }
 ```
 
@@ -164,12 +164,12 @@ VAE.fmnist <- VAE_model(c(dim.in, rep(dim.hidden, 3), dim.lat)) # setup the VAE
 objname <- paste0("VAE_gen_dim_",dim.lat,"_3_",dim.hidden,"_",dim.out,"_ntrn_",ntrn,
                   "_nbat_",nbat,"_nepo_",nepo,"_fmnist")
 ## Train the VAE
-if(dataset_exists(objname)) { # get trained VAE generator
-    VAE.fmnist$generator <- unserialize_model(read_dataset(objname),compile=FALSE)
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get trained VAE generator
+    VAE.fmnist$generator <- unserialize_model(read_rda(objname, file = objname, package = "gnn"),compile=FALSE)
 } else { # train the VAE and save the corresponding generator
     VAE.fmnist$model %>% fit(x.fmnist, x.fmnist, epochs = nepo, batch_size = nbat)
-    save_rda(serialize_model(VAE.fmnist$generator), name = objname,
-             file = paste0(objname,".rda"))
+    save_rda(serialize_model(VAE.fmnist$generator),
+             file = paste0(objname,".rda"), names = objname)
 }
 ```
 

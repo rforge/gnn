@@ -13,7 +13,7 @@ vignette: >
 ---
 <!-- Train on Sharcnet's graham (GPU server) via sbatch start.sh, where the latter contains:
 #!/bin/bash
-#SBATCH --account=$USER
+#SBATCH --account=def-mhofert # used to be $USER but needs to be 'def-mhofert' for students to run GPU jobs! might still required to start as 'sbatch --account=def-mhofert start.sh'
 #SBATCH --mail-user=$USER@uwaterloo.ca
 #SBATCH --mail-type=END
 #SBATCH --gres=gpu:1          # request GPU "generic resource"
@@ -116,8 +116,8 @@ training dataset.
 dim.in <- 2 # dimension of the prior distribution which is fed into the GMMN
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                   "_nbat_",nbat,"_nepo_",nepo,"_mixCrt",nu)
-if(dataset_exists(objname)) { # get trained GMMN
-    GMMN.mix <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get trained GMMN
+    GMMN.mix <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
     ## Generate a sample from the prior distribution that is fed into the GMMN
     N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
@@ -127,8 +127,8 @@ if(dataset_exists(objname)) { # get trained GMMN
     print(system.time(GMMN.mix %>% fit(x = N01.prior, y = U.mix, epochs = nepo,
                                        batch_size = nbat)))
     ## Save the trained GMMN
-    save_rda(serialize_model(GMMN.mix), name = objname,
-             file = paste0(objname,".rda"))
+    save_rda(serialize_model(GMMN.mix),
+             file = paste0(objname,".rda"), names = objname)
 }
 ```
 
@@ -141,7 +141,7 @@ quasi-random numbers, respectively, our prior distribution.
 ngen <- 1000L # sample size of the generated date
 ## Sample from the prior distribution (pseudo-random and quasi-random numbers)
 N01.prior.PRNG <- matrix(rnorm(ngen * dim.in), ncol = dim.in) # N(0,1) PRNG
-N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in, randomize = TRUE)) # N(0,1) QRNG
+N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in, randomize = "digital.shift")) # N(0,1) QRNG
 ## Generate data from the fitted GMMN
 ## Note: - predict() works for objects of class keras.engine.training.Model;
 ##         see ?predict.keras.engine.training.Model
@@ -231,8 +231,8 @@ and `U.NG` and samples of equal sizes from the prior distributions.
 dim.in <- 5 # dimension of the prior distributions which are fed into the GMMNs
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                  "_nbat_",nbat,"_nepo_",nepo,"_t",nu)
-if(dataset_exists(objname)) { # get the saved trained GMMN
-    GMMN.t <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved trained GMMN
+    GMMN.t <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
     ## Generate a sample from the prior distribution that is fed into the GMMN
     N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
@@ -242,16 +242,16 @@ if(dataset_exists(objname)) { # get the saved trained GMMN
     print(system.time(GMMN.t %>% fit(x = N01.prior, y = U.t, epochs = nepo,
                                      batch_size = nbat)))
     ## Save the trained GMMN
-    save_rda(serialize_model(GMMN.t), name = objname,
-             file = paste0(objname,".rda"))
+    save_rda(serialize_model(GMMN.t),
+             file = paste0(objname,".rda"), names = objname)
 }
 
 ## Train the GMMN based on the nested Gumbel copula
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                  "_nbat_",nbat,"_nepo_",nepo,"_NG",
                  paste0(ds, collapse = ""))
-if(dataset_exists(objname)) { # get the saved trained GMMN
-    GMMN.NG <- unserialize_model(read_dataset(objname), custom_objects = c(loss = loss))
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved trained GMMN
+    GMMN.NG <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
     ## Generate a sample from the prior distribution that is fed into the GMMN
     N01.prior <- matrix(rnorm(ntrn * dim.in), nrow = ntrn) # N(0,1) samples
@@ -261,8 +261,8 @@ if(dataset_exists(objname)) { # get the saved trained GMMN
     print(system.time(GMMN.NG %>% fit(x = N01.prior, y = U.NG, epochs = nepo,
                                       batch_size = nbat)))
     ## Save the trained GMMN
-    save_rda(serialize_model(GMMN.NG), name = objname,
-             file = paste0(objname,".rda"))
+    save_rda(serialize_model(GMMN.NG),
+             file = paste0(objname,".rda"), names = objname)
 }
 ```
 
@@ -297,8 +297,8 @@ CvM <- function(n, copula, GMMN, dim.in)
 ## for both copulas and their trained GMMNs
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                   "_nbat_",nbat,"_nepo_",nepo,"_CvM_est")
-if(dataset_exists(objname)) { # get the saved godness-of-fit statistics
-    CvMstat <- read_dataset(objname)
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved godness-of-fit statistics
+    CvMstat <- read_rda(objname, file = objname, package = "gnn")
 } else {
     B <- 100 # number of replications
     CvMstat <- rbind( # (4, B) matrix
@@ -306,7 +306,7 @@ if(dataset_exists(objname)) { # get the saved godness-of-fit statistics
         replicate(B, CvM(ngen, copula = NG.cop, GMMN = GMMN.NG, dim.in = dim.in)))
     rownames(CvMstat) <- c("CvM.t.PRNG",  "CvM.t.GMMN.PRNG",
                            "CvM.NG.PRNG", "CvM.NG.GMMN.PRNG")
-    save_rda(CvMstat, name = objname, file = paste0(objname,".rda"))
+    save_rda(CvMstat, file = paste0(objname,".rda"), names = objname)
 }
 ```
 
@@ -358,13 +358,13 @@ ES_aggregate_loss <- function(n, copula, GMMN, dim.in, alpha, is.firstkind = FAL
     VaR.PRNG <- quantile(S.PRNG, probs = alpha, type = 1) # VaR estimate
     ES.PRNG <- mean(S.PRNG[S.PRNG > VaR.PRNG]) # ES estimate
     ## GMMN PRNG based expected shortfall estimate
-    N01.prior.QRNG <- qnorm(sobol(n, d = dim.in, randomize = TRUE)) # N(0,1) QRNG samples
+    N01.prior.QRNG <- qnorm(sobol(n, d = dim.in, randomize = "digital.shift")) # N(0,1) QRNG samples
     S.GMMN.QRNG <- rowSums(qnorm(pobs(predict(GMMN, x = N01.prior.QRNG)))) # loss (QRNG)
     VaR.GMMN.QRNG <- quantile(S.GMMN.QRNG, probs = alpha, type = 1) # VaR estimate
     ES.GMMN.QRNG <- mean(S.GMMN.QRNG[S.GMMN.QRNG > VaR.GMMN.QRNG]) # ES estimate
     ## QRNG based expected shortfall estimate (if available)
     if (is.firstkind) { # as before but based on a QRNG via the CDM
-        S.QRNG <- rowSums(qnorm(cCopula(sobol(n, d = dim.in, randomize = TRUE),
+        S.QRNG <- rowSums(qnorm(cCopula(sobol(n, d = dim.in, randomize = "digital.shift"),
                                         copula = copula, inverse = TRUE)))
         VaR.QRNG <- quantile(S.QRNG, probs = alpha, type = 1) # VaR estimate
         ES.QRNG <- mean(S.QRNG[S.QRNG > VaR.QRNG]) # ES estimate
@@ -402,8 +402,8 @@ rates.
 ns <- round(2^seq(9, 18, by = 0.5)) # sample sizes n for which ES estimates are computed
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                   "_nbat_",nbat,"_nepo_",nepo,"_ES99_var_est")
-if(dataset_exists(objname)) { # if it exist, get the saved variance estimates
-    vars <- read_dataset(objname)
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # if it exist, get the saved variance estimates
+    vars <- read_rda(objname, file = objname, package = "gnn")
 } else { # compute the variance estimates
     vars <- rbind(sapply(ns, function(n)
                       ES_variance(n, copula = t.cop, GMMN = GMMN.t,
@@ -413,7 +413,7 @@ if(dataset_exists(objname)) { # if it exist, get the saved variance estimates
                                   dim.in = dim.in, is.firstkind = FALSE)))
     rownames(vars) <- c("Var.ES.t.PRNG", "Var.ES.t.GMMN.QRNG", "Var.ES.t.QRNG",
                         "Var.ES.NG.PRNG", "Var.ES.NG.GMMN.QRNG")
-    save_rda(vars, name = objname, file = paste0(objname,".rda"))
+    save_rda(vars, file = paste0(objname,".rda"), names = objname)
 }
 
 ## Compute the regression coefficients alpha
