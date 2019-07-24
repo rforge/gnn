@@ -42,12 +42,11 @@ exists_rda <- function(file, objnames, package = NULL)
             filename %in% data(package = package, envir = .GlobalEnv)[["results"]][,"Item"] # 'envir' is only a dummy here to avoid a CRAN note; needs no extension
         }
     }
-
 }
 
 ##' @title Reading Objects from an .rda from the Current Package or File in the
 ##'        Current Working Directory
-##' @param objnames names of objects to be read
+##' @param objnames names of objects to be read (without .rda)
 ##' @param file character string (with or without ending .rda) specifying
 ##'        the file to read from
 ##' @param package package name from which to load the objects or NULL (the default)
@@ -58,6 +57,8 @@ exists_rda <- function(file, objnames, package = NULL)
 read_rda <- function(objnames, file, package = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
+    if(!hasArg(objnames))
+        objnames <- paste0(rm_ext(basename(file)), collapse = "_")
     if(!all(exists_rda(file, objnames = objnames, package = package)))
         if(is.null(package)) {
             stop("Not all objects specified by 'objnames' exist in file '",file,"' in the local working directory")
@@ -115,7 +116,8 @@ save_rda <- function(..., file, names)
 ##' @author Marius Hofert
 ##' @note An .rds can simply be renamed (as no object name is stored)
 rename_rda <- function(oldname, oldfile = paste0(oldname, collapse = "_"),
-                       newname, newfile = paste0(oldfile,".rda"), package = NULL)
+                       newname, newfile = paste0(newname, collapse = "_", ".rda"),
+                       package = NULL)
 {
     dat <- read_rda(oldname, file = oldfile, package = package)
     save_rda(dat, file = newfile, names = newname) # does not save 'dat' as 'dat' but under the right name 'newname'

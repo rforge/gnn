@@ -12,7 +12,8 @@ exists_rda(file, objnames, package = NULL)
 read_rda(objnames, file, package = NULL)
 save_rda(..., file, names)
 rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
-           newname, newfile = paste0(oldfile,".rda"), package = NULL)
+           newname, newfile = paste0(newname, collapse = "_", ".rda"),
+	   package = NULL)
 }
 \arguments{
   \item{file}{
@@ -31,7 +32,8 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
       \item{exists_rda()}{\code{\link{character}} vector of names of objects to
 	be checked for existence.}
       \item{read_rda()}{\code{\link{character}} vector of names of
-	objects to be read.}
+	objects to be read. If not provided, a name is constructed
+	from \code{file}.}
     }
   }
   \item{package}{
