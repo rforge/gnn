@@ -14,8 +14,6 @@ importFrom("tensorflow",
            "tf")
 importFrom("utils",
            "data", "packageName")
-importFrom("tools",
-           "file_ext", "file_path_sans_ext")
 importFrom("methods",
            "hasArg")
 importFrom("stats",
@@ -29,3 +27,4 @@ export("VAE_model")
 export("loss")
 export("train", "train_once")
 export("exists_rda", "read_rda", "save_rda", "rename_rda")
+export("rm_ext")

@@ -24,7 +24,7 @@ exists_rda <- function(file, objnames, package = NULL)
             load(file, envir = myenvir)
             ## Alternatively, could work with attach()
         } else {
-            file <- file_path_sans_ext(basename(file)) # data() fails if '.rda' is included
+            file <- rm_ext(basename(file)) # data() fails if '.rda' is included
             data(list = file, package = package, envir = myenvir) # load the .rda into 'myenvir'
         }
         res <- objnames %in% ls(, envir = myenvir) # now check whether objects 'objnames' exist inside the .rda
@@ -60,7 +60,7 @@ read_rda <- function(objnames, file, package = NULL)
         load(file, envir = myenvir) # load .rda into myenvir
         ## Alternatively, could work with attach()
     } else {
-        file <- file_path_sans_ext(basename(file)) # data() fails if '.rda' is included
+        file <- rm_ext(basename(file)) # data() fails if '.rda' is included
         data(list = file, package = package, # in the current package
              envir = myenvir) # loads objects in 'file' into 'myenvir'
     }

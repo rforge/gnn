@@ -44,7 +44,7 @@ train <- function(dim, data, batch.size, nepoch, method = "GMMN", ...)
 ##' @return trained or loaded GNN
 ##' @author Marius Hofert
 train_once <- function(dim, data, batch.size, nepoch, method = "GMMN",
-                       file, name = file_path_sans_ext(basename(file)),
+                       file, name = rm_ext(basename(file)),
                        package = NULL, ...)
 {
     if(exists_rda(file, objnames = name, package = package)) { # check existence of 'name' in 'file' (in package 'package' or current working directory if package = NULL)

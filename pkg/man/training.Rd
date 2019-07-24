@@ -8,7 +8,7 @@
 \usage{
 train(dim, data, batch.size, nepoch, method = "GMMN", ...)
 train_once(dim, data, batch.size, nepoch, method = "GMMN",
-           file, name = file_path_sans_ext(basename(file)),
+           file, name = rm_ext(basename(file)),
            package = NULL, ...)
 }
 \arguments{
