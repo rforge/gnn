@@ -1,7 +1,7 @@
 ### Auxiliary functions for checking existence, loading and saving data ########
 
 ##' @title Checking whether Datasets(s) Exist
-##' @param file character string (with or without ending .rda) specifying the
+##' @param file character string (with or without extension .rda) specifying the
 ##'        name of the file considered
 ##' @param objnames names of objects to be checked for existence
 ##' @param package package name in which to check or NULL (the default) in
@@ -11,7 +11,7 @@
 ##' @note - For .rds: file.exists(file)
 ##'       - File extensions can largely mess this up:
 ##'         + file.exists() needs the file extension .rda to find the file
-##'         + data() and load() need no extension
+##'         + data() must have no extension
 exists_rda <- function(file, objnames, package = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
@@ -27,10 +27,10 @@ exists_rda <- function(file, objnames, package = NULL)
         if(is.null(package)) {
             if(!file.exists(file)) # needs extension
                 stop("File '",file,"' does not exist.")
-            load(file, envir = myenvir) # needs no extension
+            load(file, envir = myenvir)
             ## Alternatively, could work with attach()
         } else {
-            data(list = filename, package = package, envir = myenvir) # load the .rda into 'myenvir'; needs no extension
+            data(list = filename, package = package, envir = myenvir) # load the .rda into 'myenvir'; must have no extension
         }
         res <- objnames %in% ls(, envir = myenvir) # now check whether objects 'objnames' exist inside the .rda
         rm(myenvir) # clean-up
@@ -47,7 +47,7 @@ exists_rda <- function(file, objnames, package = NULL)
 ##' @title Reading Objects from an .rda from the Current Package or File in the
 ##'        Current Working Directory
 ##' @param objnames names of objects to be read (without .rda)
-##' @param file character string (with or without ending .rda) specifying
+##' @param file character string (with or without extension .rda) specifying
 ##'        the file to read from
 ##' @param package package name from which to load the objects or NULL (the default)
 ##'        in which case the current working directory is searched.
@@ -57,6 +57,8 @@ exists_rda <- function(file, objnames, package = NULL)
 read_rda <- function(objnames, file, package = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
+    filename <- rm_ext(basename(file)) # remove file extension
+    file <- paste0(filename,".rda") # file with extension (not necessarily provided by user)
     if(!hasArg(objnames))
         objnames <- paste0(rm_ext(basename(file)), collapse = "_")
     if(!all(exists_rda(file, objnames = objnames, package = package)))
@@ -67,12 +69,13 @@ read_rda <- function(objnames, file, package = NULL)
         }
     myenvir <- new.env()
     if(is.null(package)) {
+        if(!file.exists(file)) # needs extension
+            stop("File '",file,"' does not exist.")
         load(file, envir = myenvir) # load .rda into myenvir
         ## Alternatively, could work with attach()
     } else {
-        file <- rm_ext(basename(file)) # data() fails if '.rda' is included
-        data(list = file, package = package, # in the current package
-             envir = myenvir) # loads objects in 'file' into 'myenvir'
+        data(list = filename, package = package, # in the current package
+             envir = myenvir) # loads objects in 'file' into 'myenvir'; must have no extension
     }
     res <- if(length(objnames) == 1) {
                get(objnames, envir = myenvir) # get object(s) from 'myenvir'
@@ -85,7 +88,7 @@ read_rda <- function(objnames, file, package = NULL)
 
 ##' @title Saving Objects under a given Name in a Given .rda File
 ##' @param ... objects to be saved in 'file' under names specified by 'names'
-##' @param file character string (with or without ending '.rda') specifying
+##' @param file character string (with or without extension '.rda') specifying
 ##'        the file to save to
 ##' @param names character vector of names under which the objects are saved
 ##'        in 'file'
@@ -105,11 +108,11 @@ save_rda <- function(..., file, names)
 
 ##' @title Reading, Renaming and Saving an .rda Object
 ##' @param oldname character string specifying the object to be read
-##' @param oldfile file name (with or without ending .rda) specifying from which
+##' @param oldfile file name (with or without extension .rda) specifying from which
 ##'        the object named 'oldname' is read
-##' @param newname character string specifying the new name under which the object
-##'        is to be saved
-##' @param newfile file name (with ending .rda) specifying where the object named
+##' @param newname character string (without extension .rda) specifying the new name
+##'        under which the object is to be saved
+##' @param newfile file name (with extension .rda) specifying where the object named
 ##'        'oldname' is saved under the name 'newname'
 ##' @param package see ?read_rda
 ##' @return nothing (generates an .rda by side-effect)

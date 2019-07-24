@@ -115,7 +115,8 @@ training dataset.
 ## Train the GMMN
 dim.in <- 2 # dimension of the prior distribution which is fed into the GMMN
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
-                  "_nbat_",nbat,"_nepo_",nepo,"_mixCrt",nu)
+                  "_nbat_",nbat,"_nepo_",nepo,"_equi-mix_C_tau_",taus[2],"_rot90_t",
+				  nu,"_tau_",taus[2])
 if(exists_rda(objname, objnames = objname, package = "gnn")) { # get trained GMMN
     GMMN.mix <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
@@ -230,7 +231,7 @@ and `U.NG` and samples of equal sizes from the prior distributions.
 ## Train the GMMN based on the t_4 copula
 dim.in <- 5 # dimension of the prior distributions which are fed into the GMMNs
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
-                 "_nbat_",nbat,"_nepo_",nepo,"_t",nu)
+                 "_nbat_",nbat,"_nepo_",nepo,"_t",nu,"_tau_",taus[2])
 if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved trained GMMN
     GMMN.t <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
@@ -249,7 +250,7 @@ if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved t
 ## Train the GMMN based on the nested Gumbel copula
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
                  "_nbat_",nbat,"_nepo_",nepo,"_NG",
-                 paste0(ds, collapse = ""))
+                 paste0(ds, collapse = ""),"_tau_",paste0(taus, collapse = "_"))
 if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved trained GMMN
     GMMN.NG <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
@@ -296,7 +297,7 @@ CvM <- function(n, copula, GMMN, dim.in)
 ## Compute B replications of the Cramver-von Mises statistics
 ## for both copulas and their trained GMMNs
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
-                  "_nbat_",nbat,"_nepo_",nepo,"_CvM_est")
+                  "_nbat_",nbat,"_nepo_",nepo,"_CvM_statistics_t4_tau_",taus[2],"_G_tau_",taus[2])
 if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved godness-of-fit statistics
     CvMstat <- read_rda(objname, file = objname, package = "gnn")
 } else {
@@ -401,7 +402,7 @@ rates.
 ## Estimate the variances for various n
 ns <- round(2^seq(9, 18, by = 0.5)) # sample sizes n for which ES estimates are computed
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
-                  "_nbat_",nbat,"_nepo_",nepo,"_ES99_var_est")
+                  "_nbat_",nbat,"_nepo_",nepo,"_ES99_var_estimates")
 if(exists_rda(objname, objnames = objname, package = "gnn")) { # if it exist, get the saved variance estimates
     vars <- read_rda(objname, file = objname, package = "gnn")
 } else { # compute the variance estimates

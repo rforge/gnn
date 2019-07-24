@@ -1,33 +1,33 @@
 \name{GMMN_trained}
 % Trained neural networks
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.25}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.5}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.75}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.25}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.5}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.75}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixCrt4}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixGrt4}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixMOrt4}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_MO}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.25}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.5}
-\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.75}
-\alias{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NC21}
-\alias{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NG21}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_C}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_G}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NC23}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NG23}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4}
-\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C}
-\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G}
-\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55}
-\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55}
-\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.25}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.75}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.25}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.75}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_G_tau_0.5_rot90_t4_tau_0.5}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_MO_0.75_0.6_rot90_t4_tau_0.5}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_MO_0.75_0.6}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.25}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}
+\alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.75}
+\alias{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NC21_tau_0.25_0.5_0.75}
+\alias{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NG21_tau_0.25_0.5_0.75}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NC23_tau_0.25_0.5_0.75}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NG23_tau_0.25_0.5_0.75}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}
+\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}
+\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5}
+\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75}
+\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75}
+\alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}
 % Results obtained from trained NNs
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_est}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_statistics_t4_tau_0.5_G_tau_0.5}
+\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates}
 \title{Trained Generative Moment Matching Networks}
 \description{
   Trained generative moment matching networks (GMMNs) and
@@ -36,82 +36,82 @@
 }
 \usage{
 % Trained neural networks
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.25")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.5")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.75")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.25")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.5")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.75")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixCrt4")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixGrt4")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixMOrt4")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_MO")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.25")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.5")
-data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.75")
-data("GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NC21")
-data("GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NG21")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_C")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_G")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NC23")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NG23")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4")
-data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C")
-data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G")
-data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55")
-data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55")
-data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.25")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.75")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.25")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.75")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_G_tau_0.5_rot90_t4_tau_0.5")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_MO_0.75_0.6_rot90_t4_tau_0.5")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_MO_0.75_0.6")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.25")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
+data("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.75")
+data("GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NC21_tau_0.25_0.5_0.75")
+data("GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NG21_tau_0.25_0.5_0.75")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NC23_tau_0.25_0.5_0.75")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NG23_tau_0.25_0.5_0.75")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
+data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5")
+data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5")
+data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75")
+data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75")
+data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
 
 % Results obtained from trained NNs
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_est")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_statistics_t4_tau_0.5_G_tau_0.5")
+data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates")
 }
 \format{
   % Trained neural networks
   \describe{
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.25}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.25}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a bivariate Clayton
       copula (with parameter chosen such that Kendall's tau equals 0.25).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.5}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a bivariate Clayton
       copula (with parameter chosen such that Kendall's tau equals 0.5).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_0.75}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a bivariate Clayton
       copula (with parameter chosen such that Kendall's tau equals 0.75).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.25}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.25}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a bivariate Gumbel
       copula (with parameter chosen such that Kendall's tau equals 0.25).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.5}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a bivariate Gumbel
       copula (with parameter chosen such that Kendall's tau equals 0.5).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_0.75}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_G_tau_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a bivariate Gumbel
       copula (with parameter chosen such that Kendall's tau equals 0.75).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixCrt4}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -121,7 +121,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and correlation parameter chosen such that Kendall's tau equals
       0.5); see \code{vignette("GMMN_QRNG", package = "gnn")}.
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixGrt4}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_G_tau_0.5_rot90_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -131,7 +131,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and correlation parameter chosen such that Kendall's tau equals
       0.5).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixMOrt4}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_MO_0.75_0.6_rot90_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -142,7 +142,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and correlation parameter chosen such that Kendall's tau equals
       0.5).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_MO}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_MO_0.75_0.6}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -150,7 +150,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       copula (with \eqn{\alpha_{1}=0.75}{alpha_1=0.75} and
       \eqn{\alpha_{2}=0.60}{alpha_2=0.60}).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.25}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.25}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -158,7 +158,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and equi-correlation parameter chosen such that Kendall's tau equals
       0.25).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.5}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -166,7 +166,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and equi-correlation parameter chosen such that Kendall's tau equals
       0.5).
     }
-    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_0.75}{
+    \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are two-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -174,7 +174,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and equi-correlation parameter chosen such that Kendall's tau equals
       0.75).
     }
-    \item{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NC21}{
+    \item{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NC21_tau_0.25_0.5_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are three-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -182,7 +182,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       (with sector dimensions 2 and 1, corresponding Kendall's tau 0.5
       within the first sector and Kendall's tau 0.25 between the two sectors).
     }
-    \item{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NG21}{
+    \item{GMMN_dim_3_300_3_ntrn_60000_nbat_5000_nepo_300_NG21_tau_0.25_0.5_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are three-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -190,21 +190,21 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       (with sector dimensions 2 and 1, corresponding Kendall's tau 0.5
       within the first sector and Kendall's tau 0.25 between the two sectors).
     }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_C}{
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are five-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a five-dimensional Clayton
       copula (with parameter chosen such that Kendall's tau equals 0.5).
     }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_G}{
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are five-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a five-dimensional Gumbel
       copula (with parameter chosen such that Kendall's tau equals 0.5).
     }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NC23}{
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NC23_tau_0.25_0.5_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are five-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -212,7 +212,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       (with sector dimensions 2 and 3, corresponding Kendall's tau 0.5
       and 0.75, and Kendall's tau 0.25 between the two sectors).
     }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NG23}{
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_NG23_tau_0.25_0.5_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are five-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -221,7 +221,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and 0.75, and Kendall's tau 0.25 between the two sectors);
       see \code{vignette("GMMN_QRNG", package = "gnn")}.
     }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4}{
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are five-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -229,21 +229,21 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       and equi-correlation parameter chosen such that Kendall's tau equals
       0.5); see \code{vignette("GMMN_QRNG", package = "gnn")}.
     }
-    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C}{
+    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 10-dimensional, the single hiddenlayer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a 10-dimensional Clayton
       copula (with parameter chosen such that Kendall's tau equals 0.5).
     }
-    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G}{
+    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 10-dimensional, the single hiddenlayer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a 10-dimensional Gumbel
       copula (with parameter chosen such that Kendall's tau equals 0.5).
     }
-    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55}{
+    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 10-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -251,7 +251,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       (with sector dimensions 5 and 5, corresponding Kendall's tau 0.5
       and 0.75, and Kendall's tau 0.25 between the two sectors).
     }
-    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55}{
+    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 10-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -259,7 +259,7 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
       (with sector dimensions 5 and 5, corresponding Kendall's tau 0.5
       and 0.75, and Kendall's tau 0.25 between the two sectors).
     }
-    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4}{
+    \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 10-dimensional, the single hidden layer is
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
@@ -269,31 +269,31 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est")
     }
 
     % Results obtained from trained NNs
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_est}{
-      (4, 100)-\code{\link{matrix}} containing, in each row, 100 replications of
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_statistics_t4_tau_0.5_G_tau_0.5}{
+      (100, 4)-\code{\link{matrix}} containing, in each column, 100 replications of
       computed Cramer-von Mises statistics based on 1000 pseudo-samples
       generated from a pseudo-random number generator (first and third
-      row) and the trained GMMN (second and fourth row) of the
-      five-dimensional $t$ copula (first two rows) and the nested
-      Gumbel copula (last two rows) as described above;
+      column) and the trained GMMN (second and fourth column) of the
+      five-dimensional $t$ copula (first two columns) and the nested
+      Gumbel copula (last two columns) as described above;
       see \code{vignette("GMMN_QRNG", package = "gnn")}.
     }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_est}{
-      (5, 19)-\code{\link{matrix}} containing, in each row, the
+    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates}{
+      (19, 5)-\code{\link{matrix}} containing, in each column, the
       variance estimates of expected shortfall at 99\%
-      confidence level of the sum of five-dimensional distributions
-      (from 25 replications, for the sample sizes 512, 724, 1024, 1448,
-      2048, 2896, 4096, 5793, 8192, 11585, 16384, 23170, 32768, 46341,
-      65536, 92682, 131072, 185364, 262144 which are
-      roughly equidistant in log-scale) based on pseudo-samples (so
-      based on the classical Monte Carlo estimator; first and
-      fourth row) and quasi-samples (obtained from the GMMN
-      in the second and fifth row and obtained from a
-      quasi-random number generator in the third row). The
-      five-dimensional distributions have standard
-      normal margins and $t$ copula (first three rows)
-      and nested Gumbel copula (last two rows) as described above;
-      see \code{vignette("GMMN_QRNG", package = "gnn")}.
+      confidence level of the sum of the components of a
+      five-dimensional distribution (standard normal margins;
+      $t$ copula in the first three columns, Gumbel in the last two).
+      The variance estimates are computed from 25 replications
+      for the 19 sample sizes 512, 724, 1024,
+      1448, 2048, 2896, 4096, 5793, 8192, 11585, 16384, 23170, 32768, 46341,
+      65536, 92682, 131072, 185364, 262144 (roughly equidistant in
+      log-scale); for each sample, the pseudo-observations are considered.
+      First and fourth column contain variance estimates of the classical
+      Monte Carlo estimator as they are based on a PRNG, second and
+      fifth column contain the variance estimates for the GMMN-PRNG in that
+      sense, and the third column contains the results for the GMMN-QRNG.
+      See also \code{vignette("GMMN_QRNG", package = "gnn")}.
     }
   }
 }
@@ -323,7 +323,7 @@ set.seed(271)
 U.mix.PRNG <- rCopula(ngen, copula = mix.cop)
 
 ## Get a trained GMMN
-objname = "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_mixCrt4"
+objname = "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5"
 NN <- read_rda(objname, file = objname, package = "gnn")
 library(keras)
 GMMN.mix <- unserialize_model(NN, custom_objects = c(loss = loss))
