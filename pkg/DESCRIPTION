@@ -9,7 +9,7 @@ Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
 Author: Marius Hofert [aut, cre], Avinash Prasad [aut]
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.5.0)
-Imports: keras, tensorflow, qrng, tools, methods
+Imports: keras, tensorflow, qrng, methods
 Suggests: knitr, copula, RColorBrewer, RnavGraphImageData, qrmdata
 Enhances:
 License: GPL (>= 3) | file LICENCE

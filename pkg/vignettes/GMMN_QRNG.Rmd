@@ -115,8 +115,8 @@ training dataset.
 ## Train the GMMN
 dim.in <- 2 # dimension of the prior distribution which is fed into the GMMN
 objname <- paste0("GMMN_dim_",dim.in,"_",dim.hid,"_",dim.out,"_ntrn_",ntrn,
-                  "_nbat_",nbat,"_nepo_",nepo,"_equi-mix_C_tau_",taus[2],"_rot90_t",
-				  nu,"_tau_",taus[2])
+                  "_nbat_",nbat,"_nepo_",nepo,"_eqmix_C_tau_",tau,"_rot90_t",
+				  nu,"_tau_",tau)
 if(exists_rda(objname, objnames = objname, package = "gnn")) { # get trained GMMN
     GMMN.mix <- unserialize_model(read_rda(objname, file = objname, package = "gnn"), custom_objects = c(loss = loss))
 } else { # train the GMMN and save it
@@ -302,10 +302,10 @@ if(exists_rda(objname, objnames = objname, package = "gnn")) { # get the saved g
     CvMstat <- read_rda(objname, file = objname, package = "gnn")
 } else {
     B <- 100 # number of replications
-    CvMstat <- rbind( # (4, B) matrix
+    CvMstat <- t(rbind( # (4, B) matrix
         replicate(B, CvM(ngen, copula =  t.cop, GMMN = GMMN.t,  dim.in = dim.in)),
-        replicate(B, CvM(ngen, copula = NG.cop, GMMN = GMMN.NG, dim.in = dim.in)))
-    rownames(CvMstat) <- c("CvM.t.PRNG",  "CvM.t.GMMN.PRNG",
+        replicate(B, CvM(ngen, copula = NG.cop, GMMN = GMMN.NG, dim.in = dim.in))))
+    colnames(CvMstat) <- c("CvM.t.PRNG",  "CvM.t.GMMN.PRNG",
                            "CvM.NG.PRNG", "CvM.NG.GMMN.PRNG")
     save_rda(CvMstat, file = paste0(objname,".rda"), names = objname)
 }
@@ -317,12 +317,12 @@ right of Figure 11 of Hofert, Prasad and Zhu (2018).
 layout(t(1:2)) # 1 x 2 layout
 opar <- par(pty = "s") # square plots
 ## Box plot for the t copula
-boxplot(list(CvMstat["CvM.t.PRNG",], CvMstat["CvM.t.GMMN.PRNG",]),
-        names = c("PRNG", "GMMN PRNG"), ylab = expression(S[n[gen]]))
+boxplot(list(CvMstat[,"CvM.t.PRNG"], CvMstat[,"CvM.t.GMMN.PRNG"]),
+        names = c("Copula PRNG", "GMMN PRNG"), ylab = expression(S[n[gen]]))
 mtext(substitute("t, d ="~d, list(d = dim.out)), side = 4,line = 0.5, adj = 0.5)
 ## Box plot for the nested Gumbel copula
-boxplot(list(CvMstat["CvM.NG.PRNG",], CvMstat["CvM.NG.GMMN.PRNG",]),
-        names = c("PRNG", "GMMN PRNG"), ylab = expression(S[n[gen]]))
+boxplot(list(CvMstat[",CvM.NG.PRNG"], CvMstat[,"CvM.NG.GMMN.PRNG"]),
+        names = c("Copula PRNG", "GMMN PRNG"), ylab = expression(S[n[gen]]))
 mtext(substitute("Nested Gumbel, d ="~d, list(d = dim.out)),
       side = 4, line = 0.5, adj = 0.5)
 par(opar) # restore graphical parameters
@@ -418,11 +418,11 @@ if(exists_rda(objname, objnames = objname, package = "gnn")) { # if it exist, ge
 }
 
 ## Compute the regression coefficients alpha
-alpha <- c(t.PRNG       = coef(lm(log(vars["Var.ES.t.PRNG",])       ~ log(ns)))[[2]],
-           t.GMMN.QRNG  = coef(lm(log(vars["Var.ES.t.GMMN.QRNG",])  ~ log(ns)))[[2]],
-           t.QRNG       = coef(lm(log(vars["Var.ES.t.QRNG",])       ~ log(ns)))[[2]],
-           NG.PRNG      = coef(lm(log(vars["Var.ES.NG.PRNG",])      ~ log(ns)))[[2]],
-           NG.GMMN.QRNG = coef(lm(log(vars["Var.ES.NG.GMMN.QRNG",]) ~ log(ns)))[[2]])
+alpha <- c(t.PRNG       = coef(lm(log(vars[,"Var.ES.t.PRNG"])       ~ log(ns)))[[2]],
+           t.GMMN.QRNG  = coef(lm(log(vars[,"Var.ES.t.GMMN.QRNG"])  ~ log(ns)))[[2]],
+           t.QRNG       = coef(lm(log(vars[,"Var.ES.t.QRNG"])       ~ log(ns)))[[2]],
+           NG.PRNG      = coef(lm(log(vars[,"Var.ES.NG.PRNG"])      ~ log(ns)))[[2]],
+           NG.GMMN.QRNG = coef(lm(log(vars[,"Var.ES.NG.GMMN.QRNG"]) ~ log(ns)))[[2]])
 alpha. <- abs(round(alpha, 2))
 ```
 
@@ -436,10 +436,10 @@ cols <- brewer.pal(8, name = "Dark2")[c(7, 3, 5, 4)] # colors
 
 ## Plot of variance estimates of the Monte Carlo, RQMC (based on the CDM)
 ## and GMMN-based RQMC estimator for the t copula
-plot(ns, vars["Var.ES.t.PRNG",], ylim = ran, log = "xy", type = "b", col = cols[1],
+plot(ns, vars[,"Var.ES.t.PRNG"], ylim = ran, log = "xy", type = "b", col = cols[1],
      xlab = expression(n[gen]), ylab = "Variance estimates")
-lines(ns, vars["Var.ES.t.GMMN.QRNG",], type = "b", col = cols[2])
-lines(ns, vars["Var.ES.t.QRNG",],      type = "b", col = cols[3])
+lines(ns, vars[,"Var.ES.t.GMMN.QRNG"], type = "b", col = cols[2])
+lines(ns, vars[,"Var.ES.t.QRNG"],      type = "b", col = cols[3])
 legend("topright", bty = "n", lty = rep(1, 3), col = cols[1:3],
        legend = as.expression(
            c(substitute("PRNG,"~alpha == a,       list(a = alpha.["t.PRNG"])),
@@ -449,9 +449,9 @@ mtext(substitute(paste("t,"~d == d.), list(d. = dim.out)), side = 4, line = 0.5,
 
 ## Plot of variance estimates of the Monte Carlo and the GMMN-based RQMC
 ## estimator for the nested Gumbel copula
-plot(ns, vars["Var.ES.NG.PRNG",], ylim = ran, log = "xy", type = "b", col = cols[1],
+plot(ns, vars[,"Var.ES.NG.PRNG"], ylim = ran, log = "xy", type = "b", col = cols[1],
      xlab = expression(n[gen]), ylab = "Variance estimates")
-lines(ns, vars["Var.ES.NG.GMMN.QRNG",], type = "b", col = cols[2])
+lines(ns, vars[,"Var.ES.NG.GMMN.QRNG"], type = "b", col = cols[2])
 legend("topright", bty = "n", lty = rep(1, 2), col = cols[1:2],
        legend = as.expression(
            c(substitute("PRNG,"~alpha == a,       list(a = alpha.["NG.PRNG"])),
