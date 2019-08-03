@@ -453,7 +453,9 @@ model <- quote(italic(t)[4]) # model expression
 mname <- paste0("t",nu) # string
 tau <- taus[1] # Kendall's tau
 
-## TODO: this is just to see if the code also works for more complicated copulas
+## TODO: make the following copula work with the code thereafter (as an example of
+## a more involved copula)
+
 ## Specifying the copula/case
 cop <- NAC.d55 # copula
 model <- "NAC" # model expression
@@ -517,6 +519,4 @@ errTFs <- error_test_functions(B.conv, n = ns, # about 13min
 conv_plot(errTFs, model = model, dim = dim.in.out, tau = tau,
           filebname = paste0("fig_convplot_",bname), B = B.conv)
 
-
-## TODO: make robust for NACs... (see TODO above)
 ## TODO: write one helper function to call them all and call it for each copula separately
