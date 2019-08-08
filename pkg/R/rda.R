@@ -16,7 +16,7 @@ exists_rda <- function(file, objnames, package = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
     filename <- rm_ext(basename(file)) # remove file extension
-    file <- paste0(filename,".rda") # file with extension (not necessarily provided by user)
+    file <- paste0(filename,".rda") # file with extension
     if(hasArg(objnames)) { # check existence of object 'objnames' inside 'file'
         objnames <- rm_ext(basename(objnames)) # remove file extension (as '%in% ls()' fails if '.rda' is included)
         ## Note: data() per default load()s the objects into .GlobalEnv
@@ -46,7 +46,7 @@ exists_rda <- function(file, objnames, package = NULL)
 
 ##' @title Reading Objects from an .rda from the Current Package or File in the
 ##'        Current Working Directory
-##' @param objnames names of objects to be read (without .rda)
+##' @param objnames names of objects to be read (with or without .rda)
 ##' @param file character string (with or without extension .rda) specifying
 ##'        the file to read from
 ##' @param package package name from which to load the objects or NULL (the default)
@@ -58,9 +58,12 @@ read_rda <- function(objnames, file, package = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
     filename <- rm_ext(basename(file)) # remove file extension
-    file <- paste0(filename,".rda") # file with extension (not necessarily provided by user)
-    if(!hasArg(objnames))
-        objnames <- paste0(rm_ext(basename(file)), collapse = "_")
+    file <- paste0(filename,".rda") # file with extension
+    objnames <- if(hasArg(objnames)) {
+        rm_ext(basename(objnames)) # otherwise get() fails below
+    } else {
+        paste0(rm_ext(basename(file)), collapse = "_")
+    }
     if(!all(exists_rda(file, objnames = objnames, package = package)))
         if(is.null(package)) {
             stop("Not all objects specified by 'objnames' exist in file '",file,"' in the local working directory")

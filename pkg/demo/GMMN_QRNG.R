@@ -39,7 +39,7 @@ ns <- round(2^seq(9, 18, by = 0.5)) # sequence of sample sizes for convergence p
 
 ### 0 Auxiliary functions ######################################################
 
-### 0.1 Computing ##############################################################
+### 0.1 Computing ingredients ##################################################
 
 ##' @title Compute Cramer-von Mises Statistic for B Replications of Samples of Size n
 ##'        from a Copula PRNG and a GMMN PRNG
@@ -54,6 +54,7 @@ ns <- round(2^seq(9, 18, by = 0.5)) # sequence of sample sizes for convergence p
 ##'         statistic evaluated based on generated pseudo-samples from
 ##'         'copula' and 'GMMN'
 ##' @author Marius Hofert
+##' @note Could have added QRNGs based on cCopula() for those copulas available
 CvM <- function(B, n, copula, GMMN, randomize, file)
 {
     if (file.exists(file)) {
@@ -139,8 +140,8 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
                 U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG)
                 U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG)
                 ## If available, draw from a real QRNG
-                cCopula.avail <- is(copula, "ellipCopula") || is(copula, "archmCopula") ||
-                    is(copula, "rotCopula") || is(copula, "mixCopula")
+                cCopula.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
+                    is(copula, "claytonCopula") # note: Gumbel takes too long, NACs not available
                 if(cCopula.avail)
                     U.cop.QRNG <- cCopula(sob, copula = copula, inverse = TRUE)
 
@@ -150,7 +151,8 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
                 raw[1,,nind,b] <- c(mean(sum_of_squares(U.cop.PRNG)),
                                     mean(sum_of_squares(U.GMMN.PRNG)),
                                     mean(sum_of_squares(U.GMMN.QRNG)),
-                                    if(cCopula.avail) mean(sum_of_squares(U.cop.QRNG)) else NA)
+                                    if(cCopula.avail)
+                                        mean(sum_of_squares(U.cop.QRNG)) else NA)
 
                 ## 2) Compute the Sobol' g test function
                 raw[2,,nind,b] <- if(cCopula.avail) {
@@ -175,7 +177,8 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
                 raw[4,,nind,b] <- c(ES_np(qnorm(trafo(U.cop.PRNG)),       level = p),
                                     ES_np(qnorm(trafo(U.GMMN.PRNG.pobs)), level = p),
                                     ES_np(qnorm(trafo(U.GMMN.QRNG.pobs)), level = p),
-                                    if(cCopula.avail) ES_np(qnorm(trafo(U.cop.QRNG)), level = p))
+                                    if(cCopula.avail)
+                                        ES_np(qnorm(trafo(U.cop.QRNG)), level = p) else NA)
 
             }
         }
@@ -195,7 +198,7 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
 ### 0.2 Plotting ###############################################################
 
 ##' @title Contours of the True Copula and Empirical Copulas based on
-##'        GMMN-PRNG and GMMN-QRNG
+##'        GMMN PRNG and GMMN QRNG
 ##' @param copula copula object
 ##' @param uPRNG PRNG sample from GMMN
 ##' @param uQRNG QRNG sample from GMMN
@@ -230,7 +233,7 @@ contourplot3 <- function(copula, uPRNG, uQRNG, file,
     if(doPDF) pdf(file = file, bg = "transparent")
     par(pty = "s")
     print(plt)
-    if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
+    if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
 }
 
 ##' @title Plotting Rosenblatt-Transformed Bivariate Copula Samples
@@ -250,60 +253,71 @@ rosenplot <- function(copula, u, file,
     if(doPDF) pdf(file = file, bg = "transparent")
     par(pty = "s")
     plot(R, xlab = xlab, ylab = ylab)
-    if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
+    if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
+}
+
+##' @title Scatter Plots
+##' @param u observations (from a PRNG, GMMN PRNG or GMMN QRNG)
+##' @param file character string (with ending .pdf) specifying the PDF file
+##'        to plot to or not (if not provided)
+##' @return nothing (plot by side-effect)
+##' @author Marius Hofert
+scatterplot <- function(u, file)
+{
+    doPDF <- hasArg(file) && is.character(file)
+    if(doPDF) pdf(file = file, bg = "transparent")
+    par(pty = "s")
+    if(ncol(u) == 2) {
+        plot(u, xlab = quote(U[1]), ylab = quote(U[2]))
+    } else pairs2(u)
+    if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
 }
 
 ##' @title Boxplot of Replications of the Cramer-von Mises Statistic
 ##' @param CvM (B, 3)-matrix containing the B replications of the Cramer-von Mises
 ##'        statistic as computed by CvM()
-##' @param model.call call (as returned by quote()) for the underlying model
 ##' @param dim dimension of the underlying model
-##' @param tau Kendall's tau of the underlying model
+##' @param model call (as returned by quote()) for the underlying model including tau(s)
 ##' @param file character string (with ending .pdf) specifying the PDF file
 ##'        to plot to or not (if not provided)
 ##' @return nothing (plot by side-effect)
 ##' @author Marius Hofert
-CvM_boxplot <- function(CvM, model.call, dim, tau, file)
+CvM_boxplot <- function(CvM, dim, model, file)
 {
     dim. <- if(length(dim) == 1) {
                 as.character(dim)
             } else {
                 paste0("(",paste0(dim, collapse = ", "),")")
             }
-    tau. <- if(length(tau) == 1) {
-                as.character(tau)
-            } else {
-                paste0("(",paste0(tau, collapse = ", "),")")
-            }
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, bg = "transparent")
+    if(doPDF) pdf(file = file, bg = "transparent", width = 7.4, height = 7.4)
     par(pty = "s")
-    boxplot(list(CvMstat[,"CvM.cop.PRNG"],
-                 CvMstat[,"CvM.GMMN.PRNG"], CvMstat[,"CvM.GMMN.QRNG"]),
+    boxplot(list(CvM[,"CvM.cop.PRNG"], CvM[,"CvM.GMMN.PRNG"], CvM[,"CvM.GMMN.QRNG"]),
             names = c("Copula PRNG", "GMMN PRNG", "GMMN QRNG"),
             ylab = expression(S[n[gen]]))
-    mtext(substitute(B~"replications,"~e~"copula, d ="~d*
-                         ", tau ="~t, list(B = nrow(CvM), e = model.call,
-                                           d = dim., t = tau.)),
+    mtext(substitute(B~"replications, d ="~d*","~m,
+                     list(B = nrow(CvM), d = dim., m = model)),
           side = 4, line = 0.5, adj = 0)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
 }
 
 ##' @title Plot the Convergence of the Error
 ##' @param err (<test function>, <RNG>, <sample size>)-array
-##' @param model.call call (as returned by quote()) for the underlying model
 ##' @param dim dimension of the underlying model
-##' @param tau Kendall's tau of the underlying model
+##' @param model call (as returned by quote()) for the underlying model including tau(s)
 ##' @param file character string (without ending .pdf) specifying the PDF file
 ##'        base name to plot each of the four plots to or not (if not provided)
 ##' @param B number of replications used for computing the error measure estimates
 ##' @return nothing (four plots by side-effect; one for each test function)
 ##' @author Marius Hofert
-conv_plot <- function(err, model.call, dim, tau, filebname, B)
+convergence_plot <- function(err, dim, model, filebname, B)
 {
     ## Setup
     ns <- as.numeric(dimnames(err)[["n"]]) # extracting the sample sizes n
-    ccoef <- function(error) abs(coef(lm(log(error) ~ log(ns)))[["log(ns)"]]) # convergence coeff.
+    ccoef <- function(error) { # convergence coefficient
+        res <- tryCatch(lm(log(error) ~ log(ns)), error = function(e) e)
+        if(is(res, "simpleError")) NA else -coef(res)[["log(ns)"]]
+    }
     ## Note: error(n) = O(n^{-alpha}) => error(n) = c*n^{-alpha} => ccoef(error) = alpha
     ylabels <- rep(c(expression("Mean absolute deviation estimate,"~O(n^{-alpha})),
                      expression("Standard deviation estimate,"~O(n^{-alpha}))), each = 2)
@@ -313,45 +327,145 @@ conv_plot <- function(err, model.call, dim, tau, filebname, B)
             } else {
                 paste0("(",paste0(dim, collapse = ", "),")")
             }
-    tau. <- if(length(tau) == 1) {
-                as.character(tau)
-            } else {
-                paste0("(",paste0(tau, collapse = ", "),")")
-            }
 
     ## Loop over the test functions (one plot per test function)
-    for(tfind in 1:4) {
+    for(ind in 1:4) {
         ## Compute convergence rates (the larger alpha, the faster the convergence;
         ## for MC, alpha ~= 1/2 for sd [~= 1 for variance])
-        a <- round(c(PRNG      = ccoef(err[tfind,"PRNG",]),
-                     GMMN.PRNG = ccoef(err[tfind,"GMMN PRNG",]),
-                     GMMN.QRNG = ccoef(err[tfind,"GMMN QRNG",]),
-                     QRNG      = ccoef(err[tfind,"QRNG",])), digits = 2)
+        a <- round(c(PRNG      = ccoef(err[ind,"PRNG",]),
+                     GMMN.PRNG = ccoef(err[ind,"GMMN PRNG",]),
+                     GMMN.QRNG = ccoef(err[ind,"GMMN QRNG",]),
+                     QRNG      = ccoef(err[ind,"QRNG",])), digits = 2)
+        if(all(is.na(a))) next # no plot; happens for Sobol' g test function and copulas without available cCopula()
+        ## Now it could still happen that a["QRNG"] is NA (omit this case from the plot then)
 
         ## Plot
         doPDF <- hasArg(filebname) && is.character(filebname)
         if(doPDF) {
-            file <- paste0(filebname,"_testfun_",tfname[tfind],".pdf")
-            pdf(file = file, bg = "transparent")
+            file <- paste0(filebname,"_testfun_",tfname[ind],".pdf")
+            pdf(file = file, bg = "transparent", width = 7.4, height = 7.4)
         }
-        par(pty = "s") # square plot region
-        ylim <- range(err[tfind,,], na.rm = TRUE) # determine ylim
-        plot(ns, err[tfind,"PRNG",], ylim = ylim, log = "xy", type = "l", # (n, PRNG error)
-             xlab = expression(n[gen]), ylab = ylabels[tfind])
-        lines(ns, err[tfind,"GMMN PRNG",], type = "l", lty = 2, lwd = 1.3)
-        lines(ns, err[tfind,"GMMN QRNG",], type = "l", lty = 3, lwd = 1.6)
-        lines(ns, err[tfind,"QRNG",],      type = "l", lty = 4, lwd = 1.3)
-        legend("bottomleft", bty = "n", lty = 1:4, lwd = c(1, 1.3, 1.6, 1.3),
-               legend = as.expression(
-                   c(substitute("Copula PRNG,"~alpha == a., list(a. = a["PRNG"])),
-                     substitute("GMMN PRNG,"~  alpha == a., list(a. = a["GMMN.PRNG"])),
-                     substitute("GMMN QRNG,"~  alpha == a., list(a. = a["GMMN.QRNG"])),
-                     substitute("Copula QRNG,"~alpha == a., list(a. = a["QRNG"])))))
-        mtext(substitute(B~"replications,"~e~"copula, d ="~d*
-                             ", tau ="~t, list(B = B, e = model.call,
-                                               d = dim., t = tau.)),
+        par(pty = "s")
+        ylim <- range(err[ind,,], na.rm = TRUE)
+        lgnd <- as.expression(
+            c(substitute("Copula PRNG,"~alpha == a., list(a. = a["PRNG"])),
+              substitute("GMMN PRNG,"~  alpha == a., list(a. = a["GMMN.PRNG"])),
+              substitute("GMMN QRNG,"~  alpha == a., list(a. = a["GMMN.QRNG"])),
+              if(!is.na(a["QRNG"]))
+                  substitute("Copula QRNG,"~alpha == a., list(a. = a["QRNG"]))))
+        plot(ns, err[ind,"PRNG",], ylim = ylim, log = "xy", type = "l",
+             xlab = expression(n[gen]), ylab = ylabels[ind])
+        lines(ns, err[ind,"GMMN PRNG",], type = "l", lty = 2, lwd = 1.3)
+        lines(ns, err[ind,"GMMN QRNG",], type = "l", lty = 3, lwd = 1.6)
+        if(!is.na(a["QRNG"])) {
+            lines(ns, err[ind,"QRNG",], type = "l", lty = 4, lwd = 1.3)
+            legend("bottomleft", bty = "n", lty = 1:4, lwd = c(1, 1.3, 1.6, 1.3), legend = lgnd)
+        } else {
+            legend("bottomleft", bty = "n", lty = 1:3, lwd = c(1, 1.3, 1.6), legend = lgnd)
+        }
+        mtext(substitute(B~"replications, d ="~d*","~m,
+                         list(B = nrow(CvM), d = dim., m = model)),
               side = 4, line = 0.5, adj = 0)
-        if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
+        if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
+    }
+}
+
+
+### 0.3 Main wrapper reproducing all results (and more) ########################
+
+##' @title Computing All Results for a List of Copulas
+##' @param copL list of lists with components 'cop', 'name', 'mod'; see below
+##' @return nothing (computes results by side-effect)
+##' @author Marius Hofert
+reproduce <- function(copL)
+{
+    for(i in seq_along(copL))
+    {
+        cat(paste0("=> Working on element ",i," of ",length(copL)),"\n")
+        cop  <- copL[[i]]$cop
+        name <- copL[[i]]$name
+        mod  <- copL[[i]]$mod
+
+        ## 1 Training ##########################################################
+
+        ## Generate training data
+        set.seed(271) # for reproducibility
+        U <- rCopula(ntrn, copula = cop) # generate training dataset from a PRNG
+        ## Train
+        dim.in.out <- dim(cop) # dimension of the prior distribution fed into the GMMN
+        NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+                         "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
+        GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
+                           nbat = nbat, nepo = nepo, file = NNname, package = "gnn")
+        cat("=> Training done\n")
+
+        ## 2 Contour/Rosenblatt plots or scatter plots #########################
+
+        ## Setup and data generation
+        bname <- paste0("dim_",dim.in.out,"_",name) # suffix
+        seed <- 314
+        set.seed(seed) # for reproducibility
+        N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
+        N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
+        U.GMMN.PRNG <- pobs(predict(GMMN, x = N01.prior.PRNG)) # GMMN PRNs
+        U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
+
+        ## Contour and Rosenblatt plot or scatter plots
+        scatter.cops <- grepl("MO", x = name) || grepl("rot", x = name) || grepl("mix", x = name)
+        if(dim.in.out == 2 && !scatter.cops) { # for d = 2 and not MO, rotated copulas or mixtures
+            ## Contour plot
+            contourplot3(cop, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
+                         file = paste0("fig_contours_",bname,".pdf"))
+            ## Rosenblatt plot
+            rosenplot(cop, u = U.GMMN.PRNG,
+                      file = paste0("fig_rosenblatt_",bname,".pdf"))
+        } else if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
+            lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
+            nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
+            ## Scatter plots
+            for(i in seq_along(lst))
+                scatterplot(lst[[i]], file = paste0("fig_scatter_",nms[i],"_",bname,".pdf"))
+        }
+        cat("=> Contour/Rosenblatt or scatter plots done\n")
+
+        ## 3 Cramer-von Mises (CvM) statistics and test functions ##############
+
+        if(!is.null(mod)) { # only done for copulas where 'mod' is not NULL
+
+            ## Compute string of tau(s) to be displayed in plots
+            tau.str <- if(is(cop, "outer_nacopula")) {
+                           th <- sort(unique(as.vector(nacPairthetas(cop))))
+                           taus <- sapply(th, function(th.)
+                               tau(archmCopula(cop@copula@name, param = th.)))
+                           paste0("(",paste0(taus, collapse = ", "),")")
+                    } else as.character(tau(cop))
+            model <- substitute(m.*","~~tau==t., list(m. = mod, t. = tau.str)) # model and taus
+
+            ## 3.1 CVM statistics ##############################################
+
+            ## Compute B.CvM replications of the CvM statistic
+            CvMstat <- CvM(B.CvM, n = ngen, copula = cop, GMMN = GMMN, randomize = randomize,
+                           file = paste0("comp_CvMstat_",bname,".rds"))
+            cat("=> Computing Cramer-von Mises statistics done\n")
+
+            ## Boxplots
+            CvM_boxplot(CvMstat, dim = dim.in.out, model = model,
+                        file = paste0("fig_CvMboxplot_",bname,".pdf"))
+
+            ## 3.2 Test functions ##############################################
+
+            ## Compute errors over B.conv replications; an (4, 4, length(ns))-array
+            ## (<test function>, <RNG>, <sample size>)
+            errTFs <- error_test_functions(B.conv, n = ns, # about 13min
+                                           copula = cop, GMMN = GMMN, randomize = randomize,
+                                           file = paste0("comp_testfun_",bname,".rds"))
+            cat("=> Computing errors for test functions done\n")
+
+            ## Plot convergence behavior
+            convergence_plot(errTFs, dim = dim.in.out, model = model,
+                             filebname = paste0("fig_convergence_",bname), B = B.conv)
+
+        }
     }
 }
 
@@ -385,7 +499,7 @@ G.cop.d2.tau2 <- gumbelCopula(th.G[2], dim = d)
 G.cop.d2.tau3 <- gumbelCopula(th.G[3], dim = d)
 
 ## Marshall--Olkin copulas
-alpha <- c(0.75, 0.60)
+alpha <- c(0.75, 0.60) # implies tau = 0.5
 MO.cop.d2 <- moCopula(alpha, dim = d)
 
 ## Mixture copulas
@@ -441,82 +555,75 @@ NAC.d55 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayt
 NAG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 
-### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
+### 1.5 List with all copulas we use ###########################################
 
-## Note: This takes long (~= 15min per copula) even if the GMMN is already trained
+## Note:
+## - 'cop'  = copula object
+## - 'name' = name string (copula and taus together) used in trained GMMN objects,
+##            computed CvM statistics and test functions (.rds objects)
+##            for boxplots and convergence plots
+## - 'mod' = model string used in boxplots and convergence plots; if NULL then
+##           the respective cop is not used in boxplots and convergence plots
+copL <- list(
+    ## See 1.1
+    list(cop = t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # 1
+         mod = quote(italic(t)[4])),
+    list(cop = t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # 2
+         mod = quote(italic(t)[4])),
+    list(cop = t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # 3
+         mod = quote(italic(t)[4])),
+    list(cop = C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # 4
+         mod = quote(Clayton)),
+    list(cop = C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # 5
+         mod = quote(Clayton)),
+    list(cop = C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # 6
+         mod = quote(Clayton)),
+    list(cop = G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # 7
+         mod = quote(Gumbel)),
+    list(cop = G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # 8
+         mod = quote(Gumbel)),
+    list(cop = G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # 9
+         mod = quote(Gumbel)),
+    list(cop = MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")), # 10
+         mod = NULL), # or quote(MO)
+    list(cop = mix.cop.C.t90, name = "mix_C_tau_0.5_rot90_t4_tau_0.5", # 11
+         mod = NULL), # or quote(Clayton-italic(t)[4](90))
+    list(cop = mix.cop.G.t90,  name = "mix_G_tau_0.5_rot90_t4_tau_0.5", # 12
+         mod = NULL), # or quote(Gumbel-italic(t)[4](90))
+    list(cop = mix.cop.MO.t90, name = paste0("mix_MO_",paste0(alpha,collapse = "_"),
+                                             "_rot90_t4_tau_0.5"), # 13
+         mod = NULL), # or quote(MO-italic(t)[4](90))
+    ## See 1.2
+    list(cop = NAC.d21, name = paste0("NC21_tau_", taus, collapse = "_"), # 14
+         mod = quote("(2,1)-nested Clayton")),
+    list(cop = NAG.d21, name = paste0("NG21_tau_", taus, collapse = "_"), # 15
+         mod = quote("(2,1)-nested Gumbel")),
+    ## See 1.3
+    list(cop = t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # 16
+         mod = quote(italic(t)[4])),
+    list(cop = C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # 17
+         mod = quote(Clayton)),
+    list(cop = G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # 18
+         mod = quote(Gumbel)),
+    list(cop = NAC.d23, name = paste0("NC23_tau_", taus, collapse = "_"), # 19
+         mod = quote("(2,3)-nested Clayton")),
+    list(cop = NAG.d23, name = paste0("NG23_tau_", taus, collapse = "_"), # 20
+         mod = quote("(2,3)-nested Gumbel")),
+    ## See 1.4
+    list(cop = t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # 21
+         mod = quote(italic(t)[4])),
+    list(cop = C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # 22
+         mod = quote(Clayton)),
+    list(cop = G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # 23
+         mod = quote(Gumbel)),
+    list(cop = NAC.d55, name = paste0("NC55_tau_", taus, collapse = "_"), # 24
+         mod = quote("(5,5)-nested Clayton")),
+    list(cop = NAG.d55, name = paste0("NG55_tau_", taus, collapse = "_"), # 25
+         mod = quote("(5,5)-nested Gumbel")))
 
-### 2.1 d = 2 ##################################################################
 
-## Specifying the copula/case
-cop <- t.cop.d2.tau1 # copula
-model <- quote(italic(t)[4]) # model expression
-mname <- paste0("t",nu) # string
-tau <- taus[1] # Kendall's tau
+ ### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
 
-## TODO: make the following copula work with the code thereafter (as an example of
-## a more involved copula)
-
-## Specifying the copula/case
-cop <- NAC.d55 # copula
-model <- "NAC" # model expression
-mname <- model # string
-tau <- taus[2] # Kendall's tau
-
-
-### Training ###################################################################
-
-## Generate training data and train
-set.seed(271) # for reproducibility
-U <- rCopula(ntrn, copula = cop) # generate training dataset from a PRNG
-dim.in.out <- dim(cop) # dimension of the prior distribution fed into the GMMN
-bname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
-                "_nbat_",nbat,"_nepo_",nepo,"_",mname,"_tau_",tau)
-GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
-                   nbat = nbat, nepo = nepo, file = paste0(bname,".rda"),
-                   package = "gnn")
-
-
-### Contour plot and Rosenblatt plots ##########################################
-x
-## Setup and data generation
-bname <- paste0(mname,"_dim_",dim.in.out,"_tau_",tau) # suffix
-seed <- 314
-set.seed(seed) # for reproducibility
-N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
-N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
-U.GMMN.PRNG <- pobs(predict(GMMN, x = N01.prior.PRNG)) # GMMN PRNs
-U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
-
-## Contour plot
-contourplot3(cop, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
-             file = paste0("fig_contours_",bname,".pdf"))
-
-## Rosenblatt plot
-rosenplot(cop, u = U.GMMN.PRNG,
-          file = paste0("fig_rosenblatt_",bname,".pdf"))
-
-
-### Cramer-von Mises (CvM) statistic ###########################################
-
-## Compute B.CvM replications of the CvM statistic
-CvMstat <- CvM(B.CvM, n = ngen, copula = cop, GMMN = GMMN, randomize = randomize,
-               file = paste0("comp_CvMstat_",bname,".rds")) # about 1min
-
-## Boxplots
-CvM_boxplot(CvMstat, model = model, dim = dim.in.out, tau = tau,
-            file = paste0("fig_CvMboxplot_",bname,".pdf"))
-
-
-### Test functions #############################################################
-
-## Compute errors over B.conv replications; an (4, 4, length(ns))-array
-## (<test function>, <RNG>, <sample size>)
-errTFs <- error_test_functions(B.conv, n = ns, # about 13min
-                               copula = cop, GMMN = GMMN, randomize = randomize,
-                               file = paste0("comp_testfun_",bname,".rds"))
-
-## Plot convergence behavior
-conv_plot(errTFs, model = model, dim = dim.in.out, tau = tau,
-          filebname = paste0("fig_convplot_",bname), B = B.conv)
-
-## TODO: write one helper function to call them all and call it for each copula separately
+## Run everything; takes long (~= 15min per copula) even if the GMMN is already trained
+## because of the CvM statistic and test function simulations
+system.time(reproduce(copL))
