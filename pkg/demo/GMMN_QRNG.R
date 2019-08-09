@@ -422,7 +422,7 @@ reproduce <- function(copula, name, model)
         nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
         ## Scatter plots
         for(i in seq_along(lst))
-            scatterplot(lst[[i]], file = paste0("fig_scatter_",nms[i],"_",bname,".pdf"))
+            scatterplot(lst[[i]], file = paste0("fig_scatter_",bname,"_",nms[i],".pdf"))
     }
     cat("=> Contour/Rosenblatt or scatter plots done\n")
 
