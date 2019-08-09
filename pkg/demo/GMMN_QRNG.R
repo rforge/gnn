@@ -1,7 +1,7 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Code to reproduce the results of Hofert, Prasad, Zhu ("Quasi-Monte Carlo for
-## multivariate distributions based on generative neural networks")
+## multivariate distributions based on generative neural networks") and more.
 
 
 ### Setup ######################################################################
@@ -10,8 +10,8 @@
 library(keras) # interface to Keras (high-level neural network API)
 library(tensorflow) # interface to TensorFlow (numerical computation with tensors)
 library(qrmtools) # for ES_np()
-library(qrng) # requires at least version 0.0-6
-if(packageVersion("qrng") < "0.0-6")
+library(qrng) # for sobol()
+if(packageVersion("qrng") < "0.0-7")
     stop('Consider updating via install.packages("qrng", repos = "http://R-Forge.R-project.org")')
 library(copula) # considered copulas
 library(gnn) # for the used GMMN models
@@ -374,98 +374,97 @@ convergence_plot <- function(err, dim, model, filebname, B)
 ### 0.3 Main wrapper reproducing all results (and more) ########################
 
 ##' @title Computing All Results for a List of Copulas
-##' @param copL list of lists with components 'cop', 'name', 'mod'; see below
+##' @param copula copula object
+##' @param name character string (copula and taus together) for trained GMMNs,
+##'        computed CvM statistics and test functions (.rds objects) as well as
+##'        in corresponding boxplot and convergence plot figures
+##' @param model call containing a model string used in boxplots and
+##'        convergence plots; if NULL these plots are omitted for 'copula'
 ##' @return nothing (computes results by side-effect)
 ##' @author Marius Hofert
-reproduce <- function(copL)
+reproduce <- function(copula, name, model)
 {
-    for(i in seq_along(copL))
-    {
-        cat(paste0("=> Working on element ",i," of ",length(copL)),"\n")
-        cop  <- copL[[i]]$cop
-        name <- copL[[i]]$name
-        mod  <- copL[[i]]$mod
+    ## 1 Training ##########################################################
 
-        ## 1 Training ##########################################################
+    ## Generate training data
+    set.seed(271) # for reproducibility
+    U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
+    ## Train
+    dim.in.out <- dim(copula) # dimension of the prior distribution fed into the GMMN
+    NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+                     "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
+    GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
+                       nbat = nbat, nepo = nepo, file = NNname, package = "gnn")
+    cat("=> Training done\n")
 
-        ## Generate training data
-        set.seed(271) # for reproducibility
-        U <- rCopula(ntrn, copula = cop) # generate training dataset from a PRNG
-        ## Train
-        dim.in.out <- dim(cop) # dimension of the prior distribution fed into the GMMN
-        NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
-                         "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
-        GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
-                           nbat = nbat, nepo = nepo, file = NNname, package = "gnn")
-        cat("=> Training done\n")
+    ## 2 Contour/Rosenblatt plots or scatter plots #########################
 
-        ## 2 Contour/Rosenblatt plots or scatter plots #########################
+    ## Setup and data generation
+    bname <- paste0("dim_",dim.in.out,"_",name) # suffix
+    seed <- 314
+    set.seed(seed) # for reproducibility
+    N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
+    N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
+    U.GMMN.PRNG <- pobs(predict(GMMN, x = N01.prior.PRNG)) # GMMN PRNs
+    U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
 
-        ## Setup and data generation
-        bname <- paste0("dim_",dim.in.out,"_",name) # suffix
-        seed <- 314
-        set.seed(seed) # for reproducibility
-        N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
-        N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
-        U.GMMN.PRNG <- pobs(predict(GMMN, x = N01.prior.PRNG)) # GMMN PRNs
-        U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
+    ## Contour and Rosenblatt plot or scatter plots
+    scatter.cops <- grepl("MO", x = name) || grepl("rot", x = name) || grepl("mix", x = name)
+    if(dim.in.out == 2 && !scatter.cops) { # for d = 2 and not MO, rotated copulas or mixtures
+        ## Contour plot
+        contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
+                     file = paste0("fig_contours_",bname,".pdf"))
+        ## Rosenblatt plot
+        rosenplot(copula, u = U.GMMN.PRNG,
+                  file = paste0("fig_rosenblatt_",bname,".pdf"))
+    } else if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
+        lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
+        nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
+        ## Scatter plots
+        for(i in seq_along(lst))
+            scatterplot(lst[[i]], file = paste0("fig_scatter_",nms[i],"_",bname,".pdf"))
+    }
+    cat("=> Contour/Rosenblatt or scatter plots done\n")
 
-        ## Contour and Rosenblatt plot or scatter plots
-        scatter.cops <- grepl("MO", x = name) || grepl("rot", x = name) || grepl("mix", x = name)
-        if(dim.in.out == 2 && !scatter.cops) { # for d = 2 and not MO, rotated copulas or mixtures
-            ## Contour plot
-            contourplot3(cop, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
-                         file = paste0("fig_contours_",bname,".pdf"))
-            ## Rosenblatt plot
-            rosenplot(cop, u = U.GMMN.PRNG,
-                      file = paste0("fig_rosenblatt_",bname,".pdf"))
-        } else if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
-            lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
-            nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
-            ## Scatter plots
-            for(i in seq_along(lst))
-                scatterplot(lst[[i]], file = paste0("fig_scatter_",nms[i],"_",bname,".pdf"))
-        }
-        cat("=> Contour/Rosenblatt or scatter plots done\n")
+    ## 3 Cramer-von Mises (CvM) statistics and test functions ##############
 
-        ## 3 Cramer-von Mises (CvM) statistics and test functions ##############
+    if(!is.null(model)) { # only done for copulas where 'model' is not NULL
 
-        if(!is.null(mod)) { # only done for copulas where 'mod' is not NULL
+        ## Compute string of tau(s) to be displayed in plots
+        tau.str <- if(is(copula, "outer_nacopula")) {
+                       th <- sort(unique(as.vector(nacPairthetas(copula))))
+                       taus <- sapply(th, function(th.)
+                           tau(archmCopula(copula@copula@name, param = th.)))
+                       paste0("(",paste0(taus, collapse = ", "),")")
+                   } else as.character(tau(copula))
+        model. <- substitute(m.*","~~tau==t., list(m. = model, t. = tau.str)) # model and taus
 
-            ## Compute string of tau(s) to be displayed in plots
-            tau.str <- if(is(cop, "outer_nacopula")) {
-                           th <- sort(unique(as.vector(nacPairthetas(cop))))
-                           taus <- sapply(th, function(th.)
-                               tau(archmCopula(cop@copula@name, param = th.)))
-                           paste0("(",paste0(taus, collapse = ", "),")")
-                    } else as.character(tau(cop))
-            model <- substitute(m.*","~~tau==t., list(m. = mod, t. = tau.str)) # model and taus
+        ## 3.1 CVM statistics ##############################################
 
-            ## 3.1 CVM statistics ##############################################
+        ## Compute B.CvM replications of the CvM statistic
+        CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
+                       randomize = randomize,
+                       file = paste0("comp_CvMstat_",bname,".rds"))
+        cat("=> Computing Cramer-von Mises statistics done\n")
 
-            ## Compute B.CvM replications of the CvM statistic
-            CvMstat <- CvM(B.CvM, n = ngen, copula = cop, GMMN = GMMN, randomize = randomize,
-                           file = paste0("comp_CvMstat_",bname,".rds"))
-            cat("=> Computing Cramer-von Mises statistics done\n")
+        ## Boxplots
+        CvM_boxplot(CvMstat, dim = dim.in.out, model = model.,
+                    file = paste0("fig_CvMboxplot_",bname,".pdf"))
 
-            ## Boxplots
-            CvM_boxplot(CvMstat, dim = dim.in.out, model = model,
-                        file = paste0("fig_CvMboxplot_",bname,".pdf"))
+        ## 3.2 Test functions ##############################################
 
-            ## 3.2 Test functions ##############################################
+        ## Compute errors over B.conv replications; an (4, 4, length(ns))-array
+        ## (<test function>, <RNG>, <sample size>)
+        errTFs <- error_test_functions(B.conv, n = ns,
+                                       copula = copula, GMMN = GMMN,
+                                       randomize = randomize,
+                                       file = paste0("comp_testfun_",bname,".rds"))
+        cat("=> Computing errors for test functions done\n")
 
-            ## Compute errors over B.conv replications; an (4, 4, length(ns))-array
-            ## (<test function>, <RNG>, <sample size>)
-            errTFs <- error_test_functions(B.conv, n = ns, # about 13min
-                                           copula = cop, GMMN = GMMN, randomize = randomize,
-                                           file = paste0("comp_testfun_",bname,".rds"))
-            cat("=> Computing errors for test functions done\n")
+        ## Plot convergence behavior
+        convergence_plot(errTFs, dim = dim.in.out, model = model.,
+                         filebname = paste0("fig_convergence_",bname), B = B.conv)
 
-            ## Plot convergence behavior
-            convergence_plot(errTFs, dim = dim.in.out, model = model,
-                             filebname = paste0("fig_convergence_",bname), B = B.conv)
-
-        }
     }
 }
 
@@ -515,14 +514,20 @@ mix.cop.MO.t90 <- mixCopula(list(MO.cop.d2,     t.cop.d2.tau2.rot90), w = w) # M
 ## Auxiliary function
 nacList <- function(d, th) {
     stopifnot(length(d) == 2, d >= 1, length(th) == 3)
-    list(th[1], NULL, list(list(th[2], 1:d[1]), # nesting structure
+    if(d[1] == 1) {
+        list(th[1], 1, list(list(th[2], 1 + 1:d[2])))
+    } else if(d[2] == 1) {
+        list(th[1], d[1]+1, list(list(th[2], 1:d[1])))
+    } else {
+        list(th[1], NULL, list(list(th[2], 1:d[1]),
                            list(th[3], (d[1]+1):sum(d))))
+    }
 }
 
 ## Nested copulas
 d <- c(2, 1) # sector dimensions
-NAC.d21 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayton
-NAG.d21 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
+NC.d21 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayton
+NG.d21 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 
 ### 1.3 d = 5 ##################################################################
@@ -536,8 +541,8 @@ G.cop.d5.tau2 <- gumbelCopula(th.G[2],  dim = d) # Gumbel copula
 
 ## Nested copulas
 d <- c(2, 3) # sector dimensions
-NAC.d23 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayton
-NAG.d23 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
+NC.d23 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayton
+NG.d23 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 
 ### 1.4 d = 10 #################################################################
@@ -551,79 +556,68 @@ G.cop.d10.tau2 <- gumbelCopula(th.G[2],  dim = d) # Gumbel copula
 
 ## Nested copulas
 d <- c(5, 5) # sector dimensions
-NAC.d55 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayton
-NAG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
+NC.d55 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayton
+NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 
-### 1.5 List with all copulas we use ###########################################
+### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
 
-## Note:
-## - 'cop'  = copula object
-## - 'name' = name string (copula and taus together) used in trained GMMN objects,
-##            computed CvM statistics and test functions (.rds objects)
-##            for boxplots and convergence plots
-## - 'mod' = model string used in boxplots and convergence plots; if NULL then
-##           the respective cop is not used in boxplots and convergence plots
-copL <- list(
-    ## See 1.1
-    list(cop = t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # 1
-         mod = quote(italic(t)[4])),
-    list(cop = t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # 2
-         mod = quote(italic(t)[4])),
-    list(cop = t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # 3
-         mod = quote(italic(t)[4])),
-    list(cop = C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # 4
-         mod = quote(Clayton)),
-    list(cop = C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # 5
-         mod = quote(Clayton)),
-    list(cop = C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # 6
-         mod = quote(Clayton)),
-    list(cop = G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # 7
-         mod = quote(Gumbel)),
-    list(cop = G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # 8
-         mod = quote(Gumbel)),
-    list(cop = G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # 9
-         mod = quote(Gumbel)),
-    list(cop = MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")), # 10
-         mod = NULL), # or quote(MO)
-    list(cop = mix.cop.C.t90, name = "mix_C_tau_0.5_rot90_t4_tau_0.5", # 11
-         mod = NULL), # or quote(Clayton-italic(t)[4](90))
-    list(cop = mix.cop.G.t90,  name = "mix_G_tau_0.5_rot90_t4_tau_0.5", # 12
-         mod = NULL), # or quote(Gumbel-italic(t)[4](90))
-    list(cop = mix.cop.MO.t90, name = paste0("mix_MO_",paste0(alpha,collapse = "_"),
-                                             "_rot90_t4_tau_0.5"), # 13
-         mod = NULL), # or quote(MO-italic(t)[4](90))
-    ## See 1.2
-    list(cop = NAC.d21, name = paste0("NC21_tau_", taus, collapse = "_"), # 14
-         mod = quote("(2,1)-nested Clayton")),
-    list(cop = NAG.d21, name = paste0("NG21_tau_", taus, collapse = "_"), # 15
-         mod = quote("(2,1)-nested Gumbel")),
-    ## See 1.3
-    list(cop = t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # 16
-         mod = quote(italic(t)[4])),
-    list(cop = C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # 17
-         mod = quote(Clayton)),
-    list(cop = G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # 18
-         mod = quote(Gumbel)),
-    list(cop = NAC.d23, name = paste0("NC23_tau_", taus, collapse = "_"), # 19
-         mod = quote("(2,3)-nested Clayton")),
-    list(cop = NAG.d23, name = paste0("NG23_tau_", taus, collapse = "_"), # 20
-         mod = quote("(2,3)-nested Gumbel")),
-    ## See 1.4
-    list(cop = t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # 21
-         mod = quote(italic(t)[4])),
-    list(cop = C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # 22
-         mod = quote(Clayton)),
-    list(cop = G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # 23
-         mod = quote(Gumbel)),
-    list(cop = NAC.d55, name = paste0("NC55_tau_", taus, collapse = "_"), # 24
-         mod = quote("(5,5)-nested Clayton")),
-    list(cop = NAG.d55, name = paste0("NG55_tau_", taus, collapse = "_"), # 25
-         mod = quote("(5,5)-nested Gumbel")))
+## Run everything. Each call takes about 10--15min (2019; much longer for d = 10)
+## even if GMMN is already trained because of the CvM statistic and test
+## function simulations (if done); it takes significantly longer with training.
 
-
- ### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
-
-## Run everything; takes long (~= 15min per copula) even if the GMMN is already trained
-## because of the CvM statistic and test function simulations
-system.time(reproduce(copL))
+## Copulas from Section 1.1
+reproduce(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]),
+          model = quote(italic(t)[4]))
+reproduce(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]),
+          model = quote(italic(t)[4]))
+reproduce(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]),
+          model = quote(italic(t)[4]))
+reproduce(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]),
+          model = quote(Clayton))
+reproduce(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]),
+          model = quote(Clayton))
+reproduce(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]),
+          model = quote(Clayton))
+reproduce(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]),
+          model = quote(Gumbel))
+reproduce(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]),
+          model = quote(Gumbel))
+reproduce(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]),
+          model = quote(Gumbel))
+reproduce(MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")),
+          model = NULL) # or quote(MO)
+reproduce(mix.cop.C.t90, name = "eqmix_C_tau_0.5_rot90_t4_tau_0.5",
+          model = NULL) # or quote(Clayton-italic(t)[4](90))
+reproduce(mix.cop.G.t90,  name = "eqmix_G_tau_0.5_rot90_t4_tau_0.5",
+          model = NULL) # or quote(Gumbel-italic(t)[4](90))
+reproduce(mix.cop.MO.t90, name = paste0("eqmix_MO_",paste0(alpha,collapse = "_"),
+                                        "_rot90_t4_tau_0.5"),
+          model = NULL) # or quote(MO-italic(t)[4](90))
+## Copulas from Section 1.2
+reproduce(NC.d21, name = paste0("NC21_tau_",paste0(taus[1:2], collapse = "_")),
+          model = quote("(2,1)-nested Clayton"))
+reproduce(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")),
+          model = quote("(2,1)-nested Gumbel"))
+## Copulas from Section 1.3
+reproduce(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]),
+          model = quote(italic(t)[4]))
+reproduce(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]),
+          model = quote(Clayton))
+reproduce(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]),
+          model = quote(Gumbel))
+reproduce(NC.d23, name = paste0("NC23_tau_",paste0(taus, collapse = "_")),
+          model = quote("(2,3)-nested Clayton"))
+reproduce(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")),
+          model = quote("(2,3)-nested Gumbel"))
+## Copulas from Section 1.4
+reproduce(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]),
+          model = quote(italic(t)[4]))
+reproduce(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]),
+          model = quote(Clayton))
+reproduce(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]),
+          model = quote(Gumbel))
+reproduce(NC.d55, name = paste0("NC55_tau_",paste0(taus, collapse = "_")),
+          model = quote("(5,5)-nested Clayton"))
+reproduce(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")),
+          model = quote("(5,5)-nested Gumbel"))
