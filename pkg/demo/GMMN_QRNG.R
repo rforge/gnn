@@ -409,8 +409,8 @@ reproduce <- function(copula, name, model)
     U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
 
     ## Contour and Rosenblatt plot or scatter plots
-    scatter.cops <- grepl("MO", x = name) || grepl("rot", x = name) || grepl("mix", x = name)
-    if(dim.in.out == 2 && !scatter.cops) { # for d = 2 and not MO, rotated copulas or mixtures
+    scatter.cops <- grepl("MO", x = name)
+    if(dim.in.out == 2 && !scatter.cops) { # for d = 2 and not MO
         ## Contour plot
         contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
                      file = paste0("fig_contours_",bname,".pdf"))
