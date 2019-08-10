@@ -439,23 +439,21 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     U.GMMN.PRNG <- pobs(predict(GMMN, x = N01.prior.PRNG)) # GMMN PRNs
     U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
 
-    ## Contour and Rosenblatt plot or scatter plots
-    scatter.cops <- grepl("MO", x = name)
-    if(dim.in.out == 2 && !scatter.cops) { # for d = 2 and not MO
-        ## Contour plot
+    ## Contour, Rosenblatt and scatter plots
+    if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
                      file = paste0("fig_contours_",bname,".pdf"))
-        ## Rosenblatt plot
         rosenplot(copula, u = U.GMMN.PRNG,
                   file = paste0("fig_rosenblatt_",bname,".pdf"))
-    } else if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
+    }
+    ## Scatter plots
+    if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
         lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
         nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
-        ## Scatter plots
         for(i in seq_along(lst))
             scatterplot(lst[[i]], file = paste0("fig_scatter_",bname,"_",nms[i],".pdf"))
     }
-    cat("=> Contour/Rosenblatt or scatter plots done\n")
+    cat("=> Contour, Rosenblatt and scatter plots done\n")
 
     ## 3 Cramer-von Mises (CvM) statistics and test functions ##################
 
