@@ -1,7 +1,7 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Code to reproduce the results of Hofert, Prasad, Zhu ("Quasi-Monte Carlo for
-## multivariate distributions based on generative neural networks").
+## multivariate distributions based on generative neural networks") and more.
 
 
 ### Setup ######################################################################
