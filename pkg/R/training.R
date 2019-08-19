@@ -27,8 +27,8 @@ train <- function(dim, data, batch.size, nepoch, method = c("GMMN", "VAE"), ...)
            },
            "VAE" = {
                GNN <- VAE_model(dim, ...)
-               GNN$model <- %>% fit(x = data, y = data, # ... for how we defined the loss function
-                                    batch_size = batch.size, epochs = nepoch)
+               GNN$model %>% fit(x = data, y = data, # ... for how we defined the loss function
+                                 batch_size = batch.size, epochs = nepoch)
            },
            stop("Wrong 'method'"))
     GNN
@@ -48,7 +48,7 @@ train <- function(dim, data, batch.size, nepoch, method = c("GMMN", "VAE"), ...)
 ##' @param ... additional arguments passed to the underlying train()
 ##' @return trained or loaded GNN
 ##' @author Marius Hofert
-train_once <- function(dim, data, batch.size, nepoch, method = "GMMN",
+train_once <- function(dim, data, batch.size, nepoch, method = c("GMMN", "VAE"),
                        file, name = rm_ext(basename(file)),
                        package = NULL, ...)
 {

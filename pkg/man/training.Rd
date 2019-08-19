@@ -6,8 +6,8 @@
   Functions for training generative neural networks.
 }
 \usage{
-train(dim, data, batch.size, nepoch, method = "GMMN", ...)
-train_once(dim, data, batch.size, nepoch, method = "GMMN",
+train(dim, data, batch.size, nepoch, method = c("GMMN", "VAE"), ...)
+train_once(dim, data, batch.size, nepoch, method = c("GMMN", "VAE"),
            file, name = rm_ext(basename(file)),
            package = NULL, ...)
 }
@@ -21,7 +21,7 @@ train_once(dim, data, batch.size, nepoch, method = "GMMN",
   \item{nepoch}{number of epochs (one epoch equals one pass through
     the complete training dataset while updating the GNN's parameters).}
   \item{method}{\code{\link{character}} string specifying the type of
-    generative neural network (currently only GMMNs).}
+    generative neural network.}
   \item{file}{\code{\link{character}} string (with or without ending
     \code{.rda}) specifying the file to save the trained GNN to.}
   \item{name}{name under which the trained GNN is saved in \code{file}.}
@@ -31,8 +31,10 @@ train_once(dim, data, batch.size, nepoch, method = "GMMN",
   \item{\dots}{for
     \describe{
       \item{\code{train()}}{additional arguments passed to the
-	underlying \code{\link{GMMN_model}()}.}
-      \item{\code{train_once()}}{additional arguments passed to the underlying \code{train()}.}
+	underlying \code{\link{GMMN_model}()} (if \code{model = "GMMN"})
+	or \code{\link{VAE_model}()} (if \code{model = "VAE"}).}
+      \item{\code{train_once()}}{additional arguments passed to the
+	underlying \code{train()}.}
     }
   }
 }
