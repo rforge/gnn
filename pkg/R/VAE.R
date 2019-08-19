@@ -171,7 +171,7 @@ VAE_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid
             (dim[1]/1.0) * loss(x, y = y, type = loss.type, ...) # multiply reconstruction loss by dimension (of output dataset) to ensure the two losses are of the same order
 
     ## 4) Compile the model
-    model %>% compile(optimizer = "adam", loss = loss)
+    model %>% compile(optimizer = "adam", loss = loss_fn)
 
     ## 5) Generator
     ##    Note: The generator takes input samples from the normal (prior) distribution
