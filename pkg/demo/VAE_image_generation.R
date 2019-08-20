@@ -54,13 +54,23 @@ stopifnot(dim.in.out >= 1, dim.hid >= 1, dim.lat >= 1, ntrn >= 1,
 ## Train the VAE
 NNname <- paste0("facesFrey_VAE_gen_dim_",dim.in.out,"_",dim.hid,"_",dim.lat,
                  "_ntrn_",ntrn,"_nbat_",nbat,"_nepo_",nepo,".rda")
-VAE <- train_once(dim = c(dim.in.out, dim.hid, dim.lat), data = x.frey,
-                  nbat = nbat, nepo = nepo, file = NNname)
+VAE <- VAE_train_once(dim = c(dim.in.out, dim.hid, dim.lat), data = x.frey,
+                      batch.size = nbat, nepo = nepo, file = NNname)
 
-TODO: from here; fix train_once() and package to work with VAEs
+TODO: fix appendix() and others by replacing 'nbat' by 'batch.size'; compare with demo
+TODO: from here; fix train_once() *everywhere* to GMMN_train_once() and package to work with VAEs
 TODO: include comments from old vignette; follow similarly as in GMMN vignette
-TODO: store both the decoder (generator) and the encoder
-dim.lat???
+
+## Train the VAE
+if(exists_rda(objname, objnames = objname, package = "gnn")) { # get trained VAE generator
+    VAE.frey$generator <- unserialize_model(read_rda(objname, file = objname, package = "gnn"),compile=FALSE)
+} else { # train the VAE and save the corresponding generator
+    VAE.frey$model %>% fit(x.frey, x.frey, epochs = nepo, batch_size = nbat)
+    save_rda(serialize_model(VAE.frey$generator),
+             file = paste0(objname,".rda"), names = objname)
+}
+
+
 ##     VAE.frey$generator <- unserialize_model(read_rda(objname, file = objname, package = "gnn"),
 ##                                             compile=FALSE)
 ##     save_rda(serialize_model(VAE.frey$generator),
@@ -80,9 +90,9 @@ layout(1)
 par(opar)
 
 
+### 2 Fashion MNIST dataset ####################################################
 
-
-### 3
+TODO: adapt to the above once finished
 
 fmnist <- dataset_fashion_mnist() # load the full fashion MNIST dataset from 'keras'
 x.fmnist <- fmnist$train$x / 255 # standardize the dataset
