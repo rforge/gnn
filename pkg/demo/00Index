@@ -1,2 +1,2 @@
-QMC_via_GMMNs          Demo to reproduce paper
-VAE_image_generation   Application of VAEs for generating images (Frey, Fashion-MNIST)
+QMC_GMMN          Demo to reproduce paper
+imggen_VAE        Application of VAEs for generating images (Frey, Fashion-MNIST)

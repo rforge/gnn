@@ -66,7 +66,8 @@ KL <- function(mean, log.var)
 ##' @param ... additional arguments passed to the underlying loss function;
 ##'        at the moment, this can be the bandwith parameter 'bandwidth'
 ##'        which is passed on by loss() to Gaussian_mixture_kernel().
-##' @return list with the Keras model of the VAE, its encoder and generator
+##' @return List with Keras model of the VAE and additional information,
+##'         including the model's encoder and generator
 ##' @author Marius Hofert and Avinash Prasad
 ##' @note - For a picture, see https://www.doc.ic.ac.uk/~js4416/163/website/autoencoders/variational.html
 ##'       - There is always one latent layer and typically (probably always) at
@@ -116,11 +117,13 @@ VAE_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid
     ## Next, we sample from N(mu, Sigma) (dimension equal to that of the latent layers)
     ## with mu = mean and Sigma = sd^2 * var, where var denotes a variance vector
     ## (hence Sigma is constrained to be a diagonal covariance matrix).
-    ## Note: Since stochastic gradient descent can handle stochastic inputs but not stochastic
-    ##       units within the neural network, we use the "reparameterization trick" (see
-    ##       https://stats.stackexchange.com/questions/199605/how-does-the-reparameterization-trick-for-vaes-work-and-why-is-it-important
-    ##       (based on the location-scale property of normal distributions) to move the
-    ##       sampling outside of the variational autoencoder network architecture.
+    ## Note: - Since stochastic gradient descent can handle stochastic inputs but not stochastic
+    ##         units within the neural network, we use the "reparameterization trick" (see
+    ##         https://stats.stackexchange.com/questions/199605/how-does-the-reparameterization-trick-for-vaes-work-and-why-is-it-important
+    ##         (based on the location-scale property of normal distributions) to move the
+    ##         sampling outside of the variational autoencoder network architecture.
+    ##       - Because of using layer_lambda(), we can't save VAEs via serialize_model();
+    ##         same error appears as on https://github.com/rstudio/keras/issues/412
     lat.lay <- layer_concatenate(list(mean, log.var)) %>%
         layer_lambda(f = function(x) tf_rnorm(x, sd, dim = dim[1+num.hidden+1])) # sampling from N(mean, sd^2*var))
 
@@ -189,6 +192,8 @@ VAE_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid
     generator <- keras_model(gen.in.lay, gen.out.lay) # define generator
 
     ## Return
-    list(model = model, encoder = encoder, generator = generator)
+    list(model = model, encoder = encoder, generator = generator, type = "VAE",
+         dim = dim, activation = activation, batch.normalization = batch.normalization,
+         dropout.rate = dropout.rate, sd = sd, loss.type = loss.type, nGPUs = nGPUs,
+         ntrain = NA, batch.size = NA, nepoch = NA)
 }
-

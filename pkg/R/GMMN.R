@@ -21,7 +21,7 @@
 ##' @param ... additional arguments passed to the underlying loss function;
 ##'        at the moment, this can be the bandwith parameter 'bandwidth'
 ##'        which is passed on by loss() to Gaussian_mixture_kernel().
-##' @return Keras model of the GMMN
+##' @return List with Keras model of the GMMN and additional information
 ##' @note - Could at some point have an argument 'kernel.type' which specifies
 ##'         a different kernel.
 ##'       - The respective parameters are then passed via '...' (as we do for
@@ -64,7 +64,7 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
                  with(tf$device("/cpu:0"), {
                      model. <- keras_model(in.lay, out.lay)
                  })
-                 multi_gpu_model(model., gpus = nGPUs) # replicated model on different GPUsy
+                 multi_gpu_model(model., gpus = nGPUs) # replicated model on different GPUs
              } else keras_model(in.lay, out.lay)
 
     ## 3) Loss function
@@ -78,5 +78,7 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
     model %>% compile(optimizer = "adam", loss = loss_fn)
 
     ## Return
-    model
+    list(model = model, type = "GMMN", dim = dim, activation = activation,
+         batch.normalization = batch.normalization, dropout.rate = dropout.rate,
+         nGPUs = nGPUs, ntrain = NA, batch.size = NA, nepoch = NA)
 }

@@ -425,7 +425,7 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
-                       nbat = nbat, nepo = nepo, file = NNname, package = "gnn")
+                       batch.size = nbat, nepoch = nepo, file = NNname, package = "gnn")
     cat("=> Training done\n")
 
     ## 2 Contour/Rosenblatt plots or scatter plots #############################
@@ -519,7 +519,7 @@ appendix <- function(copula, name, model)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
-                       nbat = nbat, nepo = nepo, file = NNname, package = "gnn")
+                       batch.size = nbat, nepoch = nepo, file = NNname, package = "gnn")
     cat("=> Training done\n")
 
     ## 2 Expected shortfall test function ######################################

@@ -17,7 +17,7 @@ exists_rda <- function(file, objnames, package = NULL)
     stopifnot(is.character(file), length(file) == 1)
     filename <- rm_ext(basename(file)) # remove file extension
     file <- paste0(filename,".rda") # file with extension
-    if(hasArg(objnames)) { # check existence of object 'objnames' inside 'file'
+    if(hasArg(objnames)) { # need to check existence of object 'objnames' inside 'file'
         objnames <- rm_ext(basename(objnames)) # remove file extension (as '%in% ls()' fails if '.rda' is included)
         ## Note: data() per default load()s the objects into .GlobalEnv
         ##       and thus overwrites existing objects with the same name.
@@ -25,10 +25,8 @@ exists_rda <- function(file, objnames, package = NULL)
         ##       and load the data there.
         myenvir <- new.env() # new environment (in order to not overwrite .GlobalEnv entries)
         if(is.null(package)) {
-            if(!file.exists(file)) # needs extension
-                stop("File '",file,"' does not exist.")
-            load(file, envir = myenvir)
-            ## Alternatively, could work with attach()
+            if(!file.exists(file)) return(rep(FALSE, length(objnames))) # if file does not exist, 'objnames' can't exist in 'file'
+            load(file, envir = myenvir) # alternatively, could work with attach()
         } else {
             data(list = filename, package = package, envir = myenvir) # load the .rda into 'myenvir'; must have no extension
         }

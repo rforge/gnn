@@ -1,3 +1,4 @@
-demo/comp_*
-demo/fig_*
+demo/.*.rds
+demo/.*.rda
+demo/.*.pdf
 old
