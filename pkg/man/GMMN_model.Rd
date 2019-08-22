@@ -6,7 +6,7 @@
 }
 \usage{
 GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
-           batch.normalization = FALSE, dropout.rate = 0, nGPUs = 0, ...)
+           batch.norm = FALSE, dropout.rate = 0, nGPU = 0, ...)
 }
 \arguments{
   \item{dim}{\code{\link{numeric}} vector of length at least two, giving
@@ -16,13 +16,13 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     \code{length(dim) - 1} specifying the activation functions
     for all hidden layers and the output layer (in this order);
     note that the input layer does not have an activation function.}
-  \item{batch.normalization}{\code{\link{logical}} indicating whether batch
+  \item{batch.norm}{\code{\link{logical}} indicating whether batch
     normalization layers are to be added after each hidden layer.}
   \item{dropout.rate}{\code{\link{numeric}} value in [0,1] specifying
     the fraction of input to be dropped; see the rate parameter of
     \code{\link{layer_dropout}()}. Note that only if positive, dropout
     layers are added after each hidden layer.}
-  \item{nGPUs}{non-negative \code{\link{integer}} specifying the number of GPUs
+  \item{nGPU}{non-negative \code{\link{integer}} specifying the number of GPUs
     available if the GPU version of TensorFlow is installed.
     If positive, a (special) multiple GPU model for data
     parallelism is instantiated. Note that for multi-layer perceptrons
@@ -32,11 +32,25 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   \item{\dots}{additional arguments passed to \code{\link{loss}()}.}
 }
 \value{
-  \code{GMMN_model()} returns the GMMN model (an object inheriting from
-  the classes \code{"keras.engine.training.Model"},
-  \code{"keras.engine.network.Network"},
-  \code{"keras.engine.base_layer.Layer"}
-  and \code{"python.builtin.object"}).
+  \code{GMMN_model()} returns a list with components
+  \describe{
+    \item{\code{model}:}{GMMN model (a \pkg{keras} object inheriting from
+      the classes \code{"keras.engine.training.Model"},
+      \code{"keras.engine.network.Network"},
+      \code{"keras.engine.base_layer.Layer"}
+      and \code{"python.builtin.object"}).}
+    \item{\code{type}:}{\code{\link{character}} string indicating
+      the type of model (\code{"GMMN"}).}
+    \item{\code{dim}:}{see above.}
+    \item{\code{activation}:}{see above.}
+    \item{\code{batch.norm}:}{see above.}
+    \item{\code{dropout.rate}:}{see above.}
+    \item{\code{nGPU}:}{see above.}
+    \item{\code{dim.train}:}{dimension of the training data (\code{NA}
+      unless trained).}
+    \item{\code{batch.size}:}{batch size (\code{NA} unless trained).}
+    \item{\code{nepoch}:}{number of epochs (\code{NA} unless trained).}
+  }
 }
 \author{Marius Hofert and Avinash Prasad}
 \references{

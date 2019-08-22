@@ -46,6 +46,13 @@ train <- function(gnn, data, batch.size, nepoch)
                                  batch_size = batch.size, epochs = nepoch)
            },
            stop("Wrong 'type'"))
+
+    ## Update information
+    gnn[["dim.train"]] <- dim.train
+    gnn[["batch.size"]] <- batch.size
+    gnn[["nepoch"]] <- nepoch
+
+    ## Return
     gnn # GNN object with trained model and additional information
 }
 
@@ -70,9 +77,6 @@ train_once <- function(gnn, data, batch.size, nepoch,
     } else { # if 'file' does not exist or 'name' does not exist in 'file'
         ## Train and update training slots
         trained.gnn <- train(gnn, data = data, batch.size = batch.size, nepoch = nepoch) # trained GNN
-        trained.gnn[["ntrain"]] <- nrow(data)
-        trained.gnn[["batch.size"]] <- batch.size
-        trained.gnn[["nepoch"]] <- nepoch
         ## Convert necessary slots to storable objects
         trained.gnn. <- to_savable(trained.gnn)
         ## Save and return
