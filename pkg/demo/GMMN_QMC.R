@@ -361,7 +361,6 @@ convergence_plot <- function(err, dim, model, filebname, B)
         ## Compute convergence rates (the larger alpha, the faster the convergence;
         ## for MC, alpha ~= 1/2 for sd [~= 1 for variance])
         a <- round(c(PRNG      = ccoef(err.["PRNG",]),
-                     GMMN.PRNG = ccoef(err.["GMMN PRNG",]),
                      GMMN.QRNG = ccoef(err.["GMMN QRNG",]),
                      QRNG      = ccoef(err.["QRNG",])), digits = 2)
         if(all(is.na(a))) next # no plot; happens for Sobol' g test function and copulas without available cCopula()
@@ -377,19 +376,17 @@ convergence_plot <- function(err, dim, model, filebname, B)
         ylim <- range(err.[,], na.rm = TRUE)
         lgnd <- as.expression(
             c(substitute("Copula PRNG,"~alpha == a., list(a. = a["PRNG"])),
-              substitute("GMMN PRNG,"~  alpha == a., list(a. = a["GMMN.PRNG"])),
               substitute("GMMN QRNG,"~  alpha == a., list(a. = a["GMMN.QRNG"])),
               if(!is.na(a["QRNG"]))
                   substitute("Copula QRNG,"~alpha == a., list(a. = a["QRNG"]))))
         plot(ns, err.["PRNG",], ylim = ylim, log = "xy", type = "l",
              xlab = expression(n[gen]), ylab = ylabels[ind])
-        lines(ns, err.["GMMN PRNG",], type = "l", lty = 2, lwd = 1.3)
-        lines(ns, err.["GMMN QRNG",], type = "l", lty = 3, lwd = 1.6)
+        lines(ns, err.["GMMN QRNG",], type = "l", lty = 2, lwd = 1.3)
         if(!is.na(a["QRNG"])) {
-            lines(ns, err.["QRNG",], type = "l", lty = 4, lwd = 1.3)
-            legend("bottomleft", bty = "n", lty = 1:4, lwd = c(1, 1.3, 1.6, 1.3), legend = lgnd)
-        } else {
+            lines(ns, err.["QRNG",], type = "l", lty = 3, lwd = 1.6)
             legend("bottomleft", bty = "n", lty = 1:3, lwd = c(1, 1.3, 1.6), legend = lgnd)
+        } else {
+            legend("bottomleft", bty = "n", lty = 1:2, lwd = c(1, 1.3), legend = lgnd)
         }
         mtext(substitute(B.~"replications, d ="~d*","~m,
                          list(B. = B, d = dim., m = model)),
@@ -422,7 +419,7 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
     ## Train
     dim.in.out <- dim(copula) # dimension of the prior distribution fed into the GMMN
-    NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+    NNname <- paste0("GMMN_QMC_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
                        batch.size = nbat, nepoch = nepo, file = NNname, package = "gnn")
@@ -442,16 +439,16 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     ## Contour, Rosenblatt and scatter plots
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
-                     file = paste0("fig_contours_",bname,".pdf"))
+                     file = paste0("GMMN_QMC_fig_contours_",bname,".pdf"))
         rosenplot(copula, u = U.GMMN.PRNG,
-                  file = paste0("fig_rosenblatt_",bname,".pdf"))
+                  file = paste0("GMMN_QMC_fig_rosenblatt_",bname,".pdf"))
     }
     ## Scatter plots
     if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
         lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
         nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
         for(i in seq_along(lst))
-            scatterplot(lst[[i]], file = paste0("fig_scatter_",bname,"_",nms[i],".pdf"))
+            scatterplot(lst[[i]], file = paste0("GMMN_QMC_fig_scatter_",bname,"_",nms[i],".pdf"))
     }
     cat("=> Contour, Rosenblatt and scatter plots done\n")
 
@@ -473,12 +470,12 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
         ## Compute B.CvM replications of the CvM statistic
         CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
                        randomize = randomize,
-                       file = paste0("comp_CvMstat_",bname,".rds"))
+                       file = paste0("GMMN_QMC_comp_CvMstat_",bname,".rds"))
         cat("=> Computing Cramer-von Mises statistics done\n")
 
         ## Boxplots
         CvM_boxplot(CvMstat, dim = dim.in.out, model = model.,
-                    file = paste0("fig_CvMboxplot_",bname,".pdf"))
+                    file = paste0("GMMN_QMC_fig_CvMboxplot_",bname,".pdf"))
 
         ## 3.2 Test functions ##################################################
 
@@ -487,12 +484,12 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
         errTFs <- error_test_functions(B.conv, n = ns,
                                        copula = copula, GMMN = GMMN,
                                        randomize = randomize,
-                                       file = paste0("comp_testfun_",bname,".rds"))
+                                       file = paste0("GMMN_QMC_comp_testfun_",bname,".rds"))
         cat("=> Computing errors for test functions done\n")
 
         ## Plot convergence behavior
         convergence_plot(errTFs, dim = dim.in.out, model = model.,
-                         filebname = paste0("fig_convergence_",bname), B = B.conv)
+                         filebname = paste0("GMMN_QMC_fig_convergence_",bname), B = B.conv)
 
     }
 }
@@ -516,7 +513,7 @@ appendix <- function(copula, name, model)
     U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
     ## Train
     dim.in.out <- dim(copula) # dimension of the prior distribution fed into the GMMN
-    NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+    NNname <- paste0("GMMN_QMC_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
                        batch.size = nbat, nepoch = nepo, file = NNname, package = "gnn")
@@ -525,7 +522,7 @@ appendix <- function(copula, name, model)
     ## 2 Expected shortfall test function ######################################
 
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
-    file <- paste0("comp_testfun_",bname,"_digital_shift.rds")
+    file <- paste0("GMMN_QMC_comp_testfun_",bname,"_digital_shift.rds")
     res <- if (file.exists(file)) {
         readRDS(file)
     } else {
@@ -587,7 +584,8 @@ appendix <- function(copula, name, model)
                } else as.character(tau(copula))
     model. <- substitute(m.*","~~tau==t., list(m. = model, t. = tau.str)) # model and taus
     convergence_plot(res, dim = dim.in.out, model = model.,
-                     filebname = paste0("fig_convergence_",bname,"_digital_shift"), B = B.conv)
+                     filebname = paste0("GMMN_QMC_fig_convergence_",bname,
+                                        "_digital_shift"), B = B.conv)
 }
 
 
