@@ -1,7 +1,7 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Code to reproduce the results of Hofert, Prasad, Zhu ("Quasi-Monte Carlo for
-## multivariate distributions based on generative neural networks") and more.
+## multivariate distributions via generative neural networks") and more.
 
 
 ### Setup ######################################################################
@@ -30,7 +30,7 @@ nepo <- 300L # number of epochs (one epoch = one pass through the complete train
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
 ## Other variables
-firstkind <- c("normalCopula", "tCopula", "claytonCopula") # copula families for which cCopula() works
+firstkind <- c("normalCopula", "tCopula", "claytonCopula") # those copulas for which cCopula() works
 ngen <- 1000L # sample size of the generated data
 B.CvM <- 100 # number of replications for Cramer-von Mises statistic
 B.conv <- 25 # number of replications for convergence plots
@@ -72,9 +72,9 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
             ## Draw PRNs and QRNs
             U.cop.PRNG  <- pobs(rCopula(n, copula = copula)) # generate pobs of PRNs from copula
             N.PRNG <- matrix(rnorm(n * d), ncol = d) # PRNs from the prior
-            U.GMMN.PRNG <- pobs(predict(GMMN, x = N.PRNG)) # generate from the GMMN PRNG
+            U.GMMN.PRNG <- pobs(predict(GMMN$model, x = N.PRNG)) # generate from the GMMN PRNG
             N.QRNG <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # QRNs from the prior
-            U.GMMN.QRNG <- pobs(predict(GMMN, x = N.QRNG)) # generate from the GMMN QRNG
+            U.GMMN.QRNG <- pobs(predict(GMMN$model, x = N.QRNG)) # generate from the GMMN QRNG
 
             ## Compute the Cramer-von Mises statistic for each of the samples
             c(gofTstat(U.cop.PRNG,  copula = copula), # CvM statistic for PRNs
@@ -139,17 +139,18 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file, verbose = 
                     cat(paste0("Working on the ",nind,"th sample size of ",nlen,"\n"))
 
                 ## 0) Random number generation
-                ## Draw PRNs and GMMN QRNs
+                ## Draw PRNs
                 n. <- n[nind]
                 U.cop.PRNG  <- rCopula(n., copula = copula) # generate pobs of PRNs from copula
+                ## Draw GMMN PRNs
                 N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
-                U.GMMN.PRNG <- predict(GMMN, x = N.PRNG) # generate from the GMMN PRNG
+                U.GMMN.PRNG <- predict(GMMN$model, x = N.PRNG) # generate from the GMMN PRNG
+                U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG) # compute pseudo-observations
+                ## Draw GMMN QRNs
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
                 N.QRNG <- qnorm(sob) # QRNs from the prior
-                U.GMMN.QRNG <- predict(GMMN, x = N.QRNG) # generate from the GMMN QRNG
-                ## Compute pseudo-observations
-                U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG)
-                U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG)
+                U.GMMN.QRNG <- predict(GMMN$model, x = N.QRNG) # generate from the GMMN QRNG
+                U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
                 ## If available in analytical form, draw from a real QRNG
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
                     is(copula, "claytonCopula")
@@ -233,9 +234,10 @@ contourplot3 <- function(copula, uPRNG, uQRNG, file,
                                   "Empirical copula of GMMN QRNG"))
 {
     ## Contour plot of (true) copula
-    cpTRUE <- contourplot2(copula, FUN = pCopula, region = FALSE,
+    cpTRUE <- contourplot2(copula, FUN = pCopula, region = FALSE, col = "gray50",
                            key = list(corner = corner,
-                                      lines = list(lty = 1:3, lwd = c(1, 1.3, 2.3)),
+                                      lines = list(lty = 1:3, lwd = c(1, 1.3, 2.3),
+                                                   col = c("gray50", "black", "black")),
                                       text = list(text)))
     ## Grid
     u <- seq(0, 1, length.out = n.grid)
@@ -256,7 +258,7 @@ contourplot3 <- function(copula, uPRNG, uQRNG, file,
 
 ##' @title Plotting Rosenblatt-Transformed Bivariate Copula Samples
 ##' @param copula copula object
-##' @param u observations (from a PRNG or QRNG)
+##' @param u observations (from a PRNG, QRNG, GMMN PRNG or GMMN QRNG)
 ##' @param file character string (with ending .pdf) specifying the PDF file
 ##'        to plot to or not (if not provided)
 ##' @param xlab x-axis label
@@ -275,7 +277,7 @@ rosenplot <- function(copula, u, file,
 }
 
 ##' @title Scatter Plots
-##' @param u observations (from a PRNG, GMMN PRNG or GMMN QRNG)
+##' @param u observations (from a PRNG, QRNG, GMMN PRNG or GMMN QRNG)
 ##' @param file character string (with ending .pdf) specifying the PDF file
 ##'        to plot to or not (if not provided)
 ##' @return nothing (plot by side-effect)
@@ -418,12 +420,14 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     set.seed(271) # for reproducibility
     U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
     ## Train
-    dim.in.out <- dim(copula) # dimension of the prior distribution fed into the GMMN
-    NNname <- paste0("GMMN_QMC_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+    dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
+    NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
-    GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
-                       batch.size = nbat, nepoch = nepo, file = NNname, package = "gnn")
-    cat("=> Training done\n")
+    GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
+    tm <- system.time(GMMN <- train_once(GNN, data = U,
+                                         batch.size = nbat, nepoch = nepo,
+                                         file = NNname)) # training and saving
+    cat(paste0("=> Training done in ",round(tm[["elapsed"]]),"s (elapsed)\n"))
 
     ## 2 Contour/Rosenblatt plots or scatter plots #############################
 
@@ -433,14 +437,14 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     set.seed(seed) # for reproducibility
     N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
     N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
-    U.GMMN.PRNG <- pobs(predict(GMMN, x = N01.prior.PRNG)) # GMMN PRNs
-    U.GMMN.QRNG <- pobs(predict(GMMN, x = N01.prior.QRNG)) # GMMN QRNs
+    U.GMMN.PRNG <- pobs(predict(GMMN$model, x = N01.prior.PRNG)) # GMMN PRNs
+    U.GMMN.QRNG <- pobs(predict(GMMN$model, x = N01.prior.QRNG)) # GMMN QRNs
 
     ## Contour, Rosenblatt and scatter plots
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
                      file = paste0("GMMN_QMC_fig_contours_",bname,".pdf"))
-        rosenplot(copula, u = U.GMMN.PRNG,
+        rosenplot(copula, u = U.GMMN.QRNG,
                   file = paste0("GMMN_QMC_fig_rosenblatt_",bname,".pdf"))
     }
     ## Scatter plots
@@ -512,12 +516,14 @@ appendix <- function(copula, name, model)
     set.seed(271) # for reproducibility
     U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
     ## Train
-    dim.in.out <- dim(copula) # dimension of the prior distribution fed into the GMMN
+    dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
     NNname <- paste0("GMMN_QMC_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
-    GMMN <- train_once(dim = c(dim.in.out, dim.hid, dim.in.out), data = U,
-                       batch.size = nbat, nepoch = nepo, file = NNname, package = "gnn")
-    cat("=> Training done\n")
+    GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
+    tm <- system.time(GMMN <- train_once(GNN, data = U,
+                                         batch.size = nbat, nepoch = nepo,
+                                         file = NNname)) # training and saving
+    cat(paste0("=> Training done in ",round(tm[["elapsed"]]),"s (elapsed)\n"))
 
     ## 2 Expected shortfall test function ######################################
 
@@ -541,17 +547,18 @@ appendix <- function(copula, name, model)
             for(nind in seq_len(nlen)) { # iterate over sample sizes
                 setTxtProgressBar(pb, b) # update progress bar
                 ## 0) Random number generation
-                ## Draw PRNs and GMMN QRNs
+                ## Draw PRNs
                 n. <- n[nind]
                 U.cop.PRNG  <- rCopula(n., copula = copula) # generate pobs of PRNs from copula
+                ## Draw GMMN PRNs
                 N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
-                U.GMMN.PRNG <- predict(GMMN, x = N.PRNG) # generate from the GMMN PRNG
+                U.GMMN.PRNG <- predict(GMMN$model, x = N.PRNG) # generate from the GMMN PRNG
+                U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG) # compute pseudo-observations
+                ## Draw GMMN QRNs
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
                 N.QRNG <- qnorm(sob) # QRNs from the prior
-                U.GMMN.QRNG <- predict(GMMN, x = N.QRNG) # generate from the GMMN QRNG
-                ## Compute pseudo-observations
-                U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG)
-                U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG)
+                U.GMMN.QRNG <- predict(GMMN$model, x = N.QRNG) # generate from the GMMN QRNG
+                U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
                 ## If available in analytical form, draw from a real QRNG
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
                     is(copula, "claytonCopula")

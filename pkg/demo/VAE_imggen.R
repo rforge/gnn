@@ -54,7 +54,7 @@ stopifnot(dim.in.out >= 1, dim.hid >= 1, dim.lat >= 1, ntrn >= 1,
 ## Train the VAE
 NNname <- paste0("VAE_imggen_Frey_dim_",dim.in.out,"_",dim.hid,"_",dim.lat,
                  "_ntrn_",ntrn,"_nbat_",nbat,"_nepo_",nepo,".rda")
-GNN <- VAE_model(c(dim.in.out, dim.hid, dim.lat)) # model set up
+GNN <- VAE_model(c(dim.in.out, dim.hid, dim.lat)) # model setup
 system.time(VAE <- train_once(GNN, data = x.frey, # train once
                               batch.size = nbat, nepo = nepo, file = NNname)) # training ~= 20s
 
@@ -103,7 +103,7 @@ stopifnot(dim.in.out >= 1, dim.hid >= 1, dim.lat >= 1, ntrn >= 1,
 NNname <- paste0("VAE_imggen_fMNIST_dim_",dim.in.out,"_",
                  paste(rep(dim.hid, 3), collapse = "_"),"_",
                  dim.lat,"_ntrn_",ntrn,"_nbat_",nbat,"_nepo_",nepo,".rda")
-GNN <- VAE_model(c(dim.in.out, rep(dim.hid, 3), dim.lat)) # model set up
+GNN <- VAE_model(c(dim.in.out, rep(dim.hid, 3), dim.lat)) # model setup
 system.time(VAE <- train_once(GNN, data = x.fmnist, # train once
                               batch.size = nbat, nepo = nepo, file = NNname)) # training ~= 8.5min
 
