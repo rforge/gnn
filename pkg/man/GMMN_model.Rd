@@ -57,7 +57,12 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   Generative moment matching networks.
   \emph{Proceedings of Machine Learning Research}, \bold{37}
   (International Conference on Maching Learning), 1718--1727.
-  See http://proceedings.mlr.press/v37/li15.pdf
+  See http://proceedings.mlr.press/v37/li15.pdf (2019-08-24)
+
+  Dziugaite, G. K., Roy, D. M. and Ghahramani, Z. (2015).
+  Training generative neural networks via maximum mean discrepancy
+  optimization. \emph{AUAI Press}, 258--267.
+  See http://www.auai.org/uai2015/proceedings/papers/230.pdf (2019-08-24)
 }
 \seealso{
   \code{\link{VAE_model}()}

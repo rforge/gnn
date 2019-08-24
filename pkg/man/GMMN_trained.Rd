@@ -303,8 +303,8 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates")
 \author{Marius Hofert and Avinash Prasad}
 \references{
   Hofert, M., Prasad, A. and Zhu, M. (2018).
-  Quasi-random number generators for multivariate distributions
-  based on generative neural networks. See https://arxiv.org/abs/1811.00683
+  Quasi-Monte Carlo for multivariate distributions via generative neural networks.
+  (See https://arxiv.org/abs/1811.00683 for an early version)
 %% \emph{myjournal} \bold{myversion}(mynumber), --.
 }
 \seealso{
