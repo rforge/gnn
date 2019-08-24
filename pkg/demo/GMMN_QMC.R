@@ -427,7 +427,7 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     tm <- system.time(GMMN <- train_once(GNN, data = U,
                                          batch.size = nbat, nepoch = nepo,
                                          file = NNname)) # training and saving
-    cat(paste0("=> Training done in ",round(tm[["elapsed"]]),"s (elapsed)\n"))
+    cat(paste0("=> Training done in ",round(tm[["elapsed"]]/60),"min (elapsed)\n"))
 
     ## 2 Contour/Rosenblatt plots or scatter plots #############################
 
@@ -523,7 +523,7 @@ appendix <- function(copula, name, model)
     tm <- system.time(GMMN <- train_once(GNN, data = U,
                                          batch.size = nbat, nepoch = nepo,
                                          file = NNname)) # training and saving
-    cat(paste0("=> Training done in ",round(tm[["elapsed"]]),"s (elapsed)\n"))
+    cat(paste0("=> Training done in ",round(tm[["elapsed"]]/60),"min (elapsed)\n"))
 
     ## 2 Expected shortfall test function ######################################
 

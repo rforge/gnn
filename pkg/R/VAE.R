@@ -194,6 +194,6 @@ VAE_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid
     ## Return
     list(model = model, encoder = encoder, generator = generator, type = "VAE",
          dim = dim, activation = activation, batch.norm = batch.norm,
-         dropout.rate = dropout.rate, sd = sd, loss.type = loss.type, nGPU = nGPU,
+         dropout.rate = dropout.rate, sd = sd, loss.type = loss.type,
          dim.train = NA, batch.size = NA, nepoch = NA)
 }

@@ -59,7 +59,6 @@ VAE_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     \item{\code{dropout.rate}:}{see above.}
     \item{\code{sd}:}{see above.}
     \item{\code{loss.type}:}{see above.}
-    \item{\code{nGPU}:}{see above.}
     \item{\code{dim.train}:}{dimension of the training data (\code{NA}
       unless trained).}
     \item{\code{batch.size}:}{batch size (\code{NA} unless trained).}

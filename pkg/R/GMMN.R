@@ -80,5 +80,5 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
     ## Return
     list(model = model, type = "GMMN", dim = dim, activation = activation,
          batch.norm = batch.norm, dropout.rate = dropout.rate,
-         nGPU = nGPU, dim.train = NA, batch.size = NA, nepoch = NA)
+         dim.train = NA, batch.size = NA, nepoch = NA)
 }
