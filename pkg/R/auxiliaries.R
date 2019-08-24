@@ -1,15 +1,29 @@
 ### Remove extension of a file path ############################################
 
-##' @title Remove an Extension from a File Path By Only Cutting off after the
-##'        last Period
+##' @title Fixed Version of tools::file_path_sans_ext()
 ##' @param x character strings with file names and (potentially) extensions
 ##'        to be stripped off
-##' @return file name without extension (but only if extension doesn't start
-##'         with a digit (because it's then part of the file name that was
-##'         provided without extension in this case)
+##' @return file name without extension
 ##' @author Marius Hofert
-##' @note See https://stackoverflow.com/questions/57182339/how-to-strip-off-a-file-ending-but-only-when-it-starts-with-a-non-digit-a-rege
-rm_ext <- function(x) sapply(x, function(x.) sub("\\.(?:[^0-9.][^.]*)?$", "", x.))
+##' @note Idea: Find the last dot in the file name. If there is a number
+##'             thereafter, call our fix of tools::file_path_sans_ext(),
+##'             otherwise call tools::file_path_sans_ext().
+rm_ext <- function(x)
+    sapply(x, function(x.) {
+        splt <- strsplit(x., split = "")[[1]]
+        dots <- splt == "."
+        whch <- which(dots)
+        lwhch <- length(whch)
+        if(lwhch == 0 || dots[length(splt)]) # x. contains no dots or ends in a dot
+            return(file_path_sans_ext(x.))
+        ## Now we have at least one dot and the string does not end in a dot.
+        ## Figure out the element after the last dot
+        ind <- whch[lwhch] # index of last dot
+        char.after.last.dot <- splt[ind + 1] # element after last dot
+        if(grepl("^[[:digit:]]", x = char.after.last.dot)) { # see https://stackoverflow.com/questions/13638377/test-for-numeric-elements-in-a-character-string
+            sub("\\.(?:[^0-9.][^.]*)?$", "", x.) # see https://stackoverflow.com/questions/57182339/how-to-strip-off-a-file-ending-but-only-when-it-starts-with-a-non-digit-a-rege
+        } else file_path_sans_ext(x.)
+    }, USE.NAMES = FALSE)
 
 
 ### Converting Keras model weights to R objects and vice versa #################

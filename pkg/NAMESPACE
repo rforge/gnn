@@ -18,6 +18,8 @@ importFrom("methods",
            "hasArg")
 importFrom("stats",
            "rnorm")
+importFrom("tools",
+           "file_path_sans_ext")
 
 
 ### Exports ####################################################################

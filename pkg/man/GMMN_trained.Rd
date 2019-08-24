@@ -322,30 +322,29 @@ mix.cop <- mixCopula(list(C.cop, t90.cop), w = c(1/2, 1/2)) # the mixture copula
 set.seed(271)
 U.mix.PRNG <- rCopula(ngen, copula = mix.cop)
 
-## Get a trained GMMN
-objname = "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5"
-NN <- read_rda(objname, file = objname, package = "gnn")
-library(keras)
-GMMN.mix <- unserialize_model(NN, custom_objects = c(loss = loss))
+## Get the correspondingly trained GMMN
+objname <- "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5"
+read.GMMN <- read_rda(objname, file = objname, package = "gnn") # read in the trained GMMN
+GMMN <- to_callable(read.GMMN) # convert to a callable GMMN object
 
-## Generate an approximate pseudo- and quasi-sample from GMMN.mix
-## First, sample from the prior distribution (pseudo-random and quasi-random numbers)
+## Generate an approximate pseudo- and quasi-sample from GMMN
+## First, generate pseudo-random and quasi-random numbers from the prior distribution
 N01.prior.PRNG <- matrix(rnorm(ngen * 2), ncol = 2) # N(0,1) PRNG
 library(qrng)
-N01.prior.QRNG <- qnorm(sobol(ngen, d = 2, randomize = "digital.shift")) # N(0,1) QRNG
-## Generate data from the fitted GMMN
-U.mix.GMMN.PRNG <- pobs(predict(GMMN.mix, x = N01.prior.PRNG))
-U.mix.GMMN.QRNG <- pobs(predict(GMMN.mix, x = N01.prior.QRNG))
-## Note: for pobs(), see Hofert, Prasad and Zhu (2018)
+N01.prior.QRNG <- qnorm(sobol(ngen, d = 2, randomize = "Owen")) # N(0,1) QRNG
+## Now generate pseudo-random and quasi-random numbers from the fitted GMMN
+U.mix.GMMN.PRNG <- pobs(predict(GMMN$model, x = N01.prior.PRNG))
+U.mix.GMMN.QRNG <- pobs(predict(GMMN$model, x = N01.prior.QRNG))
+## Note: For an explanation why pobs() is used, see Hofert, Prasad and Zhu (2018)
 
-## Pseudo-random sample from the mixture copula, pseudo-random sample
-## from the trained GMMN and quasi-random sample from the trained GMMN
+## Visualize the pseudo-random sample from the mixture copula, the pseudo-random
+## sample from the trained GMMN and the quasi-random sample from the trained GMMN
 layout(t(1:3)) # 1 x 3 layout
 opar <- par(pty = "s") # square plots
 plot(U.mix.PRNG,      main = "PRNG sample",      xlab = bquote(U[1]), ylab = bquote(U[2]))
 plot(U.mix.GMMN.PRNG, main = "GMMN PRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
 plot(U.mix.GMMN.QRNG, main = "GMMN QRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
-par(opar) # restore graphical parameters
-layout(1) # restore layout
+par(opar)
+layout(1)
 }
 \keyword{datasets}
