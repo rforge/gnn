@@ -690,7 +690,11 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 ### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
 
-### 2.1 Main part of the paper (timings are on a 13" MacBook Pro (2018) without training)
+## Timings are on a 13" MacBook Pro (2018) without training; could speed this part
+## up with parallel computing.
+
+
+### 2.1 Main part of the paper #################################################
 
 ## Copulas from Section 1.1 above
 system.time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 3s
