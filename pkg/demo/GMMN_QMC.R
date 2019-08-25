@@ -422,10 +422,11 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
+    cat(paste0("=> Starting training (unless pre-trained). "))
     tm <- system.time(GMMN <- train_once(GNN, data = U,
                                          batch.size = nbat, nepoch = nepo,
                                          file = NNname)) # training and saving
-    cat(paste0("=> Training done in ",round(tm[["elapsed"]]/60),"min (elapsed)\n"))
+    cat(paste0("Done in ",round(tm[["elapsed"]]/60),"min (elapsed)\n"))
 
     ## 2 Contour/Rosenblatt plots or scatter plots #############################
 
@@ -440,6 +441,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     U.GMMN.QRNG <- pobs(predict(GMMNmod, x = N01.prior.QRNG)) # GMMN QRNs
 
     ## Contour, Rosenblatt and scatter plots
+    cat("=> Starting to compute contour, Rosenblatt and scatter plots.\n")
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
                      file = paste0("GMMN_QMC_fig_contours_",bname,".pdf"))
@@ -453,7 +455,6 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         for(i in seq_along(lst))
             scatterplot(lst[[i]], file = paste0("GMMN_QMC_fig_scatter_",bname,"_",nms[i],".pdf"))
     }
-    cat("=> Contour, Rosenblatt and scatter plots done\n")
 
     ## 3 Cramer-von Mises (CvM) statistics and test functions ##################
 
@@ -471,10 +472,10 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         ## 3.1 CVM statistics ##################################################
 
         ## Compute B.CvM replications of the CvM statistic
+        cat("=> Starting to compute Cramer-von Mises statistics.\n")
         CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
                        randomize = randomize,
                        file = paste0("GMMN_QMC_res_CvMstat_",bname,".rds"))
-        cat("=> Computing Cramer-von Mises statistics done\n")
 
         ## Boxplots
         CvM_boxplot(CvMstat, dim = dim.in.out, model = model.,
@@ -484,11 +485,11 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
 
         ## Compute errors over B.conv replications; an (4, 4, length(ns))-array
         ## (<test function>, <RNG>, <sample size>)
+        cat("=> Starting to compute errors for test functions.\n")
         errTFs <- error_test_functions(B.conv, n = ns,
                                        copula = copula, GMMN = GMMN,
                                        randomize = randomize,
                                        file = paste0("GMMN_QMC_res_testfun_",bname,".rds"))
-        cat("=> Computing errors for test functions done\n")
 
         ## Plot convergence behavior
         convergence_plot(errTFs, dim = dim.in.out, model = model.,
@@ -520,10 +521,11 @@ appendix <- function(copula, name, model, randomize)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
+    cat(paste0("=> Starting training (unless pre-trained). "))
     tm <- system.time(GMMN <- train_once(GNN, data = U,
                                          batch.size = nbat, nepoch = nepo,
                                          file = NNname)) # training and saving
-    cat(paste0("=> Training done in ",round(tm[["elapsed"]]/60),"min (elapsed)\n"))
+    cat(paste0("Done in ",round(tm[["elapsed"]]/60),"min (elapsed)\n"))
 
     ## 2 Expected shortfall test function ######################################
 
@@ -544,6 +546,7 @@ appendix <- function(copula, name, model, randomize)
         dmnms <- list("RNG" = c("PRNG", "GMMN PRNG", "GMMN QRNG", "QRNG"),
                       "n" = as.character(n), "Replication" = 1:B)
         raw <- array(, dim = c(4, nlen, B), dimnames = dmnms) # intermediate object
+        cat("=> Starting to compute errors for test functions.\n")
         for(b in seq_len(B)) { # iterate over replications (just to have 'equidistant' progress bar)
             for(nind in seq_len(nlen)) { # iterate over sample sizes
                 setTxtProgressBar(pb, b) # update progress bar
@@ -581,7 +584,6 @@ appendix <- function(copula, name, model, randomize)
         saveRDS(res., file = file)
         res.
     }
-    cat("\n=> Computing error for the test function done\n")
 
     ## Plot convergence behavior
     tau.str <- if(is(copula, "outer_nacopula")) {
