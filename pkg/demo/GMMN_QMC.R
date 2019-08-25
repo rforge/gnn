@@ -17,11 +17,6 @@ library(copula) # considered copulas
 library(gnn) # for the used GMMN models
 library(latticeExtra) # for contourplot3
 
-## Type of randomization of the QMC point sets
-randomize <- "Owen" # "Owen" (scrambling) or "digital.shift"
-## Note that we have to pass the integer seed as an argument to qrng::sobol()
-## to guarantee reproducibility in case randomize = "Owen"
-
 ## Global training parameters
 dim.hid <- 300L # dimension of the (single) hidden layer
 ntrn <- 60000L # training dataset size (number of pseudo-random numbers from the copula)
@@ -29,7 +24,7 @@ nbat <- 5000L # batch size for training (number of samples per stochastic gradie
 nepo <- 300L # number of epochs (one epoch = one pass through the complete training dataset while updating the GNN's parameters)
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
-## Other variables
+## Other global parameters
 firstkind <- c("normalCopula", "tCopula", "claytonCopula") # those copulas for which cCopula() works
 ngen <- 1000L # sample size of the generated data
 B.CvM <- 100 # number of replications for Cramer-von Mises statistic
@@ -61,6 +56,7 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
         readRDS(file)
     } else {
         ## Setup
+        GMMNmod <- GMMN[["model"]]
         d <- dim(copula) # copula dimension
         pb <- txtProgressBar(max = B, style = 3) # setup progress bar
         on.exit(close(pb)) # on exit, close progress bar
@@ -72,9 +68,9 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
             ## Draw PRNs and QRNs
             U.cop.PRNG  <- pobs(rCopula(n, copula = copula)) # generate pobs of PRNs from copula
             N.PRNG <- matrix(rnorm(n * d), ncol = d) # PRNs from the prior
-            U.GMMN.PRNG <- pobs(predict(GMMN$model, x = N.PRNG)) # generate from the GMMN PRNG
+            U.GMMN.PRNG <- pobs(predict(GMMNmod, x = N.PRNG)) # generate from the GMMN PRNG
             N.QRNG <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # QRNs from the prior
-            U.GMMN.QRNG <- pobs(predict(GMMN$model, x = N.QRNG)) # generate from the GMMN QRNG
+            U.GMMN.QRNG <- pobs(predict(GMMNmod, x = N.QRNG)) # generate from the GMMN QRNG
 
             ## Compute the Cramer-von Mises statistic for each of the samples
             c(gofTstat(U.cop.PRNG,  copula = copula), # CvM statistic for PRNs
@@ -115,6 +111,7 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file, verbose = 
         readRDS(file)
     } else {
         ## Setup
+        GMMNmod <- GMMN[["model"]]
         d <- dim(copula) # copula dimension
         nlen <- length(n)
         if(!verbose) {
@@ -144,12 +141,12 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file, verbose = 
                 U.cop.PRNG  <- rCopula(n., copula = copula) # generate pobs of PRNs from copula
                 ## Draw GMMN PRNs
                 N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
-                U.GMMN.PRNG <- predict(GMMN$model, x = N.PRNG) # generate from the GMMN PRNG
+                U.GMMN.PRNG <- predict(GMMNmod, x = N.PRNG) # generate from the GMMN PRNG
                 U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG) # compute pseudo-observations
                 ## Draw GMMN QRNs
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
                 N.QRNG <- qnorm(sob) # QRNs from the prior
-                U.GMMN.QRNG <- predict(GMMN$model, x = N.QRNG) # generate from the GMMN QRNG
+                U.GMMN.QRNG <- predict(GMMNmod, x = N.QRNG) # generate from the GMMN QRNG
                 U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
                 ## If available in analytical form, draw from a real QRNG
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
@@ -407,12 +404,13 @@ convergence_plot <- function(err, dim, model, filebname, B)
 ##'        in corresponding boxplot and convergence plot figures
 ##' @param model call containing a model string used in boxplots and
 ##'        convergence plots; not used if CvM.testfun = FALSE
+##' @param randomize type or randomization used
 ##' @param CvM.testfun logical indicating whether the CvM statistics and
 ##'        the test functions are evaluated
 ##' @return nothing (computes results by side-effect)
 ##' @author Marius Hofert
 ##' @note Uses global variables to keep number of arguments small
-main <- function(copula, name, model, CvM.testfun = TRUE)
+main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
 {
     ## 1 Training ##############################################################
 
@@ -432,13 +430,14 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
     ## 2 Contour/Rosenblatt plots or scatter plots #############################
 
     ## Setup and data generation
+    GMMNmod <- GMMN[["model"]]
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
     seed <- 314
     set.seed(seed) # for reproducibility
     N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
     N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
-    U.GMMN.PRNG <- pobs(predict(GMMN$model, x = N01.prior.PRNG)) # GMMN PRNs
-    U.GMMN.QRNG <- pobs(predict(GMMN$model, x = N01.prior.QRNG)) # GMMN QRNs
+    U.GMMN.PRNG <- pobs(predict(GMMNmod, x = N01.prior.PRNG)) # GMMN PRNs
+    U.GMMN.QRNG <- pobs(predict(GMMNmod, x = N01.prior.QRNG)) # GMMN QRNs
 
     ## Contour, Rosenblatt and scatter plots
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
@@ -474,7 +473,7 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
         ## Compute B.CvM replications of the CvM statistic
         CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
                        randomize = randomize,
-                       file = paste0("GMMN_QMC_comp_CvMstat_",bname,".rds"))
+                       file = paste0("GMMN_QMC_res_CvMstat_",bname,".rds"))
         cat("=> Computing Cramer-von Mises statistics done\n")
 
         ## Boxplots
@@ -488,7 +487,7 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
         errTFs <- error_test_functions(B.conv, n = ns,
                                        copula = copula, GMMN = GMMN,
                                        randomize = randomize,
-                                       file = paste0("GMMN_QMC_comp_testfun_",bname,".rds"))
+                                       file = paste0("GMMN_QMC_res_testfun_",bname,".rds"))
         cat("=> Computing errors for test functions done\n")
 
         ## Plot convergence behavior
@@ -505,10 +504,11 @@ main <- function(copula, name, model, CvM.testfun = TRUE)
 ##'        in corresponding boxplot and convergence plot figures
 ##' @param model call containing a model string used in boxplots and
 ##'        convergence plots; not used if CvM.testfun = FALSE
+##' @param randomize type or randomization used
 ##' @return nothing (computes results by side-effect)
 ##' @author Marius Hofert
 ##' @note Uses global variables to keep number of arguments small
-appendix <- function(copula, name, model)
+appendix <- function(copula, name, model, randomize)
 {
     ## 1 Training ##############################################################
 
@@ -517,7 +517,7 @@ appendix <- function(copula, name, model)
     U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
     ## Train
     dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
-    NNname <- paste0("GMMN_QMC_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+    NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
     tm <- system.time(GMMN <- train_once(GNN, data = U,
@@ -527,8 +527,9 @@ appendix <- function(copula, name, model)
 
     ## 2 Expected shortfall test function ######################################
 
+    GMMNmod <- GMMN[["model"]]
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
-    file <- paste0("GMMN_QMC_comp_testfun_",bname,"_digital_shift.rds")
+    file <- paste0("GMMN_QMC_res_testfun_",bname,"_digital_shift.rds")
     res <- if (file.exists(file)) {
         readRDS(file)
     } else {
@@ -552,12 +553,12 @@ appendix <- function(copula, name, model)
                 U.cop.PRNG  <- rCopula(n., copula = copula) # generate pobs of PRNs from copula
                 ## Draw GMMN PRNs
                 N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
-                U.GMMN.PRNG <- predict(GMMN$model, x = N.PRNG) # generate from the GMMN PRNG
+                U.GMMN.PRNG <- predict(GMMNmod, x = N.PRNG) # generate from the GMMN PRNG
                 U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG) # compute pseudo-observations
                 ## Draw GMMN QRNs
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
                 N.QRNG <- qnorm(sob) # QRNs from the prior
-                U.GMMN.QRNG <- predict(GMMN$model, x = N.QRNG) # generate from the GMMN QRNG
+                U.GMMN.QRNG <- predict(GMMNmod, x = N.QRNG) # generate from the GMMN QRNG
                 U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
                 ## If available in analytical form, draw from a real QRNG
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
@@ -692,94 +693,104 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 ### 2.1 Main part of the paper (timings are on a 13" MacBook Pro (2018) without training)
 
 ## Copulas from Section 1.1 above
-system.time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 2s
-                 model = quote(italic(t)[4]), CvM.testfun = FALSE))
-system.time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 16min
-                 model = quote(italic(t)[4])))
-system.time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 2s
-                 model = quote(italic(t)[4]), CvM.testfun = FALSE))
-system.time(main(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # ~= 2s
-                 model = quote(Clayton), CvM.testfun = FALSE))
-system.time(main(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 7min
-                 model = quote(Clayton)))
-system.time(main(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # ~= 2s
-                 model = quote(Clayton), CvM.testfun = FALSE))
-system.time(main(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # ~= 2s
-                 model = quote(Gumbel), CvM.testfun = FALSE))
-system.time(main(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 12min
-                 model = quote(Gumbel)))
-system.time(main(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # ~= 2s
-                 model = quote(Gumbel), CvM.testfun = FALSE))
-system.time(main(MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")), # ~= 2s
-                 model = quote(MO), CvM.testfun = FALSE)) # argument 'model' actually not used here
-system.time(main(mix.cop.C.t90, name = "eqmix_C_tau_0.5_rot90_t4_tau_0.5", # ~= 2s
-                 model = quote(Clayton-italic(t)[4](90)), CvM.testfun = FALSE)) # argument 'model' actually not used here
-system.time(main(mix.cop.G.t90,  name = "eqmix_G_tau_0.5_rot90_t4_tau_0.5", # ~= 2s
-                 model = quote(Gumbel-italic(t)[4](90)), CvM.testfun = FALSE)) # argument 'model' actually not used here
-system.time(main(mix.cop.MO.t90, # ~= 2s
+system.time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 3s
+                 model = quote(italic(t)[4]), randomize = "Owen",
+                 CvM.testfun = FALSE))
+system.time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 18min
+                 model = quote(italic(t)[4]), randomize = "Owen"))
+system.time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 3s
+                 model = quote(italic(t)[4]), randomize = "Owen",
+                 CvM.testfun = FALSE))
+system.time(main(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # ~= 3s
+                 model = quote(Clayton), randomize = "Owen",
+                 CvM.testfun = FALSE))
+system.time(main(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 8min
+                 model = quote(Clayton), randomize = "Owen"))
+system.time(main(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # ~= 3s
+                 model = quote(Clayton), randomize = "Owen",
+                 CvM.testfun = FALSE))
+system.time(main(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # ~= 3s
+                 model = quote(Gumbel), randomize = "Owen",
+                 CvM.testfun = FALSE))
+system.time(main(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 13min
+                 model = quote(Gumbel), randomize = "Owen"))
+system.time(main(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # ~= 3s
+                 model = quote(Gumbel), randomize = "Owen",
+                 CvM.testfun = FALSE))
+system.time(main(MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")), # ~= 3s
+                 model = quote(MO), randomize = "Owen",
+                 CvM.testfun = FALSE)) # argument 'model' actually not used here
+system.time(main(mix.cop.C.t90, name = "eqmix_C_tau_0.5_rot90_t4_tau_0.5", # ~= 3s
+                 model = quote(Clayton-italic(t)[4](90)), randomize = "Owen",
+                 CvM.testfun = FALSE)) # argument 'model' actually not used here
+system.time(main(mix.cop.G.t90,  name = "eqmix_G_tau_0.5_rot90_t4_tau_0.5", # ~= 3s
+                 model = quote(Gumbel-italic(t)[4](90)), randomize = "Owen",
+                 CvM.testfun = FALSE)) # argument 'model' actually not used here
+system.time(main(mix.cop.MO.t90, # ~= 3s
                  name = paste0("eqmix_MO_",paste0(alpha,collapse = "_"),"_rot90_t4_tau_0.5"),
-                 model = quote(MO-italic(t)[4](90)), CvM.testfun = FALSE)) # argument 'model' actually not used here
+                 model = quote(MO-italic(t)[4](90)), randomize = "Owen",
+                 CvM.testfun = FALSE)) # argument 'model' actually not used here
 
 ## Copulas from Section 1.2 above
-system.time(main(NC.d21, name = paste0("NC21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 5min
-                 model = quote("(2,1)-nested Clayton")))
-system.time(main(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 5min
-                 model = quote("(2,1)-nested Gumbel")))
+system.time(main(NC.d21, name = paste0("NC21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 6min
+                 model = quote("(2,1)-nested Clayton"), randomize = "Owen"))
+system.time(main(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 6min
+                 model = quote("(2,1)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.3 above
 system.time(main(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 60min
-                 model = quote(italic(t)[4])))
+                 model = quote(italic(t)[4]), randomize = "Owen"))
 system.time(main(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 9min
-                 model = quote(Clayton)))
+                 model = quote(Clayton), randomize = "Owen"))
 system.time(main(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 32min
-                 model = quote(Gumbel)))
+                 model = quote(Gumbel), randomize = "Owen"))
 system.time(main(NC.d23, name = paste0("NC23_tau_",paste0(taus, collapse = "_")), # ~= 5min
-                 model = quote("(2,3)-nested Clayton")))
+                 model = quote("(2,3)-nested Clayton"), randomize = "Owen"))
 system.time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 5min
-                 model = quote("(2,3)-nested Gumbel")))
+                 model = quote("(2,3)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.4 above
 system.time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.4h
-                 model = quote(italic(t)[4])))
+                 model = quote(italic(t)[4]), randomize = "Owen"))
 system.time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 13min
-                 model = quote(Clayton)))
+                 model = quote(Clayton), randomize = "Owen"))
 system.time(main(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 1.1h
-                 model = quote(Gumbel)))
+                 model = quote(Gumbel), randomize = "Owen"))
 system.time(main(NC.d55, name = paste0("NC55_tau_",paste0(taus, collapse = "_")), # ~= 13min
-                 model = quote("(5,5)-nested Clayton")))
+                 model = quote("(5,5)-nested Clayton"), randomize = "Owen"))
 system.time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 12min
-                 model = quote("(5,5)-nested Gumbel")))
+                 model = quote("(5,5)-nested Gumbel"), randomize = "Owen"))
 
 
-### 2.2 Appendix (done 'manually' here for randomize = "digital.shift")
+### 2.2 Appendix ###############################################################
 
 ## Note: No .rds will be written in this case (just the plots generated directly)
 
 ## Row 1
 system.time(appendix(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 5min
-                     model = quote(italic(t)[4])))
+                     model = quote(italic(t)[4]), randomize = "digital.shift"))
 system.time(appendix(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 11min
-                     model = quote(italic(t)[4])))
+                     model = quote(italic(t)[4]), randomize = "digital.shift"))
 system.time(appendix(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 20min
-                     model = quote(italic(t)[4])))
+                     model = quote(italic(t)[4]), randomize = "digital.shift"))
 ## Row 2
 system.time(appendix(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 4min
-                     model = quote(Clayton)))
+                     model = quote(Clayton), randomize = "digital.shift"))
 system.time(appendix(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 5min
-                     model = quote(Clayton)))
+                     model = quote(Clayton), randomize = "digital.shift"))
 system.time(appendix(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 7min
-                     model = quote(Clayton)))
+                     model = quote(Clayton), randomize = "digital.shift"))
 ## Row 3
 system.time(appendix(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 4min
-                     model = quote(Gumbel)))
+                     model = quote(Gumbel), randomize = "digital.shift"))
 system.time(appendix(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 5min
-                     model = quote(Gumbel)))
+                     model = quote(Gumbel), randomize = "digital.shift"))
 system.time(appendix(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 7min
-                     model = quote(Gumbel)))
+                     model = quote(Gumbel), randomize = "digital.shift"))
 ## Row 4
 system.time(appendix(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 5min
-                     model = quote("(2,1)-nested Gumbel")))
+                     model = quote("(2,1)-nested Gumbel"), randomize = "digital.shift"))
 system.time(appendix(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 6min
-                     model = quote("(2,3)-nested Gumbel")))
+                     model = quote("(2,3)-nested Gumbel"), randomize = "digital.shift"))
 system.time(appendix(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 7min
-                     model = quote("(5,5)-nested Gumbel")))
+                     model = quote("(5,5)-nested Gumbel"), randomize = "digital.shift"))
