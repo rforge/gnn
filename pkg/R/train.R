@@ -38,7 +38,7 @@ train <- function(gnn, data, batch.size, nepoch)
     switch(type,
            "GMMN" = {
                prior <- matrix(rnorm(dim.train[1] * dim[1]), nrow = dim.train[1]) # N(0,1) prior (same dimension as input layer)
-               gnn$model %>% fit(x = data, y = prior, # X, Z in the paper
+               gnn$model %>% fit(x = prior, y = data, # Z, X in the paper
                                  batch_size = batch.size, epochs = nepoch) # training
            },
            "VAE" = {
