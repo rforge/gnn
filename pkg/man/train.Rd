@@ -8,7 +8,7 @@
 \usage{
 train(gnn, data, batch.size, nepoch)
 train_once(gnn, data, batch.size, nepoch,
-           file, name = rm_ext(basename(file)))
+           file, name = rm_ext(basename(file)), package = NULL)
 }
 \arguments{
   \item{gnn}{GNN object as created by \code{\link{GMMN_model}()} or
@@ -22,6 +22,8 @@ train_once(gnn, data, batch.size, nepoch,
   \item{file}{\code{\link{character}} string (with or without ending
     \code{.rda}) specifying the file to save the trained GNN to.}
   \item{name}{name under which the trained GNN is saved in \code{file}.}
+  \item{package}{name of the package from which to read the trained GNN;
+    if \code{\link{NULL}} (the default) the current working directory is used.}
 }
 \value{
   \describe{

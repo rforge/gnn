@@ -64,13 +64,15 @@ train <- function(gnn, data, batch.size, nepoch)
 ##' @param file character string (with or without ending .rda) specifying the file
 ##'        to save the trained GNN object to (with component 'model' serialized)
 ##' @param name name under which the trained GNN object is saved in 'file'
+##' @param package name of the package from which to read the trained GNN; if NULL
+##'        (the default) the current working directory is used.
 ##' @return trained or loaded GNN object
 ##' @author Marius Hofert
 train_once <- function(gnn, data, batch.size, nepoch,
-                       file, name = rm_ext(basename(file)))
+                       file, name = rm_ext(basename(file)), package = NULL)
 {
-    if(exists_rda(file, objnames = name)) { # check existence of 'name' in 'file'
-        read.gnn <- read_rda(name, file = file) # GNN object with serialized component 'model'
+    if(exists_rda(file, names = name, package = package)) { # check existence of 'name' in 'file'
+        read.gnn <- read_rda(name, file = file, package = package) # GNN object with serialized component 'model'
         if(read.gnn[["type"]] != gnn[["type"]])
             stop("The 'type' of the read GNN and that of 'gnn' do not coincide")
         to_callable(read.gnn) # return whole GNN object (with unserialized model (components))

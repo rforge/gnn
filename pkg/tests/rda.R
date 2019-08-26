@@ -14,10 +14,10 @@ rm(myobj1, myobj2)
 ## Testing exists_rda()
 stopifnot(exists_rda(file)) # check existence of file 'file' with...
 stopifnot(exists_rda(filename)) # ... and without file ending '.rda'
-stopifnot(exists_rda(file, objnames = "myobj1")) # check existence of 'myobj1' inside 'file' with...
-stopifnot(exists_rda(filename, objnames = "myobj1")) # ... and without file ending '.rda'
+stopifnot(exists_rda(file, names = "myobj1")) # check existence of 'myobj1' inside 'file' with...
+stopifnot(exists_rda(filename, names = "myobj1")) # ... and without file ending '.rda'
 stopifnot(exists_rda("SP500_const", package = "qrmdata")) # check existence of file named 'SP500_const' in 'qrmdata'
-stopifnot(exists_rda("SP500_const", objnames = "SP500_const_info", package = "qrmdata")) # check existence of object 'SP500_const_info' inside 'SP500_const' in 'qrmdata'
+stopifnot(exists_rda("SP500_const", names = "SP500_const_info", package = "qrmdata")) # check existence of object 'SP500_const_info' inside 'SP500_const' in 'qrmdata'
 
 ## Testing read_rda()
 stopifnot(names(read_rda(c("myobj1", "myobj2"), file = file)) == c("myobj1", "myobj2"))

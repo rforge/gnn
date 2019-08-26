@@ -693,7 +693,8 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 ### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
 
 ## Timings are on a 13" MacBook Pro (2018) without training; could speed this part
-## up with parallel computing.
+## up with parallel computing. Overall, with pre-trained NNs, this runs in a bit
+## less than 11h (via R CMD BATCH GMMN_QMC.R, for example)
 
 
 ### 2.1 Main part of the paper #################################################
@@ -702,7 +703,7 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 system.time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 3s
                  model = quote(italic(t)[4]), randomize = "Owen",
                  CvM.testfun = FALSE))
-system.time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 18min
+system.time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 17min
                  model = quote(italic(t)[4]), randomize = "Owen"))
 system.time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 3s
                  model = quote(italic(t)[4]), randomize = "Owen",
@@ -746,25 +747,25 @@ system.time(main(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = 
 ## Copulas from Section 1.3 above
 system.time(main(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 60min
                  model = quote(italic(t)[4]), randomize = "Owen"))
-system.time(main(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 9min
+system.time(main(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 10min
                  model = quote(Clayton), randomize = "Owen"))
-system.time(main(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 32min
+system.time(main(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 33min
                  model = quote(Gumbel), randomize = "Owen"))
-system.time(main(NC.d23, name = paste0("NC23_tau_",paste0(taus, collapse = "_")), # ~= 5min
+system.time(main(NC.d23, name = paste0("NC23_tau_",paste0(taus, collapse = "_")), # ~= 7min
                  model = quote("(2,3)-nested Clayton"), randomize = "Owen"))
-system.time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 5min
+system.time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 7min
                  model = quote("(2,3)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.4 above
 system.time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.4h
                  model = quote(italic(t)[4]), randomize = "Owen"))
-system.time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 13min
+system.time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 14min
                  model = quote(Clayton), randomize = "Owen"))
-system.time(main(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 1.1h
+system.time(main(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 1.2h
                  model = quote(Gumbel), randomize = "Owen"))
-system.time(main(NC.d55, name = paste0("NC55_tau_",paste0(taus, collapse = "_")), # ~= 13min
+system.time(main(NC.d55, name = paste0("NC55_tau_",paste0(taus, collapse = "_")), # ~= 10min
                  model = quote("(5,5)-nested Clayton"), randomize = "Owen"))
-system.time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 12min
+system.time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 10min
                  model = quote("(5,5)-nested Gumbel"), randomize = "Owen"))
 
 
@@ -773,30 +774,30 @@ system.time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_"))
 ## Note: No .rds will be written in this case (just the plots generated directly)
 
 ## Row 1
-system.time(appendix(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 5min
+system.time(appendix(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 8min
                      model = quote(italic(t)[4]), randomize = "digital.shift"))
-system.time(appendix(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 11min
+system.time(appendix(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 13min
                      model = quote(italic(t)[4]), randomize = "digital.shift"))
-system.time(appendix(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 20min
+system.time(appendix(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 22min
                      model = quote(italic(t)[4]), randomize = "digital.shift"))
 ## Row 2
-system.time(appendix(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 4min
+system.time(appendix(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 6min
                      model = quote(Clayton), randomize = "digital.shift"))
-system.time(appendix(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 5min
+system.time(appendix(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 8min
                      model = quote(Clayton), randomize = "digital.shift"))
-system.time(appendix(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 7min
+system.time(appendix(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 10min
                      model = quote(Clayton), randomize = "digital.shift"))
 ## Row 3
-system.time(appendix(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 4min
+system.time(appendix(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 7min
                      model = quote(Gumbel), randomize = "digital.shift"))
-system.time(appendix(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 5min
+system.time(appendix(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 8min
                      model = quote(Gumbel), randomize = "digital.shift"))
-system.time(appendix(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 7min
+system.time(appendix(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 9min
                      model = quote(Gumbel), randomize = "digital.shift"))
 ## Row 4
-system.time(appendix(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 5min
+system.time(appendix(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 7min
                      model = quote("(2,1)-nested Gumbel"), randomize = "digital.shift"))
-system.time(appendix(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 6min
+system.time(appendix(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 8min
                      model = quote("(2,3)-nested Gumbel"), randomize = "digital.shift"))
-system.time(appendix(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 7min
+system.time(appendix(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 10min
                      model = quote("(5,5)-nested Gumbel"), randomize = "digital.shift"))

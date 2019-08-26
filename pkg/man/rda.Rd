@@ -8,8 +8,8 @@
   Check Existence, Read, Save and Rename \code{.rda} Files and their Objects.
 }
 \usage{
-exists_rda(file, objnames, package = NULL)
-read_rda(objnames, file, package = NULL)
+exists_rda(file, names, package = NULL)
+read_rda(names, file, package = NULL)
 save_rda(..., file, names)
 rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
            newname, newfile = paste0(newname, collapse = "_", ".rda"),
@@ -27,13 +27,15 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
 	\code{.rda}) specifying the file to save to.}
     }
   }
-  \item{objnames}{
+  \item{names}{
     \describe{
       \item{exists_rda()}{\code{\link{character}} vector of names of objects to
 	be checked for existence.}
       \item{read_rda()}{\code{\link{character}} vector of names of
 	objects to be read. If not provided, a name is constructed
 	from \code{file}.}
+      \item{save_rda()}{\code{\link{character}} vector of names under
+	which the objects in \code{\dots} are saved in \code{file}.}
     }
   }
   \item{package}{
@@ -46,9 +48,6 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
     }
   }
   \item{\dots}{any number of \R objects.}
-  \item{names}{\code{\link{character}} \code{\link{vector}} of names
-    under which the objects in \code{...} are to be saved in
-    the file \code{file}.}
   \item{oldname}{\code{\link{character}} string specifying the object to
     be read.}
   \item{oldfile}{file name (with or without ending \code{.rda})
@@ -62,9 +61,9 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
 \value{
   \describe{
     \item{exists_rda()}{\code{\link{logical}} indicating whether the
-      \code{.rda} file \code{file} exists (if \code{objnames} is not
-      provided) or whether the objects with names \code{objnames}
-      exist inside \code{file} (if \code{objnames} is provided).}
+      \code{.rda} file \code{file} exists (if \code{names} is not
+      provided) or whether the objects with names \code{names}
+      exist inside \code{file} (if \code{names} is provided).}
     \item{read_rda()}{the object read from the \code{.rda}.}
     \item{save_rda()}{nothing (generated an \code{.rda} by side-effect).}
     \item{rename_rda()}{nothing (generated an \code{.rda} by side-effect).}
