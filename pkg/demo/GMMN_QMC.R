@@ -33,7 +33,8 @@ B.CvM <- 100 # number of replications for Cramer-von Mises statistic
 B.conv <- 25 # number of replications for convergence plots
 ns <- round(2^seq(9, 18, by = 0.5)) # sequence of sample sizes for convergence plots
 ncores <- 1 # detectCores() # number of cores to be used for parallel computing
-stopifnot(ncores == 1) # as of 2019, TensorFlow does not allow multicore calculations in R (see TODO)
+stopifnot(ncores == 1) # as of 2019, TensorFlow does not allow multicore calculations in R
+## Note: See the discussion on https://stat.ethz.ch/pipermail/r-sig-hpc/2019-August/002092.html
 
 
 ### 0 Auxiliary functions ######################################################
