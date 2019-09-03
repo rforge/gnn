@@ -13,7 +13,7 @@ library(qrmtools) # for ES_np()
 library(qrng) # for sobol()
 if(packageVersion("qrng") < "0.0-7")
     stop('Consider updating via install.packages("qrng", repos = "http://R-Forge.R-project.org")')
-library(copula) # considered copulas
+library(copula) # for the considered copulas
 library(gnn) # for the used GMMN models
 library(latticeExtra) # for contourplot3
 library(parallel) # for parallel computing
@@ -50,9 +50,9 @@ stopifnot(ncores == 1) # as of 2019, TensorFlow does not allow multicore calcula
 ##' @param randomize type or randomization used
 ##' @param file character string (with ending .rds) specifying the file
 ##'        to save the results in
-##' @return (B, 2)-matrix containing the B replications of the Cramer-von Mises
-##'         statistic evaluated based on generated pseudo-samples from
-##'         'copula' and 'GMMN'
+##' @return (B, 3)-matrix containing the B replications of the Cramer-von Mises
+##'         statistic evaluated based on the generated pseudo-samples from
+##'         'copula', the GMMN PRNs and the GMMN QRNs
 ##' @author Marius Hofert
 ##' @note Could have added QRNGs based on cCopula() for those copulas available
 CvM <- function(B, n, copula, GMMN, randomize, file)
@@ -82,7 +82,7 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
         RNGkind("L'Ecuyer-CMRG") # switch PRNG to CMRG (for reproducible parallel computing)
         raw <- mclapply(seq_len(B), function(b) aux(b), mc.cores = ncores)
         RNGkind("Mersenne-Twister") # switch back to default RNG
-        res <- matrix(unlist(raw), ncol = 3, byrow = TRUE)
+        res <- simplify2array(raw) # or, here: matrix(unlist(raw), ncol = 3, byrow = TRUE)
 
         ## Check, save and return
         stopifnot(dim(res) == c(B, 3)) # sanity check

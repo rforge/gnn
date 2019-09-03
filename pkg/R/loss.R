@@ -9,6 +9,7 @@
 ##' @return 2d tensor of shape (batch size, batch size) => (batch size, batch size)-matrix
 ##' @author Marius Hofert and Avinash Prasad
 ##' @note - This function works with tensor objects; see https://www.tensorflow.org/guide/tensors
+##'         and the R package tensorflow (for 'tf')
 ##'       - To get help on tensorflow functions, replace '$' by '.' and
 ##'         look up the corresponding Python function on https://www.tensorflow.org/api_docs/python.
 ##'       - This implementation is partially based on the Python code from
@@ -41,6 +42,7 @@ Gaussian_mixture_kernel <- function(x, y, bandwidth = c(0.001, 0.01, 0.15, 0.25,
 ##'        be provided.
 ##' @return 0d tensor containing the reconstruction loss
 ##' @author Marius Hofert and Avinash Prasad
+##' @note See the R package tensorflow for 'tf'
 loss <- function(x, y, type = c("MSE", "binary.cross", "MMD"), ...)
 {
     type <- match.arg(type)

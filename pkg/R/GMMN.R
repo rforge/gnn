@@ -50,7 +50,7 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
                                units = dim[1 + i], # dimensions of hidden layers (input layer is in 1st component)
                                activation = activation[i]) # 'activation' starts with hidden layers
         if(batch.norm) hid.lay <- layer_batch_normalization(hid.lay)
-        if(dropout.rate > 0)    hid.lay <- layer_dropout(hid.lay, rate = dropout.rate)
+        if(dropout.rate > 0) hid.lay <- layer_dropout(hid.lay, rate = dropout.rate)
     }
 
     ## 1.3) Output layer

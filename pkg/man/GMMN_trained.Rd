@@ -25,14 +25,10 @@
 \alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75}
 \alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75}
 \alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}
-% Results obtained from trained NNs
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_statistics_t4_tau_0.5_G_tau_0.5}
-\alias{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates}
 \title{Trained Generative Moment Matching Networks}
 \description{
-  Trained generative moment matching networks (GMMNs) and
-  related results. The results and some of the GMMNs
-  are used in the vignette \code{GMMN_QRNG}.
+  Trained generative moment matching networks (GMMNs); see also
+  the demo \code{GMMN_QMC} or the vignette \code{GMMN_QMC}.
 }
 \usage{
 % Trained neural networks
@@ -61,10 +57,6 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5")
 data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75")
 data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75")
 data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
-
-% Results obtained from trained NNs
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_statistics_t4_tau_0.5_G_tau_0.5")
-data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates")
 }
 \format{
   % Trained neural networks
@@ -266,34 +258,6 @@ data("GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates")
       300 epochs) from a 10-dimensional $t$ copula (with 4 degrees of freedom
       and equi-correlation parameter chosen such that Kendall's tau equals
       0.5).
-    }
-
-    % Results obtained from trained NNs
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_CvM_statistics_t4_tau_0.5_G_tau_0.5}{
-      (100, 4)-\code{\link{matrix}} containing, in each column, 100 replications of
-      computed Cramer-von Mises statistics based on 1000 pseudo-samples
-      generated from a pseudo-random number generator (first and third
-      column) and the trained GMMN (second and fourth column) of the
-      five-dimensional $t$ copula (first two columns) and the nested
-      Gumbel copula (last two columns) as described above;
-      see \code{vignette("GMMN_QRNG", package = "gnn")}.
-    }
-    \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_ES99_var_estimates}{
-      (19, 5)-\code{\link{matrix}} containing, in each column, the
-      variance estimates of expected shortfall at 99\%
-      confidence level of the sum of the components of a
-      five-dimensional distribution (standard normal margins;
-      $t$ copula in the first three columns, Gumbel in the last two).
-      The variance estimates are computed from 25 replications
-      for the 19 sample sizes 512, 724, 1024,
-      1448, 2048, 2896, 4096, 5793, 8192, 11585, 16384, 23170, 32768, 46341,
-      65536, 92682, 131072, 185364, 262144 (roughly equidistant in
-      log-scale); for each sample, the pseudo-observations are considered.
-      First and fourth column contain variance estimates of the classical
-      Monte Carlo estimator as they are based on a PRNG, second and
-      fifth column contain the variance estimates for the GMMN-PRNG in that
-      sense, and the third column contains the results for the GMMN-QRNG.
-      See also \code{vignette("GMMN_QRNG", package = "gnn")}.
     }
   }
 }
