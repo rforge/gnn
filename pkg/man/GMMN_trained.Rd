@@ -274,42 +274,4 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
 \seealso{
   \code{\link{GMMN_model}()}
 }
-\examples{
-ngen <- 1000L # sample size of the generated data
-
-## Generate a pseudo-sample from the mixture copula considered here
-library(copula)
-C.cop <- claytonCopula(iTau(claytonCopula(), tau = 0.5)) # Clayton copula
-t.cop <- tCopula(iTau(tCopula(), tau = 0.5), df = 4) # t copula
-t90.cop <- rotCopula(t.cop, flip = c(TRUE, FALSE)) # t copula rotated by 90 degrees
-mix.cop <- mixCopula(list(C.cop, t90.cop), w = c(1/2, 1/2)) # the mixture copula
-set.seed(271)
-U.mix.PRNG <- rCopula(ngen, copula = mix.cop)
-
-## "Train" the GMMN (here: get the trained GMMN from 'gnn')
-NNname <- "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5.rda"
-GNN <- GMMN_model(c(2, 300, 2)) # model setup
-GMMN <- train_once(GNN, data = U.mix.PRNG, batch.size = 5000, nepoch = 300,
-                   file = NNname, package = "gnn") # (training/saving/)loading
-
-## Generate an approximate pseudo- and quasi-sample from GMMN
-## First, generate pseudo-random and quasi-random numbers from the prior distribution
-N01.prior.PRNG <- matrix(rnorm(ngen * 2), ncol = 2) # N(0,1) PRNG
-library(qrng)
-N01.prior.QRNG <- qnorm(sobol(ngen, d = 2, randomize = "Owen")) # N(0,1) QRNG
-## Now generate pseudo-random and quasi-random numbers from the fitted GMMN
-U.mix.GMMN.PRNG <- pobs(predict(GMMN$model, x = N01.prior.PRNG))
-U.mix.GMMN.QRNG <- pobs(predict(GMMN$model, x = N01.prior.QRNG))
-## Note: For an explanation why pobs() is used, see Hofert, Prasad and Zhu (2018)
-
-## Visualize the pseudo-random sample from the mixture copula, the pseudo-random
-## sample from the trained GMMN and the quasi-random sample from the trained GMMN
-layout(t(1:3)) # 1 x 3 layout
-opar <- par(pty = "s") # square plots
-plot(U.mix.PRNG,      main = "PRNG sample",      xlab = bquote(U[1]), ylab = bquote(U[2]))
-plot(U.mix.GMMN.PRNG, main = "GMMN PRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
-plot(U.mix.GMMN.QRNG, main = "GMMN QRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
-par(opar)
-layout(1)
-}
 \keyword{datasets}

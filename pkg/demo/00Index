@@ -1,2 +1,3 @@
-GMMN_QMC          Demo to reproduce paper
+GMMN_QMC          Minimal working example for QMC based on GMMNs
+HPZ19             Demo to reproduce paper Hofert, Prasad, Zhu (2019)
 VAE_imggen        Application of VAEs for generating images (Frey, Fashion-MNIST)
