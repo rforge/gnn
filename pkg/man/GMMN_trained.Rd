@@ -275,7 +275,13 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
   \code{\link{GMMN_model}()}
 }
 \examples{
-ngen <- 1000L # sample size of the generated date
+\donttest{
+## Note: to_callable() below fails with "Error in load_model_hdf5(tmp,
+## custom_objects = custom_objects, compile = compile) :
+## The h5py Python package is required to save and load models"
+## on win-builder which is the reason for \donttest{} here.
+
+ngen <- 1000L # sample size of the generated data
 
 ## Generate a pseudo-sample from the mixture copula considered here
 library(copula)
@@ -310,5 +316,6 @@ plot(U.mix.GMMN.PRNG, main = "GMMN PRNG sample", xlab = bquote(U[1]), ylab = bqu
 plot(U.mix.GMMN.QRNG, main = "GMMN QRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
 par(opar)
 layout(1)
+}
 }
 \keyword{datasets}

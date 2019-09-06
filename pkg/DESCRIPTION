@@ -10,7 +10,7 @@ Author: Marius Hofert [aut, cre], Avinash Prasad [aut]
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.5.0)
 Imports: keras, tensorflow, qrng, methods, tools
-Suggests: knitr, copula, RColorBrewer, RnavGraphImageData, qrmtools, qrmdata
+Suggests: copula, RColorBrewer, RnavGraphImageData, qrmtools, qrmdata, knitr, rmarkdown
 Enhances:
 License: GPL (>= 3) | file LICENCE
 SystemRequirements: TensorFlow (https://www.tensorflow.org/)
