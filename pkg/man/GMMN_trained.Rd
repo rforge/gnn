@@ -275,12 +275,6 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
   \code{\link{GMMN_model}()}
 }
 \examples{
-\donttest{
-## Note: to_callable() below fails with "Error in load_model_hdf5(tmp,
-## custom_objects = custom_objects, compile = compile) :
-## The h5py Python package is required to save and load models"
-## on win-builder which is the reason for \donttest{} here.
-
 ngen <- 1000L # sample size of the generated data
 
 ## Generate a pseudo-sample from the mixture copula considered here
@@ -292,10 +286,11 @@ mix.cop <- mixCopula(list(C.cop, t90.cop), w = c(1/2, 1/2)) # the mixture copula
 set.seed(271)
 U.mix.PRNG <- rCopula(ngen, copula = mix.cop)
 
-## Get the correspondingly trained GMMN
-objname <- "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5"
-read.GMMN <- read_rda(objname, file = objname, package = "gnn") # read in the trained GMMN
-GMMN <- to_callable(read.GMMN) # convert to a callable GMMN object
+## "Train" the GMMN (here: get the trained GMMN from 'gnn')
+NNname <- "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5.rda"
+GNN <- GMMN_model(c(2, 300, 2)) # model setup
+GMMN <- train_once(GNN, data = U.mix.PRNG, batch.size = 5000, nepoch = 300,
+                   file = NNname, package = "gnn") # (training/saving/)loading
 
 ## Generate an approximate pseudo- and quasi-sample from GMMN
 ## First, generate pseudo-random and quasi-random numbers from the prior distribution
@@ -316,6 +311,5 @@ plot(U.mix.GMMN.PRNG, main = "GMMN PRNG sample", xlab = bquote(U[1]), ylab = bqu
 plot(U.mix.GMMN.QRNG, main = "GMMN QRNG sample", xlab = bquote(U[1]), ylab = bquote(U[2]))
 par(opar)
 layout(1)
-}
 }
 \keyword{datasets}

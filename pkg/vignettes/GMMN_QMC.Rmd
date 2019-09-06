@@ -65,7 +65,6 @@ will remain fixed for all examples considered.
 ```{r setup, message = FALSE}
 ## Packages
 library(keras) # R interface to Keras (high-level neural network API)
-library(tensorflow) # R interface to TensorFlow (numerical computation with tensors)
 library(qrng) # for sobol()
 if(packageVersion("copula") < "0.999.19")
     stop('Consider updating via install.packages("copula", repos = "http://R-Forge.R-project.org")')
@@ -119,7 +118,7 @@ NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn
                  nu,"_tau_",tau,".rda")
 GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
 GMMN <- train_once(GNN, data = U, batch.size = nbat, nepoch = nepo,
-                   file = NNname, package = package) # training and saving
+                   file = NNname, package = package) # training/saving/loading
 ```
 
 
@@ -229,7 +228,7 @@ NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn
                  "_nbat_",nbat,"_nepo_",nepo,"_t",nu,"_tau_",tau,".rda")
 GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
 GMMN <- train_once(GNN, data = U, batch.size = nbat, nepoch = nepo,
-                   file = NNname, package = package) # training and saving
+                   file = NNname, package = package) # training/saving/loading
 ```
 
 
