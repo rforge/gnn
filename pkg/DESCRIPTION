@@ -11,7 +11,6 @@ Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
 		    comment = c(ORCID = "0000-0001-8009-4665")),
              person(given = "Avinash", family = "Prasad", role = "aut",
                     email = "a2prasad@uwaterloo.ca"))
-Author: Marius Hofert [aut, cre], Avinash Prasad [aut]
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.5.0)
 Imports: keras, tensorflow, qrng, methods, tools
