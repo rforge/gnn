@@ -76,7 +76,9 @@ VAE_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   \code{\link{GMMN_model}()}
 }
 \examples{
-## Example model (untrained) with a 5d input, 300d hidden and 4d output layer
+\donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
+## Example model with a 5d input, 300d hidden and 4d output layer
 str(VAE_model(c(5, 300, 4)))
+}
 }
 \keyword{datagen}
