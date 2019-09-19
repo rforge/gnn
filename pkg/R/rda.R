@@ -67,7 +67,7 @@ read_rda <- function(names, file, package = NULL)
             stop("Not all objects specified by 'names' exist in file '",file.,"' in the local working directory")
         } else {
             stop("Not all objects specified by 'names' exist in file '",file.,"' in package '",package,"'")
-        }
+        }x
     myenvir <- new.env()
     if(is.null(package)) {
         if(!file.exists(file.)) # needs extension

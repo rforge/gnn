@@ -75,4 +75,8 @@ VAE_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
 \seealso{
   \code{\link{GMMN_model}()}
 }
+\examples{
+## Example model (untrained) with a 5d input, 300d hidden and 4d output layer
+str(VAE_model(c(5, 300, 4)))
+}
 \keyword{datagen}
