@@ -44,17 +44,17 @@ exists_rda <- function(file, names, package = NULL)
 
 ##' @title Reading Objects from an .rda from the Current Package or File in the
 ##'        Current Working Directory
-##' @param names character vector of names of objects to be read (with or without .rda)
 ##' @param file character string (with or without extension .rda) specifying
 ##'        the file to read from
+##' @param names character vector of names of objects to be read (with or without .rda)
 ##' @param package name of the package from which to load the objects; if NULL
 ##'        (the default) the current working directory is searched.
 ##' @return the read object(s)
 ##' @author Marius Hofert
 ##' @note For .rds: readRDS()
-read_rda <- function(names, file, package = NULL)
+read_rda <- function(file, names, package = NULL)
 {
-    stopifnot(is.character(file), length(file) == 1)
+    stopifnot(is.character(file))
     file  <- rm_ext(file) # remove file extension
     file. <- paste0(file,".rda") # file with extension
     names <- if(hasArg(names)) {

@@ -21,13 +21,13 @@ stopifnot(exists_rda("SP500_const", names = "SP500_const_info", package = "qrmda
 
 ## Testing read_rda()
 stopifnot(names(read_rda(c("myobj1", "myobj2"), file = file1.)) == c("myobj1", "myobj2"))
-foo <- read_rda("SP500_const_info", file = "SP500_const", package = "qrmdata")
+foo <- read_rda("SP500_const", names = "SP500_const_info", package = "qrmdata")
 stopifnot(is.data.frame(foo))
 
 ## Testing save_rda()
 file2. <- tempfile("foo2", fileext = ".rda") # for CRAN
 save_rda(foo, file = file2., names = "SP500info2")
-bar <- read_rda("SP500info2", file = file2.)
+bar <- read_rda(file2., names = "SP500info2")
 stopifnot(identical(bar, foo))
 
 ## Clean-up

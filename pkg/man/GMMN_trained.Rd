@@ -272,6 +272,30 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
 %% \emph{myjournal} \bold{myversion}(mynumber), --.
 }
 \seealso{
-  \code{\link{GMMN_model}()}
+  \code{\link{GMMN_model}()}, \code{\link{to_callable}()}
+}
+\examples{
+\donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
+## Load a trained GMMN (see train_once())
+NNname <- "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5"
+NN <- read_rda(NNname, package = "gnn")
+GMMN1 <- to_callable(NN)
+str(GMMN1)
+
+## Alternative
+NNnm <- data(list = NNname)
+GMMN2 <- to_callable(get(NNnm))
+str(GMMN2)
+
+## Check (the check-able components)
+stopifnot(identical(GMMN1[names(GMMN1) != "model"],
+                    GMMN2[names(GMMN2) != "model"]))
+
+## Evaluate
+set.seed(271)
+N.prior <- matrix(rnorm(2000 * 2), ncol = 2)
+X <- predict(GMMN1[["model"]], x = N.prior)
+plot(X, xlab = expression(X[1]), ylab = expression(X[2]))
+}
 }
 \keyword{datasets}

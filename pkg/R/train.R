@@ -72,7 +72,7 @@ train_once <- function(gnn, data, batch.size, nepoch,
                        file, name = rm_ext(basename(file)), package = NULL)
 {
     if(exists_rda(file, names = name, package = package)) { # check existence of 'name' in 'file'
-        read.gnn <- read_rda(name, file = file, package = package) # GNN object with serialized component 'model'
+        read.gnn <- read_rda(file, names = name, package = package) # GNN object with serialized component 'model'
         if(read.gnn[["type"]] != gnn[["type"]])
             stop("The 'type' of the read GNN and that of 'gnn' do not coincide")
         to_callable(read.gnn) # return whole GNN object (with unserialized model (components))

@@ -9,7 +9,7 @@
 }
 \usage{
 exists_rda(file, names, package = NULL)
-read_rda(names, file, package = NULL)
+read_rda(file, names, package = NULL)
 save_rda(..., file, names)
 rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
            newname, newfile = paste0(newname, collapse = "_", ".rda"),
