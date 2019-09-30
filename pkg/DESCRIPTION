@@ -1,10 +1,10 @@
 Package: gnn
-Version: 0.0-1
+Version: 0.0-2
 Title: Generative Neural Networks
 Description: Tools to set up, train, store, load, investigate and analyze
              generative neural networks. In particular, functionality for
 	     generative moment matching networks is provided.
-	     See Hofert, Prasad, Zhu (2018) <arXiv:abs/1811.00683>
+	     See Hofert, Prasad, Zhu (2018) <arXiv:1811.00683>
 	     for more details.
 Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
                     email = "marius.hofert@uwaterloo.ca",
