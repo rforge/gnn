@@ -8,3 +8,4 @@
      code (so that one can call them in parallel)
   2) Perhaps even implement fitting/training in R (even if inefficient)
 - Fix: Paper citations (2019 on arXiv or the real publication if published)
+- Fix too long lines in help files (line breaks)
