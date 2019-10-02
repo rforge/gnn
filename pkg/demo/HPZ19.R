@@ -359,7 +359,7 @@ convergence_plot <- function(err, dim, model, filebname, B)
     ## Note: error(n) = O(n^{-alpha}) => error(n) = c*n^{-alpha} => ccoef(error) = alpha
     ld <- length(dim(err))
     if(ld == 3) { # for all test functions
-        ylabels <- rep(c(expression("Mean absolute deviation estimate,"~O(n[gen]^{-alpha})),
+        ylabels <- rep(c(expression("Median absolute deviation estimate,"~O(n[gen]^{-alpha})),
                          expression("Standard deviation estimate,"~O(n[gen]^{-alpha}))), each = 2)
         tfname <- c("sumofsq", "sobolg", "exceedprob99", "ES99") # test function names for PDF files
         tfnum <- 4 # number of test functions
