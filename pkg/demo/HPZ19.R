@@ -84,7 +84,7 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
         RNGkind("L'Ecuyer-CMRG") # switch PRNG to CMRG (for reproducible parallel computing)
         raw <- mclapply(seq_len(B), function(b) aux(b), mc.cores = ncores)
         RNGkind("Mersenne-Twister") # switch back to default RNG
-        res <- simplify2array(raw) # or, here: matrix(unlist(raw), ncol = 3, byrow = TRUE)
+        res <- t(simplify2array(raw)) # or, here: matrix(unlist(raw), ncol = 3, byrow = TRUE)
 
         ## Check, save and return
         stopifnot(dim(res) == c(B, 3)) # sanity check
