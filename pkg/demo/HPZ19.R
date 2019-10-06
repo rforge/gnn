@@ -9,8 +9,10 @@
 ## Packages
 library(keras) # interface to Keras (high-level neural network API)
 library(tensorflow) # interface to TensorFlow (numerical computation with tensors)
+if(packageVersion("qrmtools") < "0.0.11")
+    stop('Consider updating via install.packages("qrmtools", repos = "http://R-Forge.R-project.org")')
 library(qrmtools) # for ES_np()
-if(packageVersion("qrng") < "0.0-7")
+if(packageVersion("qrng") < "0.0.7")
     stop('Consider updating via install.packages("qrng", repos = "http://R-Forge.R-project.org")')
 library(qrng) # for sobol()
 if(packageVersion("copula") < "0.999.19")
