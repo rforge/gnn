@@ -200,7 +200,7 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
         RNGkind("L'Ecuyer-CMRG") # switch PRNG to CMRG (for reproducible parallel computing)
         raw <- mclapply(seq_len(B), function(b) aux(b), mc.cores = ncores)
         RNGkind("Mersenne-Twister") # switch back to default RNG
-        res. <- simplify2array(raw) # convert list of 3-arrays to 4-array
+        res. <- simplify2array(raw) # convert list of 3-arrays to 4-array (dimension 'B' is added as last component)
         names(dimnames(res.))[4] <- "Replication" # update name of dimnames
         dimnames(res.)[[4]] <- 1:B  # update dimnames
 
@@ -612,7 +612,7 @@ appendix <- function(copula, name, model, randomize)
         gettime(raw <- mclapply(seq_len(B), function(b) aux(b), mc.cores = ncores),
                 string = "Done in")
         RNGkind("Mersenne-Twister") # switch back to default RNG
-        res. <- simplify2array(raw) # convert list of 2-arrays to 3-array
+        res. <- simplify2array(raw) # convert list of 2-arrays to 3-array (dimension 'B' is added as last component)
         names(dimnames(res.))[3] <- "Replication" # update name of dimnames
         dimnames(res.)[[3]] <- 1:B  # update dimnames
 
