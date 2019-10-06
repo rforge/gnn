@@ -90,7 +90,7 @@ to_callable <- function(gnn)
     switch(gnn[["type"]],
            "GMMN" = {
                gnn[["model"]] <- unserialize_model(gnn[["model"]], # unserialize component 'model'
-                                                   custom_objects = c(loss = loss))
+                                                   custom_objects = c(loss = loss, loss_fn = loss)) # used to be loss = loss (and loss_fn = loss) when run interactively, but suddenly stopped to work (2019-10-06).
            },
            "VAE" = {
                gnn[["model"]]     <- unserialize_weights(gnn[["model"]],

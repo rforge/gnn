@@ -18,7 +18,9 @@ exists_rda <- function(file, names, package = NULL)
     file  <- rm_ext(file) # remove file extension
     file. <- paste0(file,".rda") # file with extension
     if(hasArg(names)) { # need to check existence of object 'names' inside 'file.'
-        names <- rm_ext(basename(names)) # remove path and file extension (as '%in% ls()' fails if '.rda' is included)
+        ## names <- rm_ext(basename(names)) # remove path and file extension (as '%in% ls()' fails if '.rda' is included)
+        ## Note (2019-10-06): Commented out the last line as it can remove parts of objects names
+        ##                    which are then not found in 'file' anymore.
         ## Note: data() per default load()s the objects into .GlobalEnv
         ##       and thus overwrites existing objects with the same name.
         ##       To avoid this we create a new, temporary environment
@@ -46,7 +48,7 @@ exists_rda <- function(file, names, package = NULL)
 ##'        Current Working Directory
 ##' @param file character string (with or without extension .rda) specifying
 ##'        the file to read from
-##' @param names character vector of names of objects to be read (with or without .rda)
+##' @param names character vector of names of objects to be read
 ##' @param package name of the package from which to load the objects; if NULL
 ##'        (the default) the current working directory is searched.
 ##' @return the read object(s)
@@ -58,10 +60,13 @@ read_rda <- function(file, names, package = NULL)
     file  <- rm_ext(file) # remove file extension
     file. <- paste0(file,".rda") # file with extension
     names <- if(hasArg(names)) {
-        rm_ext(basename(names)) # otherwise get() fails below
-    } else {
-        paste0(rm_ext(basename(file.)), collapse = "_")
-    }
+                 ## rm_ext(basename(names)) # otherwise get() fails below
+                 ## Note (2019-10-06): Commented out the last line as we don't want to change names
+                 names
+             } else {
+                 paste0(file, collapse = "_")
+                 ## Note (2019-10-06): 'file' in the last line was rm_ext(basename(file.))
+             }
     if(!all(exists_rda(file., names = names, package = package)))
         if(is.null(package)) {
             stop("Not all objects specified by 'names' exist in file '",file.,"' in the local working directory")
