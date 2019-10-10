@@ -1,7 +1,7 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Code to reproduce the results of Hofert, Prasad, Zhu ("Quasi-Monte Carlo for
-## multivariate distributions via generative neural networks") [HPZ19] and more.
+## multivariate distributions via generative neural networks") and more.
 
 
 ### Setup ######################################################################
@@ -149,6 +149,7 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
                 U.GMMN.QRNG <- predict(GMMNmod, x = N.QRNG) # generate from the GMMN QRNG
                 U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
                 ## If available in analytical form, draw from a real QRNG
+                ## Note: cCopula() now exists for moCopula() but wasn't included here
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
                     is(copula, "claytonCopula")
                 if(cCopula.inverse.avail)
@@ -467,16 +468,16 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     cat("=> Computing contour, Rosenblatt and scatter plots\n")
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
-                     file = paste0("HPZ19_fig_contours_",bname,".pdf"))
+                     file = paste0("GMMN_QMC_paper_fig_contours_",bname,".pdf"))
         rosenplot(copula, u = U.GMMN.QRNG,
-                  file = paste0("HPZ19_fig_rosenblatt_",bname,".pdf"))
+                  file = paste0("GMMN_QMC_paper_fig_rosenblatt_",bname,".pdf"))
     }
     ## Scatter plots
     if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
         lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
         nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
         for(i in seq_along(lst))
-            scatterplot(lst[[i]], file = paste0("HPZ19_fig_scatter_",bname,"_",nms[i],".pdf"))
+            scatterplot(lst[[i]], file = paste0("GMMN_QMC_paper_fig_scatter_",bname,"_",nms[i],".pdf"))
     }
 
     ## 3 Cramer-von Mises (CvM) statistics and test functions ##################
@@ -498,12 +499,12 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         cat("=> Starting to compute Cramer-von Mises statistics. ")
         gettime(CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
                                randomize = randomize,
-                               file = paste0("HPZ19_res_CvMstat_",bname,".rds")),
+                               file = paste0("GMMN_QMC_paper_res_CvMstat_",bname,".rds")),
                 string = "Done in")
 
         ## Boxplots
         CvM_boxplot(CvMstat, dim = dim.in.out, model = model.,
-                    file = paste0("HPZ19_fig_CvMboxplot_",bname,".pdf"))
+                    file = paste0("GMMN_QMC_paper_fig_CvMboxplot_",bname,".pdf"))
 
         ## 3.2 Test functions ##################################################
 
@@ -513,12 +514,12 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         gettime(errTFs <- error_test_functions(B.conv, n = ns,
                                                copula = copula, GMMN = GMMN,
                                                randomize = randomize,
-                                               file = paste0("HPZ19_res_testfun_",bname,".rds")),
+                                               file = paste0("GMMN_QMC_paper_res_testfun_",bname,".rds")),
                 string = "Done in")
 
         ## Plot convergence behavior
         convergence_plot(errTFs, dim = dim.in.out, model = model.,
-                         filebname = paste0("HPZ19_fig_convergence_",bname), B = B.conv)
+                         filebname = paste0("GMMN_QMC_paper_fig_convergence_",bname), B = B.conv)
 
     }
 }
@@ -556,7 +557,7 @@ appendix <- function(copula, name, model, randomize)
 
     GMMNmod <- GMMN[["model"]]
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
-    file <- paste0("HPZ19_res_testfun_",bname,"_digital_shift.rds")
+    file <- paste0("GMMN_QMC_paper_res_testfun_",bname,"_digital_shift.rds")
     res <- if (file.exists(file)) {
         readRDS(file)
     } else {
@@ -589,6 +590,7 @@ appendix <- function(copula, name, model, randomize)
                 U.GMMN.QRNG <- predict(GMMNmod, x = N.QRNG) # generate from the GMMN QRNG
                 U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
                 ## If available in analytical form, draw from a real QRNG
+                ## Note: cCopula() now exists for moCopula() but wasn't included here
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
                     is(copula, "claytonCopula")
                 if(cCopula.inverse.avail)
@@ -634,7 +636,7 @@ appendix <- function(copula, name, model, randomize)
                } else as.character(tau(copula))
     model. <- substitute(m.*","~~tau==t., list(m. = model, t. = tau.str)) # model and taus
     convergence_plot(res, dim = dim.in.out, model = model.,
-                     filebname = paste0("HPZ19_fig_convergence_",bname,
+                     filebname = paste0("GMMN_QMC_paper_fig_convergence_",bname,
                                         "_digital_shift"), B = B.conv)
 }
 
@@ -733,8 +735,8 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 ### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
 
 ## Timings are on a 13" MacBook Pro (2018) without training. Overall, with
-## pre-trained NNs, this runs in a bit less than 11h (via R CMD BATCH HPZ19.R,
-## for example).
+## pre-trained NNs, this runs in a bit less than 11h (via R CMD BATCH
+## GMMN_QMC_paper.R, for example).
 
 
 ### 2.1 Main part of the paper #################################################

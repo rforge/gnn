@@ -15,4 +15,4 @@ if(TFisInstalled && # OS-level TensorFlow
    require(tensorflow) && # tensorflow package
    require(qrng) && packageVersion("qrng") >= "0.0-7" &&
    require(copula) && packageVersion("copula") >= "0.999.19")
-    demo("GMMN_QMC")
+    demo("GMMN_QMC_MWE")

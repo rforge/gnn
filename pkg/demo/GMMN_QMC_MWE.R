@@ -75,7 +75,7 @@ stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 ##'         statistics evaluated based on pseudo-random samples from
 ##'         'copula', GMMN PRNs and GMMN QRNs.
 ##' @author Marius Hofert
-##' @note This is an adapted version of the same function in the demo GMMN_QMC
+##' @note This is an adapted version of the same function in the demo GMMN_QMC_paper
 CvM <- function(B, n, copula, GMMN, randomize, file, name = rm_ext(basename(file)),
                 package = NULL)
 {
