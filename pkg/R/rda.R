@@ -101,11 +101,16 @@ read_rda <- function(file, names, package = NULL)
 ##' @return nothing (generates an .rda by side-effect)
 ##' @author Marius Hofert
 ##' @note For .rds: saveRDS()
-save_rda <- function(..., file, names)
+save_rda <- function(..., file, names = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
     args <- list(...)
     len <- length(args)
+    if(is.null(names)) {
+        nms <- deparse(substitute(list(...))) # get names of provided arguments
+        nms <- substring(nms, first = 6, last = nchar(nms) - 1) # strip away "list(" and ")"
+        names <- unlist(strsplit(nms, split = ", "))
+    }
     stopifnot(length(names) == len)
     for(i in seq_len(len))
         assign(names[i], value = args[[i]]) # name the objects in 'args' as specified by 'names'

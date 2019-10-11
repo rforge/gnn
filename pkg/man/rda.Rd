@@ -10,7 +10,7 @@
 \usage{
 exists_rda(file, names, package = NULL)
 read_rda(file, names, package = NULL)
-save_rda(..., file, names)
+save_rda(..., file, names = NULL)
 rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
            newname, newfile = paste0(newname, collapse = "_", ".rda"),
 	   package = NULL)
@@ -35,7 +35,9 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
 	objects to be read. If not provided, a name is constructed
 	from \code{file}.}
       \item{save_rda()}{\code{\link{character}} vector of names under
-	which the objects in \code{\dots} are saved in \code{file}.}
+	which the objects in \code{\dots} are saved in \code{file}. If
+        \code{\link{NULL}}, the names of the objects provided by \dots
+        are taken as default values.}
     }
   }
   \item{package}{
