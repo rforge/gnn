@@ -47,7 +47,7 @@ if(packageVersion("copula") < "0.999.19")
 library(copula) # for the considered copulas
 library(gnn) # for the used GMMN models
 library(latticeExtra) # for contourplot3
-
+library(qrmtools) # For ES_np
 ## Global training parameters
 package <- "gnn" # uses pre-trained NNs from 'gnn' (recommended); for retraining, use package = NULL
 dim.hid <- 300L # dimension of the (single) hidden layer
@@ -183,7 +183,7 @@ ES99_sd <- function(B, ns, copula, GMMN, randomize, file,
                     name = rm_ext(basename(file)), package = NULL)
 {
     if(exists_rda(file, names = name, package = package)) {
-        read_rda(name, file = file, package = package)
+        sds<-read_rda(name, file = file, package = package)
     } else {
         nslen <- length(ns)
         sds <- t(sapply(seq_len(nslen), function(i) {
@@ -196,6 +196,7 @@ ES99_sd <- function(B, ns, copula, GMMN, randomize, file,
                            "Sd.ES99.GMMN.QRNG", "Sd.ES99.cop.QRNG")
         save_rda(sds, file = file, names = name)
     }
+sds
 }
 
 
