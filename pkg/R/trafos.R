@@ -78,10 +78,13 @@ logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
 ### Principal component analysis ###############################################
 
 ##' @title Principal Component Transformtion
-##' @param x (n, d)-matrix of data (typically before training or after sampling)
-##' @param mu location vector mu such that Y = Gamma^T (X - mu)
-##' @param Gamma (d, d)-matrix whose columns contains the orthonormal eigenvectors
-##'        of cov(x) ('loadings') in decreasing order of their eigenvalues
+##' @param x (n, d)-matrix of data (typically before training or after sampling).
+##'        If inverse, then an (n, k)-matrix with 1 <= k <= d.
+##' @param mu d-vector for the transformation Y = Gamma^T (X - mu)
+##' @param Gamma (d, k)-matrix with k >= ncol(x) whose columns contain k orthonormal
+##'        eigenvectors of a covariance matrix sorted in decreasing order of their
+##'        eigenvalues. If a matrix with k > ncol(x) is provided, only the first
+##'        k-many are considered.
 ##' @param inverse logical indicating whether the inverse transformation is applied
 ##'        based on provided 'mu' and 'Gamma'.
 ##' @param ... additional arguments passed to the underlying prcomp() if inverse.
@@ -94,12 +97,10 @@ logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
 ##'         "Gamma": computed matrix of sorted orthonormal eigenvectors;
 ##'         otherwise: transformed (n, d)-matrix of data
 ##' @author Marius Hofert
-##' @note - See also MFE (2015, Section 6.4.5)
-##'       - cv <- PCA_trafo(x)$cumvar > 0.95
-##'         which.max(cv) # dimensions needed to explain 95% of the variance
+##' @note See also MFE (2015, Section 6.4.5)
 PCA_trafo <- function(x, mu, Gamma, inverse = FALSE, ...)
 {
-    stopifnot(is.matrix(x), is.logical(inverse))
+    stopifnot(is.matrix(x), ncol(x) >= 1, is.logical(inverse))
     if(!inverse) { # unused: mu, Gamma
         ## PCA
         PCA <- prcomp(x, ...)
@@ -119,10 +120,19 @@ PCA_trafo <- function(x, mu, Gamma, inverse = FALSE, ...)
             stop("'mu' (vector of centers) needs to be provided if 'inverse = TRUE'")
         if(missing(Gamma))
             stop("'Gamma' (matrix of decreasingly sorted orthonormal eigenvectors (columns)) needs to be provided if 'inverse = TRUE'")
-        d <- ncol(x)
-        stopifnot(length(mu) == d, dim(Gamma) == c(d, d))
+        d.x <- ncol(x) # (old) dimension of the given/original data
+        d.mu <- length(mu) # (new) dimension we want to transform to
+        if(d.mu < 1)
+            stop("length(mu) must be >= 1")
+        d.Gamma <- dim(Gamma)
+        if(d.Gamma[1] != d.mu) # check rows of Gamma
+            stop("'Gamma' must have length(mu)-many rows")
+        if(d.Gamma[2] < d.x) # check columns of Gamma
+            stop("'Gamma' must have at least ncol(x)-many columns")
 
-        ## Transforming back and return
-        rep(mu, each = nrow(x)) + x %*% t(Gamma) # for Y = x: Y = Gamma^T (X - mu) => X = mu + Gamma Y
+        ## Transforming back and return (we grab out as many columns from Gamma
+        ## as needed, the rest is discarded)
+        rep(mu, each = nrow(x)) + x %*% t(Gamma[,seq_len(d.x)]) # (n, d) + (n, k) x t((d, k))
+        ## For Y = x: Y = Gamma^T (X - mu) => X = mu + Gamma Y
     }
 }
