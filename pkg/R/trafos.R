@@ -31,9 +31,9 @@ range_trafo <- function(x, lower, upper, inverse = FALSE)
 ##' @param x (n, d)-matrix of data (typically before training or after sampling)
 ##' @param mean numeric or d-vector of marginal sample means
 ##' @param sd numeric or d-vector of marginal sample standard deviations
-##' @param intercept numeric or d-vector of intercepts of the linear transformations
-##'        applied after applying plogis() (if inverse: before applying qlogis())
 ##' @param slope numeric or d-vector of slopes of the linear transformations
+##'        applied after applying plogis() (if inverse: before applying qlogis())
+##' @param intercept numeric or d-vector of intercepts of the linear transformations
 ##'        applied after applying plogis() (if inverse: before applying qlogis())
 ##' @param inverse logical indicating whether a linear transformation of plogit()
 ##'        (the default) or qlogit() of a linear transformation of the data is
@@ -45,7 +45,7 @@ range_trafo <- function(x, lower, upper, inverse = FALSE)
 ##' @note On each margin, the logistic distribution/quantile function
 ##'       (= inverse logit/logit function) is used with location and scale chosen
 ##'       to match the provided (sample) mean and standard deviation.
-logis_trafo <- function(x, mean = 0, sd = 1, intercept = 0, slope = 1,
+logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
                         inverse = FALSE)
 {
     ## Basics
@@ -72,4 +72,3 @@ logis_trafo <- function(x, mean = 0, sd = 1, intercept = 0, slope = 1,
                    scale = sqrt(3*sd[j]^2/pi^2)))
     }
 }
-
