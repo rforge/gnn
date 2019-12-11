@@ -17,7 +17,7 @@ importFrom("utils",
 importFrom("methods",
            "hasArg")
 importFrom("stats",
-           "rnorm")
+           "rnorm", "plogis", "qlogis")
 importFrom("tools",
            "file_path_sans_ext")
 
