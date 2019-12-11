@@ -72,3 +72,56 @@ logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
                    scale = sqrt(3*sd[j]^2/pi^2)))
     }
 }
+
+
+### Principal component analysis ###############################################
+
+##' @title Principal Component Transformtion
+##' @param x (n, d)-matrix of data (typically before training or after sampling)
+##' @param mu location vector mu such that Y = Gamma^T (X - mu)
+##' @param Gamma (d, d)-matrix whose columns contains the orthonormal eigenvectors
+##'        of cov(x) ('loadings') in decreasing order of their eigenvalues
+##' @param inverse logical indicating whether the inverse transformation is applied
+##'        based on provided 'mu' and 'Gamma'.
+##' @param ... additional arguments passed to the underlying prcomp() if inverse.
+##' @return if inverse: list with components:
+##'         "PCs": principal components or 'scores' (Y = Gamma^T (X - mu))
+##'         "cumvar": cumulative variances
+##'         "sd": standard deviations of each Y;
+##'         "lambda": eigenvalues of cov(x) sorted in decreasing order;
+##'         "mu": computed centers;
+##'         "Gamma": computed matrix of sorted orthonormal eigenvectors;
+##'         otherwise: transformed (n, d)-matrix of data
+##' @author Marius Hofert
+##' @note - See also MFE (2015, Chapter 6)
+##'       - cv <- PCA_trafo(x)$cumvar > 0.95
+##'         which.max(cv) # dimensions needed to explain 95% of the variance
+PCA_trafo <- function(x, mu, Gamma, inverse = FALSE, ...)
+{
+    stopifnot(is.matrix(x), is.logical(inverse))
+    if(!inverse) { # unused: mu, Gamma
+        ## PCA
+        PCA <- prcomp(x, ...)
+
+        ## Extracting all information
+        mu <- PCA$center # estimated centers
+        Gamma <- PCA$rotation # principal axes (jth column is orthonormal eigenvector of cov(X) corresponding to jth largest eigenvalue) or 'loadings'
+        Y <- PCA$x # estimated principal components of X or 'scores'
+        lambda <- PCA$sdev^2 # sorted eigenvalues of Cov(X) since diag(<sorted sigma^2>) = Cov(Y) = Cov(Gamma^T (X - mu)) = Gamma^T Cov(X) Gamma = diag(<sorted lambda>)
+        cumvar <- cumsum(lambda) / sum(lambda) # explained variances per first so-many principal components
+
+        ## Return
+        list(PCs = Y, cumvar = cumvar, sd = PCA$sdev, lambda = lambda, mu = mu, Gamma = Gamma)
+    } else { # inverse
+        ## Basics
+        if(missing(mu))
+            stop("'mu' (vector of centers) needs to be provided if 'inverse = TRUE'")
+        if(missing(Gamma))
+            stop("'Gamma' (matrix of decreasingly sorted orthonormal eigenvectors (columns)) needs to be provided if 'inverse = TRUE'")
+        d <- ncol(x)
+        stopifnot(length(mu) = d, dim(Gamma) = c(d, d))
+
+        ## Transforming back and return
+        rep(mu, each = nrow(x)) + x %*% t(Gamma) # for Y = x: Y = Gamma^T (X - mu) => X = mu + Gamma Y
+    }
+}
