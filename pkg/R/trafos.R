@@ -2,9 +2,9 @@
 
 ##' @title Marginal Range Transformation
 ##' @param x (n, d)-matrix of data (typically before training or after sampling)
-##' @param lower numeric or d-vector typically containing the smallest value of
+##' @param lower value or d-vector typically containing the smallest value of
 ##'        each column of x
-##' @param upper numeric or d-vector typically containing the largest value of
+##' @param upper value or d-vector typically containing the largest value of
 ##'        each column of x
 ##' @param inverse logical indicating whether a range transform (the default)
 ##'        or its inverse is applied to each component sample of x
@@ -29,12 +29,13 @@ range_trafo <- function(x, lower, upper, inverse = FALSE)
 
 ##' @title Marginal Linearly Transformed Logistic Function
 ##' @param x (n, d)-matrix of data (typically before training or after sampling)
-##' @param mean numeric or d-vector of marginal sample means
-##' @param sd numeric or d-vector of marginal sample standard deviations
-##' @param slope numeric or d-vector of slopes of the linear transformations
+##' @param mean value or d-vector of marginal sample means
+##' @param sd value or d-vector of marginal sample standard deviations
+##' @param slope value or d-vector of slopes of the linear transformations
 ##'        applied after applying plogis() (if inverse: before applying qlogis())
-##' @param intercept numeric or d-vector of intercepts of the linear transformations
-##'        applied after applying plogis() (if inverse: before applying qlogis())
+##' @param intercept value or d-vector of intercepts of the linear
+##'        transformations applied after applying plogis() (if inverse: before
+##'        applying qlogis())
 ##' @param inverse logical indicating whether a linear transformation of plogit()
 ##'        (the default) or qlogit() of a linear transformation of the data is
 ##'        applied to each component sample of x
@@ -93,7 +94,7 @@ logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
 ##'         "Gamma": computed matrix of sorted orthonormal eigenvectors;
 ##'         otherwise: transformed (n, d)-matrix of data
 ##' @author Marius Hofert
-##' @note - See also MFE (2015, Chapter 6)
+##' @note - See also MFE (2015, Section 6.4.5)
 ##'       - cv <- PCA_trafo(x)$cumvar > 0.95
 ##'         which.max(cv) # dimensions needed to explain 95% of the variance
 PCA_trafo <- function(x, mu, Gamma, inverse = FALSE, ...)
@@ -119,7 +120,7 @@ PCA_trafo <- function(x, mu, Gamma, inverse = FALSE, ...)
         if(missing(Gamma))
             stop("'Gamma' (matrix of decreasingly sorted orthonormal eigenvectors (columns)) needs to be provided if 'inverse = TRUE'")
         d <- ncol(x)
-        stopifnot(length(mu) = d, dim(Gamma) = c(d, d))
+        stopifnot(length(mu) == d, dim(Gamma) == c(d, d))
 
         ## Transforming back and return
         rep(mu, each = nrow(x)) + x %*% t(Gamma) # for Y = x: Y = Gamma^T (X - mu) => X = mu + Gamma Y

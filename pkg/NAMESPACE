@@ -17,7 +17,7 @@ importFrom("utils",
 importFrom("methods",
            "hasArg")
 importFrom("stats",
-           "rnorm", "plogis", "qlogis")
+           "rnorm", "plogis", "qlogis", "prcomp")
 importFrom("tools",
            "file_path_sans_ext")
 
@@ -28,6 +28,6 @@ export("GMMN_model")
 export("VAE_model")
 export("loss")
 export("train", "train_once")
-export("range_trafo", "logis_trafo")
+export("range_trafo", "logis_trafo", "PCA_trafo")
 export("exists_rda", "read_rda", "save_rda", "rename_rda")
 export("rm_ext", "to_savable", "to_callable")
