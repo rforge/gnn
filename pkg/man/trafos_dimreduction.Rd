@@ -1,4 +1,4 @@
-\name{dreduction_trafos}
+\name{trafos_dimreduction}
 \alias{PCA_trafo}
 \title{Dimension-Reduction Transformations for Training or Sampling}
 \description{

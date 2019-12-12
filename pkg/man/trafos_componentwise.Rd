@@ -1,4 +1,4 @@
-\name{componentwise_trafos}
+\name{trafos_componentwise}
 \alias{range_trafo}
 \alias{logis_trafo}
 \title{Data Transformations for Training or Sampling}
