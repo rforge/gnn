@@ -99,11 +99,11 @@ stopifnot(all(x.logis.scale[,2] != 1)) # => no values equal to 1 anymore
 
 ## Alternatively, log() the data first, thus working with a log-logistic
 ## distribution as transformation
-log.x <- cbind(x[,1], log(x[,2])) # 2nd coordinate only
-log.mu <- c(mu[1], mean(log.x[,2]))
-log.sig <- c(sig[1], sd(log.x[,2]))
-x.loglogis <- logis_trafo(log.x, mean = log.mu, sd = log.sig)
-x. <- logis_trafo(x.loglogis,    mean = log.mu, sd = log.sig, inverse = TRUE)
+lx <- cbind(x[,1], log(x[,2])) # 2nd coordinate only
+lmu <- c(mu[1], mean(lx[,2]))
+lsig <- c(sig[1], sd(lx[,2]))
+x.llogis <- logis_trafo(lx, mean = lmu, sd = lsig)
+x. <- logis_trafo(x.llogis, mean = lmu, sd = lsig, inverse = TRUE)
 x.. <- cbind(x.[,1], exp(x.[,2])) # undo log()
 stopifnot(all.equal(x.., x))
 }
