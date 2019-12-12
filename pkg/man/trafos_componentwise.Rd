@@ -43,28 +43,28 @@ set.seed(271)
 x <- cbind(rnorm(n), (1-runif(n))^(-1/2)-1) # normal and Pareto(2) margins
 plot(x)
 
-## 1 Range transformation
+## Range transformation
 ran <- apply(x, 2, range) # column j = range of the jth column of x
 x.ran <- range_trafo(x, lower = ran[1,], upper = ran[2,]) # marginally transform to [0,1]
 plot(x.ran) # => now range [0,1] but points a bit clustered around small y-values
 x. <- range_trafo(x.ran, lower = ran[1,], upper = ran[2,], inverse = TRUE) # transform back
 stopifnot(all.equal(x., x)) # check
 
-## 2 Logistic transformation
+## Logistic transformation
 x.logis <- logis_trafo(x) # marginally transform to [0,1] via plogis()
 plot(x.logis) # => y-range is [1/2, 1] which can be harder to train
 x. <- logis_trafo(x.logis, inverse = TRUE) # transform back
 stopifnot(all.equal(x., x)) # check
 
-## 3 Logistic transformation with scaling to all of [0,1] in the second coordinate
+## Logistic transformation with scaling to all of [0,1] in the second coordinate
 x.logis.scale <- logis_trafo(x, slope = 2, intercept = -1)
 plot(x.logis.scale) # => now y-range is scaled to [0,1]
 x. <- logis_trafo(x.logis.scale, slope = 2, intercept = -1, inverse = TRUE) # transform back
 stopifnot(all.equal(x., x)) # check
 
-## 4 Logistic transformation with sample mean and standard deviation and then
-##   transforming the range to [0,1] with a range transformation (note that
-##   slope = 2, intercept = -1 would not help here as the y-range is not [1/2, 1])
+## Logistic transformation with sample mean and standard deviation and then
+## transforming the range to [0,1] with a range transformation (note that
+## slope = 2, intercept = -1 would not help here as the y-range is not [1/2, 1])
 mu <- colMeans(x)
 sig <- apply(x, 2, sd)
 x.logis.fit <- logis_trafo(x, mean = mu, sd = sig) # marginally plogis(, location, scale)
@@ -96,5 +96,15 @@ mu <- colMeans(x)
 sig <- apply(x, 2, sd)
 x.logis.scale <- logis_trafo(x, mean = mu, sd = sig)
 stopifnot(all(x.logis.scale[,2] != 1)) # => no values equal to 1 anymore
+
+## Alternatively, log() the data first, thus working with a log-logistic
+## distribution as transformation
+log.x <- cbind(x[,1], log(x[,2])) # 2nd coordinate only
+log.mu <- c(mu[1], mean(log.x[,2]))
+log.sig <- c(sig[1], sd(log.x[,2]))
+x.loglogis <- logis_trafo(log.x, mean = log.mu, sd = log.sig)
+x. <- logis_trafo(x.loglogis,    mean = log.mu, sd = log.sig, inverse = TRUE)
+x.. <- cbind(x.[,1], exp(x.[,2])) # undo log()
+stopifnot(all.equal(x.., x))
 }
 \keyword{manip}

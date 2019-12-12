@@ -43,9 +43,17 @@ range_trafo <- function(x, lower, upper, inverse = FALSE)
 ##'         of plogis() if !inverse and qlogis() of linear transformations of the
 ##'         data if inverse)
 ##' @author Marius Hofert
-##' @note On each margin, the logistic distribution/quantile function
-##'       (= inverse logit/logit function) is used with location and scale chosen
-##'       to match the provided (sample) mean and standard deviation.
+##' @note 1) On each margin, the (log-)logistic distribution/quantile function
+##'          (= inverse logit/logit function) is used with location and scale chosen
+##'          to match the provided (sample) mean and standard deviation.
+##'       2) We need to provide 'mean' and 'sd' as arguments (instead of computing
+##'          them) for the case inverse = TRUE (the sample mean or sd of the original
+##'          x is unknown then, so we can't transform back)
+##'       3) We can't have a log = FALSE argument here as it is unclear how 'mean'
+##'          and 'sd' change. For the same reason as 2), we can't use the available
+##'          data to recompute 'mean' and 'sd' (as inverse = TRUE would not work then).
+##'          The easiest is to first manually log the data, then compute 'mean' and 'sd'
+##'          and call logis_trafo().
 logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
                         inverse = FALSE)
 {
