@@ -1,7 +1,7 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Code to reproduce the results of Hofert, Prasad, Zhu ("Multivariate time
-## series modeling with generative neural networks").
+## series modeling with generative neural networks"); it runs in about 4h or so.
 
 
 ### Setup ######################################################################
