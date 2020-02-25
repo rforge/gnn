@@ -757,7 +757,7 @@ forecast_evaluation_plot <- function(type.series, train.period, test.period,
 }
 
 
-### 0.9 Run time ###############################################################
+### 0.9 Run time measurement ###################################################
 
 ##' @title Human-readable Elapsed Time
 ##' @param expr R expression to evaluate and time
