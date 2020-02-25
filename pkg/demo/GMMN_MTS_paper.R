@@ -21,7 +21,6 @@ if(packageVersion("qrmdata") < "2019.12.3.1")
     stop('You must update "qrmdata" via install.packages("qrmdata")')
 library(rugarch) # for GARCH fit
 library(scoringRules) # for vs_sample()
-doPDF <- require(crop)
 
 ## Colors
 library(RColorBrewer)
@@ -378,7 +377,7 @@ MMD_metric <- function(type.series, train.period, test.period, with.mu = TRUE,
     dm <- dim(U.test)
     d <- dm[2] # dimension of the empirical dependence structure of the test data
     file <- paste0("MMD","_dim_",d,"_B_",B,"_",type.series,".rds")
-    if(file.exists(file)){
+    if(file.exists(file)) {
         mmd.vals <- readRDS(file)
     } else {
         models <- all_multivariate_ts_fit(type.series = type.series, train.period = train.period,
@@ -748,12 +747,13 @@ forecast_evaluation_plot <- function(type.series, train.period, test.period,
 
     ## Plotting average MMD vs average forecast evaluation metric
     filename.plot <- paste0("fig_MMD","_vs_",rm_ext(filename.metrics),".pdf")
-    if(doPDF) pdf(file = filename.plot, bg = "transparent")
+    doPDF <- require(crop)
+    if(doPDF) pdf(file = filename.plot)
     plot(average.MMD.metrics, average.forecast.metrics, xlab = 'AMMD',
          ylab = ylabel, pch = pch.vec, col = cols.vec)
     legend(x = "topleft", cex = 0.6, legend = labels.vec,
            bty = 'n', pch = pch.vec, col = cols.vec)
-    if(doPDF) dev.off.crop(file)
+    if(doPDF) dev.off.crop(filename.plot)
 }
 
 

@@ -271,7 +271,7 @@ contourplot3 <- function(copula, uPRNG, uQRNG, file,
     ## Build plot object
     plt <- cpTRUE + cpPRNG + cpQRNG # overlaid plot
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, bg = "transparent")
+    if(doPDF) pdf(file = file)
     par(pty = "s")
     print(plt)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
@@ -291,7 +291,7 @@ rosenplot <- function(copula, u, file,
 {
     R <- cCopula(u, copula = copula) # Rosenblatt transform
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, bg = "transparent")
+    if(doPDF) pdf(file = file)
     par(pty = "s")
     plot(R, xlab = xlab, ylab = ylab)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
@@ -306,7 +306,7 @@ rosenplot <- function(copula, u, file,
 scatterplot <- function(u, file)
 {
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, bg = "transparent")
+    if(doPDF) pdf(file = file)
     par(pty = "s")
     if(ncol(u) == 2) {
         plot(u, xlab = quote(U[1]), ylab = quote(U[2]))
@@ -331,7 +331,7 @@ CvM_boxplot <- function(CvM, dim, model, file)
                 paste0("(",paste0(dim, collapse = ", "),")")
             }
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, bg = "transparent", width = 7.4, height = 7.4)
+    if(doPDF) pdf(file = file, width = 7.4, height = 7.4)
     par(pty = "s")
     boxplot(list(CvM[,"CvM.cop.PRNG"], CvM[,"CvM.GMMN.PRNG"], CvM[,"CvM.GMMN.QRNG"]),
             names = c("Copula PRNG", "GMMN PRNG", "GMMN QRNG"),
@@ -393,7 +393,7 @@ convergence_plot <- function(err, dim, model, filebname, B)
         doPDF <- hasArg(filebname) && is.character(filebname)
         if(doPDF) {
             file <- paste0(filebname,"_testfun_",tfname[ind],".pdf")
-            pdf(file = file, bg = "transparent", width = 7.4, height = 7.4)
+            pdf(file = file, width = 7.4, height = 7.4)
         }
         par(pty = "s")
         ylim <- range(err.[,], na.rm = TRUE)
