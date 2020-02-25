@@ -1,3 +1,13 @@
+## Short term
+- Use verbose = 1/2 in all train() etc. in both _paper demos, so that not all
+  epochs are printed
+- Use qrmdata data object names in file names of GMMN_MTS_paper.R
+- put gettime() in package, rename, remove from both demos
+- record run times of each function call in demo GMMN_MTS_paper.R
+- Fix: Paper citations (2019 on arXiv or the real publication if published)
+- Fix too long lines in help files (line breaks)
+
+## Long term
 - KL(): If an analytical (differentiable) form exits for K-L divergence
         between copulas, we could propose an interesting extension.
         (Simpler) extensions to consider first: encoder maps to non-diagonal
@@ -7,5 +17,3 @@
   1) Functions to extract parameters of trained GNNs and convert them to a NN in pure R
      code (so that one can call them in parallel)
   2) Perhaps even implement fitting/training in R (even if inefficient)
-- Fix: Paper citations (2019 on arXiv or the real publication if published)
-- Fix too long lines in help files (line breaks)
