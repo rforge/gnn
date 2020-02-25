@@ -757,6 +757,25 @@ forecast_evaluation_plot <- function(type.series, train.period, test.period,
 }
 
 
+### 0.9 Run time ###############################################################
+
+##' @title Human-readable Elapsed Time
+##' @param expr R expression to evaluate and time
+##' @param string character string to be printed before the time
+##' @return human-readable rounded elapsed time
+##' @author Marius Hofert
+gettime <- function(expr, string = "=> Overall done in")
+{
+    st <- system.time(expr)[["elapsed"]]
+    res <- if(st < 60) {
+        paste0(sprintf("%.1f", round(st, 1)),"s") # time in seconds
+    } else if(st < 3600) {
+        paste0(sprintf("%.1f", round(st/60, 1)),"m") # time in minutes
+    } else paste0(sprintf("%.1f", round(st/3600, 1)),"h") # time in hours
+    cat(paste(string,res,"\n"))
+}
+
+
 ### 1 Computing all results ####################################################
 
 if(!tf$executing_eagerly())
@@ -774,16 +793,16 @@ test.period   <- c("2015-01-01", "2015-12-31")
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-forecast_evaluation_plot(type.series = "US_exchange_rates",
-                         train.period = train.period1, test.period = test.period,
-                         type.metric = "MSE")
-forecast_evaluation_plot(type.series = "US_exchange_rates",
-                         train.period = train.period1, test.period = test.period,
-                         type.metric = "variogram_score",
-                         p = 0.25)
-forecast_evaluation_plot(type.series = "US_exchange_rates",
-                         train.period = train.period1, test.period = test.period,
-                         type.metric = "VaR_exceedance_abserror")
+gettime(forecast_evaluation_plot(type.series = "US_exchange_rates",
+                                 train.period = train.period1, test.period = test.period,
+                                 type.metric = "MSE"))
+gettime(forecast_evaluation_plot(type.series = "US_exchange_rates",
+                                 train.period = train.period1, test.period = test.period,
+                                 type.metric = "variogram_score",
+                                 p = 0.25))
+gettime(forecast_evaluation_plot(type.series = "US_exchange_rates",
+                                 train.period = train.period1, test.period = test.period,
+                                 type.metric = "VaR_exceedance_abserror"))
 
 
 ### 1.2 Plots for GBP exchange rate data #######################################
@@ -793,16 +812,16 @@ forecast_evaluation_plot(type.series = "US_exchange_rates",
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-forecast_evaluation_plot(type.series = "GBP_exchange_rates",
-                         train.period = train.period1, test.period = test.period,
-                         type.metric = "MSE")
-forecast_evaluation_plot(type.series = "GBP_exchange_rates",
-                         train.period = train.period1, test.period = test.period,
-                         type.metric = "variogram_score",
-                         p = 0.25)
-forecast_evaluation_plot(type.series = "GBP_exchange_rates",
-                         train.period = train.period1, test.period = test.period,
-                         type.metric = "VaR_exceedance_abserror")
+gettime(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
+                                 train.period = train.period1, test.period = test.period,
+                                 type.metric = "MSE"))
+gettime(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
+                                 train.period = train.period1, test.period = test.period,
+                                 type.metric = "variogram_score",
+                                 p = 0.25))
+gettime(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
+                                 train.period = train.period1, test.period = test.period,
+                                 type.metric = "VaR_exceedance_abserror"))
 
 
 ### 1.3 Plots for US interest rate data ########################################
@@ -815,12 +834,12 @@ forecast_evaluation_plot(type.series = "GBP_exchange_rates",
 ## Obtain results for only MSE, variogram score evaluation metrics
 
 ## pca.dim = 3
-forecast_evaluation_plot(type.series = "US_interest_rates",
-                         train.period = train.period2, test.period = test.period,
-                         type.metric = "MSE", pca.dim = 3)
-forecast_evaluation_plot(type.series = "US_interest_rates",
-                         train.period = train.period2, test.period = test.period,
-                         type.metric = "variogram_score", p = 0.25, pca.dim = 3)
+gettime(forecast_evaluation_plot(type.series = "US_interest_rates",
+                                 train.period = train.period2, test.period = test.period,
+                                 type.metric = "MSE", pca.dim = 3))
+getttime(forecast_evaluation_plot(type.series = "US_interest_rates",
+                                  train.period = train.period2, test.period = test.period,
+                                  type.metric = "variogram_score", p = 0.25, pca.dim = 3))
 
 
 ### 1.4 Plots for US interest rate data ########################################
@@ -831,11 +850,11 @@ forecast_evaluation_plot(type.series = "US_interest_rates",
 ##       models projected onto the test dataset
 
 ## pca.dim = 4
-forecast_evaluation_plot(type.series = "CA_interest_rates",
-                         train.period = train.period2, test.period = test.period,
-                         type.metric = "MSE", pca.dim = 4)
-forecast_evaluation_plot(type.series = "CA_interest_rates",
-                         train.period = train.period2, test.period = test.period,
-                         type.metric = "variogram_score", p = 0.25, pca.dim = 4)
+gettime(forecast_evaluation_plot(type.series = "CA_interest_rates",
+                                 train.period = train.period2, test.period = test.period,
+                                 type.metric = "MSE", pca.dim = 4))
+gettime(forecast_evaluation_plot(type.series = "CA_interest_rates",
+                                 train.period = train.period2, test.period = test.period,
+                                 type.metric = "variogram_score", p = 0.25, pca.dim = 4))
 
 if(!tf$executing_eagerly()) sess$close()
