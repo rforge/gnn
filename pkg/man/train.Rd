@@ -6,7 +6,7 @@
   Functions for training generative neural networks.
 }
 \usage{
-train(gnn, data, batch.size, nepoch, verbose = 2, ...)
+train(gnn, data, batch.size, nepoch, verbose = 3, ...)
 train_once(gnn, data, batch.size, nepoch,
            file, name = rm_ext(basename(file)), package = NULL, ...)
 }

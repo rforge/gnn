@@ -12,7 +12,7 @@
 ##'        see ?keras:::fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
-train <- function(gnn, data, batch.size, nepoch, verbose = 2, ...)
+train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
 {
     ## Define variables and do checks
     if(!is.matrix(data))

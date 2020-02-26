@@ -775,14 +775,17 @@ test.period   <- c("2015-01-01", "2015-12-31")
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
 human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
-                                    train.period = train.period1, test.period = test.period,
+                                    train.period = train.period1,
+                                    test.period = test.period,
                                     type.metric = "MSE"))
 human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
-                                    train.period = train.period1, test.period = test.period,
+                                    train.period = train.period1,
+                                    test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
 human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
-                                    train.period = train.period1, test.period = test.period,
+                                    train.period = train.period1,
+                                    test.period = test.period,
                                     type.metric = "VaR_exceedance_abserror"))
 
 
@@ -794,14 +797,17 @@ human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
 human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
-                                    train.period = train.period1, test.period = test.period,
+                                    train.period = train.period1,
+                                    test.period = test.period,
                                     type.metric = "MSE"))
 human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
-                                    train.period = train.period1, test.period = test.period,
+                                    train.period = train.period1,
+                                    test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
 human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
-                                    train.period = train.period1, test.period = test.period,
+                                    train.period = train.period1,
+                                    test.period = test.period,
                                     type.metric = "VaR_exceedance_abserror"))
 
 
@@ -816,11 +822,15 @@ human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
 
 ## pca.dim = 3
 human_time(forecast_evaluation_plot(type.series = "US_interest_rates",
-                                    train.period = train.period2, test.period = test.period,
-                                    type.metric = "MSE", pca.dim = 3))
+                                    train.period = train.period2,
+                                    test.period = test.period,
+                                    type.metric = "MSE",
+                                    pca.dim = 3))
 getttime(forecast_evaluation_plot(type.series = "US_interest_rates",
-                                  train.period = train.period2, test.period = test.period,
-                                  type.metric = "variogram_score", p = 0.25, pca.dim = 3))
+                                  train.period = train.period2,
+                                  test.period = test.period,
+                                  type.metric = "variogram_score", p = 0.25,
+                                  pca.dim = 3))
 
 
 ### 1.4 Plots for US interest rate data ########################################
@@ -832,10 +842,14 @@ getttime(forecast_evaluation_plot(type.series = "US_interest_rates",
 
 ## pca.dim = 4
 human_time(forecast_evaluation_plot(type.series = "CA_interest_rates",
-                                    train.period = train.period2, test.period = test.period,
-                                    type.metric = "MSE", pca.dim = 4))
+                                    train.period = train.period2,
+                                    test.period = test.period,
+                                    type.metric = "MSE",
+                                    pca.dim = 4))
 human_time(forecast_evaluation_plot(type.series = "CA_interest_rates",
-                                    train.period = train.period2, test.period = test.period,
-                                    type.metric = "variogram_score", p = 0.25, pca.dim = 4))
+                                    train.period = train.period2,
+                                    test.period = test.period,
+                                    type.metric = "variogram_score", p = 0.25,
+                                    pca.dim = 4))
 
 if(!tf$executing_eagerly()) sess$close()
