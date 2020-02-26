@@ -24,3 +24,31 @@ rm_ext <- function(x)
             sub("\\.(?:[^0-9.][^.]*)?$", "", x.) # see https://stackoverflow.com/questions/57182339/how-to-strip-off-a-file-ending-but-only-when-it-starts-with-a-non-digit-a-rege
         } else file_path_sans_ext(x.)
     }, USE.NAMES = FALSE)
+
+
+### system.time() with human-readable output ###################################
+
+##' @title system.time() with Human-Readable Output
+##' @param expr see ?system.time (expression to be timed)
+##' @param ... additional arguments passed to the underlying system.time()
+##' @return timings in human-readable format
+##' @author Marius Hofert
+human_time <- function(expr, ...) {
+    toHuman <- function(t)
+        if(t < 60) {
+            paste0(t,"s")
+        } else if(t < 3600) {
+            paste0(t / 60,"min")
+        } else {
+            paste0(t / 3600,"h")
+        }
+    res <- sapply(system.time(expr, ...), toHuman)
+    res <- res[1:3]
+    names(res) <- c("user", "system", "elapsed")
+    noquote(res)
+}
+
+
+
+
+

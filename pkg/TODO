@@ -1,13 +1,13 @@
-## Short term
-- Use verbose = 1/2 in all train() etc. in both _paper demos, so that not all
-  epochs are printed
-- Use qrmdata data object names in file names of GMMN_MTS_paper.R
+## Short-term
 - put gettime() in package, rename, remove from both demos
-- record run times of each function call in demo GMMN_MTS_paper.R
-- Fix: Paper citations (2019 on arXiv or the real publication if published)
-- Fix too long lines in help files (line breaks)
 
-## Long term
+## Mid-term
+- Use qrmdata data object names in file names of demo GMMN_MTS_paper.R
+- Record run times of each function call in demo GMMN_MTS_paper.R
+- Run this demo again on Graham
+
+## Long-term
+- Fix: Paper citations (2019 on arXiv or the real publication if published)
 - KL(): If an analytical (differentiable) form exits for K-L divergence
         between copulas, we could propose an interesting extension.
         (Simpler) extensions to consider first: encoder maps to non-diagonal

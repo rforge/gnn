@@ -6,9 +6,9 @@
   Functions for training generative neural networks.
 }
 \usage{
-train(gnn, data, batch.size, nepoch)
+train(gnn, data, batch.size, nepoch, verbose = 2, ...)
 train_once(gnn, data, batch.size, nepoch,
-           file, name = rm_ext(basename(file)), package = NULL)
+           file, name = rm_ext(basename(file)), package = NULL, ...)
 }
 \arguments{
   \item{gnn}{GNN object as created by \code{\link{GMMN_model}()} or
@@ -19,11 +19,17 @@ train_once(gnn, data, batch.size, nepoch,
   \item{nepoch}{number of epochs (one epoch equals one pass through
     the complete training dataset while updating the GNN's parameters
     through stochastic gradient steps).}
+  \item{verbose}{see \code{\link{fit.keras.engine.training.Model}()}.}
   \item{file}{\code{\link{character}} string (with or without ending
     \code{.rda}) specifying the file to save the trained GNN to.}
   \item{name}{name under which the trained GNN is saved in \code{file}.}
   \item{package}{name of the package from which to read the trained GNN;
-    if \code{\link{NULL}} (the default) the current working directory is used.}
+    if \code{\link{NULL}} (the default) the current working directory is
+    used.}
+  \item{\dots}{additional arguments passed to the underlying
+    \code{train()} for \code{train_once()} and \code{fit()}
+    (which is \code{keras:::fit.keras.engine.training.Model()}) for
+    \code{train()}.}
 }
 \value{
   \describe{
