@@ -39,11 +39,7 @@ nepo <- 1000L
 
 ##' @title Retrieve Financial Time Series Data
 ##' @param type.series character string specifying the financial time series to
-##'        retrieve. Choices include:
-##'        - "US_exchange_rates"
-##'        - "GBP_exchange_rates"
-##'        - "US_interest_rates"
-##'        - "CA_interest_rates"
+##'        retrieve. Choices include FX_USD, FX_GBP, ZCB_USD, ZCB_CAD.
 ##' @param train.period character vector of length 2 with entries "YYYY-MM-DD"
 ##'        specifying the start and end date of the training period
 ##' @param test.period same for the test period
@@ -52,16 +48,16 @@ nepo <- 1000L
 ##' @return 2-list containing return series during training and test period
 get_ts <- function(type.series, train.period, test.period, ...)
 {
-    raw <- if (grepl("exchange_rates", type.series) & grepl("US",type.series)) {
+    raw <- if (grepl("FX", type.series) & grepl("USD",type.series)) {
                data("CAD_USD", "GBP_USD", "EUR_USD", "CHF_USD", "JPY_USD")
                cbind(CAD_USD, GBP_USD, EUR_USD, CHF_USD, JPY_USD)
-           } else if (grepl("exchange_rates",type.series) & grepl("GBP",type.series)) {
+           } else if (grepl("FX",type.series) & grepl("GBP",type.series)) {
                data("CAD_GBP", "USD_GBP", "EUR_GBP", "CHF_GBP", "JPY_GBP", "CNY_GBP")
                cbind(CAD_GBP, USD_GBP, EUR_GBP, CHF_GBP, JPY_GBP, CNY_GBP)
-           } else if (grepl("interest_rates",type.series) & grepl("US",type.series)) {
+           } else if (grepl("ZCB",type.series) & grepl("USD",type.series)) {
                data("ZCB_USD")
                ZCB_USD / 100
-           } else if (grepl("interest_rates", type.series) & grepl("CA", type.series)) {
+           } else if (grepl("ZCB", type.series) & grepl("CAD", type.series)) {
                data("ZCB_CAD")
                ZCB_CAD / 100
            } else {
@@ -177,7 +173,7 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
                                     pca.dim = NULL, with.mu = TRUE)
 {
     ## For interest rate data we have a handful of different specifications
-    if (grepl("interest_rates", type.series)) {
+    if (grepl("ZCB", type.series)) {
         X <- get_ts(type.series = type.series, train.period = train.period,
                     test.period = test.period, method = "diff")
         with.mu <- FALSE
@@ -267,7 +263,7 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
 extract_dependence_ts <- function(type.series,train.period,test.period,pca.dim=NULL,with.mu=TRUE)
 {
     ## For interest rate data we have a handful of different specifications
-    if (grepl("interest_rates", type.series)) {
+    if (grepl("ZCB", type.series)) {
         X <- get_ts(type.series = type.series, train.period = train.period,
                     test.period = test.period, method = "diff")
         with.mu <- FALSE
@@ -535,7 +531,7 @@ all_distribution_forecast_ts <- function(type.series, train.period, test.period,
                                          pca.dim = NULL, n.samples = 1000, h = 1)
 {
     ## For interest rate data we have a handful of different specifications
-    if (grepl("interest_rates", type.series)) {
+    if (grepl("ZCB", type.series)) {
         X <- get_ts(type.series = type.series, train.period = train.period,
                     test.period = test.period, method = "diff")
         with.mu <- FALSE
@@ -609,7 +605,7 @@ all_distribution_forecast_ts <- function(type.series, train.period, test.period,
 ##'         evaluation metric for each one-period ahead forecast.
 distribution_forecast_eval <- function(distribution.forecasts, X,
                                        type.metric = c("variogram_score", "MSE",
-                                                       "VaR_exceedance_abserror"),
+                                                       "VaR_exceed_abs_error"),
                                        file, alpha = 0.05, p = 0.5)
 {
     if (file.exists(file)) {
@@ -633,7 +629,7 @@ distribution_forecast_eval <- function(distribution.forecasts, X,
                            mean(sapply(1:n.samples, function(j)
                                dist(rbind(distribution.forecasts[[k]][[i]][j,], X.test[i,]))))))
                },
-               "VaR_exceedance_abserror" = { # portfolio VaR exceedance evaluation metric
+               "VaR_exceed_abs_error" = { # portfolio VaR exceedance evaluation metric
                    ## Aggregate returns
                    sum.test <- rowSums(X.test) # for the test data set
                    sum.forecasts <- lapply(1:length(distribution.forecasts), function(j) # for each path and dependence model
@@ -681,7 +677,7 @@ forecast_evaluation_plot <- function(type.series, train.period, test.period,
                                      pca.dim = NULL, n.samples = 1000, B = 100, p = 0.5)
 {
     ## For interest rate data we have a handful of different specifications
-    if (grepl("interest_rates", type.series)) {
+    if (grepl("ZCB", type.series)) {
         X <- get_ts(type.series = type.series, train.period = train.period,
                     test.period = test.period, method = "diff")
         with.mu <- FALSE
@@ -697,8 +693,8 @@ forecast_evaluation_plot <- function(type.series, train.period, test.period,
 
     ## File name for saving/loading forecast metrics
     dep.dim <- if (!is.null(pca.dim)) pca.dim else ncol(X$test) # dependence dimension (for file name)
-    filename.metrics <- paste0(type.metric, if(grepl("VaR_exceedance_abserror",type.metric)) "_alpha_",
-                               if(grepl("VaR_exceedance_abserror",type.metric)) alpha,
+    filename.metrics <- paste0(type.metric, if(grepl("VaR_exceed_abs_error",type.metric)) "_alpha_",
+                               if(grepl("VaR_exceed_abs_error",type.metric)) alpha,
                                if(grepl("variogram_score",type.metric)) "_p_",
                                if(grepl("variogram_score",type.metric)) p,
                                "_depdim_",dep.dim,"_",type.series,".rds")
@@ -741,7 +737,7 @@ forecast_evaluation_plot <- function(type.series, train.period, test.period,
         "AMSE"
     } else if (grepl("variogram_score", type.metric)) {
         substitute("AVS"^p., list(p. = p))
-    } else if (grepl("VaR_exceedance_abserror", type.metric)) {
+    } else if (grepl("VaR_exceed_abs_error", type.metric)) {
         substitute("VEAR"[alpha.], list(alpha. = alpha))
     }
 
@@ -774,19 +770,19 @@ test.period   <- c("2015-01-01", "2015-12-31")
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
+human_time(forecast_evaluation_plot(type.series = "FX_US",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
-human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
+human_time(forecast_evaluation_plot(type.series = "FX_US",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
-human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
+human_time(forecast_evaluation_plot(type.series = "FX_US",
                                     train.period = train.period1,
                                     test.period = test.period,
-                                    type.metric = "VaR_exceedance_abserror"))
+                                    type.metric = "VaR_exceed_abs_error"))
 
 
 ### 1.2 Plots for GBP exchange rate data #######################################
@@ -796,19 +792,19 @@ human_time(forecast_evaluation_plot(type.series = "US_exchange_rates",
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
+human_time(forecast_evaluation_plot(type.series = "FX_GBP",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
-human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
+human_time(forecast_evaluation_plot(type.series = "FX_GBP",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
-human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
+human_time(forecast_evaluation_plot(type.series = "FX_GBP",
                                     train.period = train.period1,
                                     test.period = test.period,
-                                    type.metric = "VaR_exceedance_abserror"))
+                                    type.metric = "VaR_exceed_abs_error"))
 
 
 ### 1.3 Plots for US interest rate data ########################################
@@ -821,12 +817,12 @@ human_time(forecast_evaluation_plot(type.series = "GBP_exchange_rates",
 ## Obtain results for only MSE, variogram score evaluation metrics
 
 ## pca.dim = 3
-human_time(forecast_evaluation_plot(type.series = "US_interest_rates",
+human_time(forecast_evaluation_plot(type.series = "ZCB_USD",
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 3))
-getttime(forecast_evaluation_plot(type.series = "US_interest_rates",
+getttime(forecast_evaluation_plot(type.series = "ZCB_USD",
                                   train.period = train.period2,
                                   test.period = test.period,
                                   type.metric = "variogram_score", p = 0.25,
@@ -841,12 +837,12 @@ getttime(forecast_evaluation_plot(type.series = "US_interest_rates",
 ##       models projected onto the test dataset
 
 ## pca.dim = 4
-human_time(forecast_evaluation_plot(type.series = "CA_interest_rates",
+human_time(forecast_evaluation_plot(type.series = "ZCB_CAD",
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 4))
-human_time(forecast_evaluation_plot(type.series = "CA_interest_rates",
+human_time(forecast_evaluation_plot(type.series = "ZCB_CAD",
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "variogram_score", p = 0.25,

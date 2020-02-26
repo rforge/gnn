@@ -1,6 +1,4 @@
 ## Short-term
-- Use qrmdata data object names in file names of demo GMMN_MTS_paper.R
-
 - Record run times of each function call in demo GMMN_MTS_paper.R
 - Run this demo again on Graham
 
