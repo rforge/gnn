@@ -138,7 +138,7 @@ dependence_fit <- function(U,GMMN.dim, file)
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "t_ex" = {
-                       fitCopula(tCopula(dim = d), data = U,
+                       fitCopula(tCopula(dim = d),
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "t_un" = {
@@ -146,7 +146,7 @@ dependence_fit <- function(U,GMMN.dim, file)
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "gumbel" = {
-                       fitCopula(gumbelCopula(dim = d), data = U,
+                       fitCopula(gumbelCopula(dim = d),
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "GMMN" = {
