@@ -48,13 +48,13 @@ nepo <- 1000L
 ##' @return 2-list containing return series during training and test period
 get_ts <- function(type.series, train.period, test.period, ...)
 {
-    raw <- if (grepl("FX", type.series) & grepl("USD",type.series)) {
+    raw <- if (grepl("FX", type.series) & grepl("USD", type.series)) {
                data("CAD_USD", "GBP_USD", "EUR_USD", "CHF_USD", "JPY_USD")
                cbind(CAD_USD, GBP_USD, EUR_USD, CHF_USD, JPY_USD)
-           } else if (grepl("FX",type.series) & grepl("GBP",type.series)) {
+           } else if (grepl("FX", type.series) & grepl("GBP", type.series)) {
                data("CAD_GBP", "USD_GBP", "EUR_GBP", "CHF_GBP", "JPY_GBP", "CNY_GBP")
                cbind(CAD_GBP, USD_GBP, EUR_GBP, CHF_GBP, JPY_GBP, CNY_GBP)
-           } else if (grepl("ZCB",type.series) & grepl("USD",type.series)) {
+           } else if (grepl("ZCB", type.series) & grepl("USD", type.series)) {
                data("ZCB_USD")
                ZCB_USD / 100
            } else if (grepl("ZCB", type.series) & grepl("CAD", type.series)) {
@@ -104,7 +104,7 @@ marginal_ts_fit <- function(data, file, garch.order = c(1,1), arma.order = c(1,1
                                     distribution.model = innov.model)),
                     ncol(data))
         fitted.models <- fit_ARMA_GARCH(data, ugarchspec.list = spec, solver = 'hybrid')
-        saveRDS(fitted.models,file=file)
+        saveRDS(fitted.models, file = file)
     }
     fitted.models
 }
@@ -214,13 +214,13 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
     nbat <- ntrn
 
     ## 4) Fitting the four copula models
-    file.gumbel  <- paste0("fitted_","gumbel", "_dim_",dim.in.out,
+    file.gumbel  <- paste0("cop_","gumbel", "_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
-    file.norm.ex <- paste0("fitted_","norm_ex","_dim_",dim.in.out,
+    file.norm.ex <- paste0("cop_","norm_ex","_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
-    file.t.ex    <- paste0("fitted_","t_ex",   "_dim_",dim.in.out,
+    file.t.ex    <- paste0("cop","t_ex",   "_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
-    file.t.un    <- paste0("fitted_","t_un",   "_dim_",dim.in.out,
+    file.t.un    <- paste0("cop_","t_un",   "_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
     model.gumbel  <- dependence_fit(U = U, file = file.gumbel)
     model.norm.ex <- dependence_fit(U = U, file = file.norm.ex)
@@ -770,16 +770,16 @@ test.period   <- c("2015-01-01", "2015-12-31")
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "FX_US",
+human_time(forecast_evaluation_plot(type.series = "FX_USD",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
-human_time(forecast_evaluation_plot(type.series = "FX_US",
+human_time(forecast_evaluation_plot(type.series = "FX_USD",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
-human_time(forecast_evaluation_plot(type.series = "FX_US",
+human_time(forecast_evaluation_plot(type.series = "FX_USD",
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "VaR_exceed_abs_error"))
@@ -822,11 +822,11 @@ human_time(forecast_evaluation_plot(type.series = "ZCB_USD",
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 3))
-getttime(forecast_evaluation_plot(type.series = "ZCB_USD",
-                                  train.period = train.period2,
-                                  test.period = test.period,
-                                  type.metric = "variogram_score", p = 0.25,
-                                  pca.dim = 3))
+human_time(forecast_evaluation_plot(type.series = "ZCB_USD",
+                                    train.period = train.period2,
+                                    test.period = test.period,
+                                    type.metric = "variogram_score", p = 0.25,
+                                    pca.dim = 3))
 
 
 ### 1.4 Plots for US interest rate data ########################################
