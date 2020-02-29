@@ -30,17 +30,18 @@ rm_ext <- function(x)
 
 ##' @title system.time() with Human-Readable Output
 ##' @param expr see ?system.time (expression to be timed)
+##' @param digits see ?round
 ##' @param ... additional arguments passed to the underlying system.time()
 ##' @return timings in human-readable format
 ##' @author Marius Hofert
-human_time <- function(expr, ...) {
+human_time <- function(expr, digits = 2, ...) {
     toHuman <- function(t)
         if(t < 60) {
-            paste0(t,"s")
+            paste0(round(t, digits = digits),"s")
         } else if(t < 3600) {
-            paste0(t / 60,"min")
+            paste0(round(t/60, digits = digits),"min")
         } else {
-            paste0(t / 3600,"h")
+            paste0(round(t/3600, digits = digits),"h")
         }
     res <- sapply(system.time(expr, ...), toHuman)
     res <- res[1:3]
