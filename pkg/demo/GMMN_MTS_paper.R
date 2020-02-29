@@ -134,16 +134,20 @@ dependence_fit <- function(U,GMMN.dim, file)
         fitted.model <-
             switch(dep.types[ind],
                    "norm_ex" = {
-                       fitCopula(normalCopula(dim = d), data = U, method = "mpl")
+                       fitCopula(normalCopula(dim = d),
+                                 data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "t_ex" = {
-                       fitCopula(tCopula(dim = d), data = U, method = "mpl")
+                       fitCopula(tCopula(dim = d), data = U,
+                                 data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "t_un" = {
-                       fitCopula(tCopula(dim = d, dispstr = "un"), data = U, method = "mpl")
+                       fitCopula(tCopula(dim = d, dispstr = "un"),
+                                 data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "gumbel" = {
-                       fitCopula(gumbelCopula(dim = d), data = U, method = "mpl")
+                       fitCopula(gumbelCopula(dim = d), data = U,
+                                 data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "GMMN" = {
                        train_once(GMMN_model(GMMN.dim), data = U,
@@ -218,7 +222,7 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
     file.norm.ex <- paste0("cop_","norm_ex","_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
-    file.t.ex    <- paste0("cop","t_ex",   "_dim_",dim.in.out,
+    file.t.ex    <- paste0("cop_","t_ex",   "_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
     file.t.un    <- paste0("cop_","t_un",   "_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
