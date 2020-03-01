@@ -1,7 +1,8 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Code to reproduce the results of Hofert, Prasad, Zhu ("Multivariate time
-## series modeling with generative neural networks"); it runs in about 4h or so.
+## series modeling with generative neural networks"); it runs in about 7h on
+## a computer cluster.
 
 
 ### Setup ######################################################################
@@ -841,12 +842,12 @@ human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 8min
 ## models projected onto the test dataset
 
 ## pca.dim = 4
-human_time(forecast_evaluation_plot(type.series = "ZCB_CAD",
+human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 2.4h
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 4))
-human_time(forecast_evaluation_plot(type.series = "ZCB_CAD",
+human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 44min
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "variogram_score", p = 0.25,
