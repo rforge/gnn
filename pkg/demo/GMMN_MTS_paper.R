@@ -219,13 +219,13 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
 
     ## 4) Fitting the four copula models
     file.gumbel  <- paste0("cop_","gumbel", "_dim_",dim.in.out,
-                           if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                           if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.norm.ex <- paste0("cop_","norm_ex","_dim_",dim.in.out,
-                           if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                           if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.t.ex    <- paste0("cop_","t_ex",   "_dim_",dim.in.out,
-                           if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                           if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.t.un    <- paste0("cop_","t_un",   "_dim_",dim.in.out,
-                           if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                           if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     model.gumbel  <- dependence_fit(U = U, file = file.gumbel)
     model.norm.ex <- dependence_fit(U = U, file = file.norm.ex)
     model.t.ex    <- dependence_fit(U = U, file = file.t.ex)
@@ -233,11 +233,11 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
 
     ## 5) Fitting the three GMMN models
     file.G1 <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid1,"_",dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
-                      "_nepo_",nepo, if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                      "_nepo_",nepo, if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.G2 <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid2,"_",dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
-                      "_nepo_",nepo, if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                      "_nepo_",nepo, if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.G3 <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid3,"_",dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
-                      "_nepo_",nepo, if(!is.null(pca.dim)) "_tpca","_",type.series,".rda")
+                      "_nepo_",nepo, if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     model.G1 <- dependence_fit(U = U, GMMN.dim = c(dim.in.out, dim.hid1, dim.in.out), file = file.G1)
     model.G2 <- dependence_fit(U = U, GMMN.dim = c(dim.in.out, dim.hid2, dim.in.out), file = file.G2)
     model.G3 <- dependence_fit(U = U, GMMN.dim = c(dim.in.out, dim.hid3, dim.in.out), file = file.G3)
@@ -765,8 +765,8 @@ if(!tf$executing_eagerly())
 
 ### 1.1 Plots for US exchange rate data ########################################
 
-## 1.1.1 Results where MMD is computed using fitted ARMA-GARCH models and PCA
-##       models projected onto the test dataset
+## Results where MMD is computed using fitted ARMA-GARCH models and PCA
+## models projected onto the test dataset
 
 train.period1 <- c("2000-01-01", "2014-12-31")
 train.period2 <- c("1995-01-01", "2014-12-31")
@@ -774,16 +774,16 @@ test.period   <- c("2015-01-01", "2015-12-31")
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "FX_USD",
+human_time(forecast_evaluation_plot(type.series = "FX_USD", # ~= 34min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
-human_time(forecast_evaluation_plot(type.series = "FX_USD",
+human_time(forecast_evaluation_plot(type.series = "FX_USD", # ~= 3min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
-human_time(forecast_evaluation_plot(type.series = "FX_USD",
+human_time(forecast_evaluation_plot(type.series = "FX_USD", # ~= 3min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "VaR_exceed_abs_error"))
@@ -791,21 +791,21 @@ human_time(forecast_evaluation_plot(type.series = "FX_USD",
 
 ### 1.2 Plots for GBP exchange rate data #######################################
 
-## 1.2.1 Results where MMD is computed using fitted ARMA-GARCH models and PCA
-##       models projected onto the test dataset
+## Results where MMD is computed using fitted ARMA-GARCH models and PCA
+## models projected onto the test dataset
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "FX_GBP",
+human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 1.2h
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
-human_time(forecast_evaluation_plot(type.series = "FX_GBP",
+human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 5min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "variogram_score",
                                     p = 0.25))
-human_time(forecast_evaluation_plot(type.series = "FX_GBP",
+human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 4min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "VaR_exceed_abs_error"))
@@ -815,18 +815,18 @@ human_time(forecast_evaluation_plot(type.series = "FX_GBP",
 
 ## For this data we fix the PCA dimension to be 3 (originally 30).
 
-## 1.3.1 Results where MMD is computed using fitted ARMA-GARCH models and PCA
-##       models projected onto the test dataset
+## Results where MMD is computed using fitted ARMA-GARCH models and PCA
+## models projected onto the test dataset
 
 ## Obtain results for only MSE, variogram score evaluation metrics
 
 ## pca.dim = 3
-human_time(forecast_evaluation_plot(type.series = "ZCB_USD",
+human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 1.8h
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 3))
-human_time(forecast_evaluation_plot(type.series = "ZCB_USD",
+human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 8min
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "variogram_score", p = 0.25,
@@ -837,8 +837,8 @@ human_time(forecast_evaluation_plot(type.series = "ZCB_USD",
 
 ## For this data we experiment with PCA dimension equal to 4 (originally 120).
 
-## 1.4.1 Results where MMD is computed using fitted ARMA-GARCH models and PCA
-##       models projected onto the test dataset
+## Results where MMD is computed using fitted ARMA-GARCH models and PCA
+## models projected onto the test dataset
 
 ## pca.dim = 4
 human_time(forecast_evaluation_plot(type.series = "ZCB_CAD",
