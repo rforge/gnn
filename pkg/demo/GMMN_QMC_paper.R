@@ -1,7 +1,10 @@
 ## By Marius Hofert and Avinash Prasad
 
-## Code to reproduce the results of Hofert, Prasad, Zhu ("Quasi-Monte Carlo for
-## multivariate distributions via generative neural networks") and more.
+## Reproducing R script for Hofert, Prasad, Zhu ("Quasi-Monte Carlo for
+## multivariate distributions via generative neural networks"). The NNs were
+## trained on an NVIDIA Tesla P100 GPU. Timings below are from a 13" MacBook
+## Pro (2018) without training. With pre-trained NNs, the code runs in a bit
+## less than 11h (via R CMD BATCH GMMN_QMC_paper.R, for example).
 
 
 ### Setup ######################################################################
@@ -712,11 +715,6 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 
 ### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
-
-## Timings are on a 13" MacBook Pro (2018) without training. Overall, with
-## pre-trained NNs, this runs in a bit less than 11h (via R CMD BATCH
-## GMMN_QMC_paper.R, for example).
-
 
 ### 2.1 Main part of the paper #################################################
 
