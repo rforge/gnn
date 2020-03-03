@@ -854,3 +854,6 @@ human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 44min
                                     pca.dim = 4))
 
 if(!tf$executing_eagerly()) sess$close()
+
+
+sessionInfo()

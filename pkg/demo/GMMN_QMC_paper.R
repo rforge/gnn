@@ -820,3 +820,6 @@ human_time(appendix(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_
                     model = quote("(2,3)-nested Gumbel"), randomize = "digital.shift"))
 human_time(appendix(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 9.5m
                     model = quote("(5,5)-nested Gumbel"), randomize = "digital.shift"))
+
+
+sessionInfo()
