@@ -5,13 +5,11 @@
   \code{\link{system.time}()} with human-readable output.
 }
 \usage{
-human_time(expr, digits = 2, ...)
+human_time(..., digits = 2)
 }
 \arguments{
-  \item{expr}{expression to measure run time of; see \code{\link{system.time}()}.}
+  \item{\dots}{arguments passed to the underlying \code{\link{system.time}()}.}
   \item{digits}{for rounding the output; see \code{\link{round}()}.}
-  \item{\dots}{additional arguments passed to the underlying
-    \code{\link{system.time}()}.}
 }
 \value{
   Timings with units indicated.
