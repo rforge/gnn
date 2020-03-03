@@ -35,21 +35,21 @@ rm_ext <- function(x)
 ##' @return timings in human-readable format
 ##' @author Marius Hofert
 human_time <- function(expr, digits = 2, ...) {
-    toHuman <- function(t)
-        if(t < 60) {
-            paste0(round(t, digits = digits),"s")
+    toHuman <- function(tm) {
+        if(!is.numeric(tm))
+            stop("'tm' not numeric but ",class(tm))
+        if(tm < 60) {
+            paste0(round(tm, digits = digits),"s")
         } else if(t < 3600) {
-            paste0(round(t/60, digits = digits),"min")
+            paste0(round(tm/60, digits = digits),"min")
         } else {
-            paste0(round(t/3600, digits = digits),"h")
+            paste0(round(tm/3600, digits = digits),"h")
         }
+    }
     res <- sapply(system.time(expr, ...), toHuman)
     res <- res[1:3]
     names(res) <- c("user", "system", "elapsed")
     noquote(res)
 }
-
-
-
 
 
