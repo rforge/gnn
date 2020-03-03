@@ -1,5 +1,5 @@
 Package: gnn
-Version: 0.0-3
+Version: 0.0-2
 Title: Generative Neural Networks
 Description: Tools to set up, train, store, load, investigate and analyze
              generative neural networks. In particular, functionality for
