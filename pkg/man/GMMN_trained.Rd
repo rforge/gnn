@@ -25,10 +25,22 @@
 \alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75}
 \alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75}
 \alias{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}
+\alias{GMMN_dim_3_100_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}
+\alias{GMMN_dim_3_300_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}
+\alias{GMMN_dim_3_600_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}
+\alias{GMMN_dim_4_100_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}
+\alias{GMMN_dim_4_300_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}
+\alias{GMMN_dim_4_600_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}
+\alias{GMMN_dim_5_100_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}
+\alias{GMMN_dim_5_300_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}
+\alias{GMMN_dim_5_600_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}
+\alias{GMMN_dim_6_100_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}
+\alias{GMMN_dim_6_300_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}
+\alias{GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}
 \title{Trained Generative Moment Matching Networks}
 \description{
   Trained generative moment matching networks (GMMNs); see also
-  the demo \code{GMMN_QMC} or the vignette \code{GMMN_QMC}.
+  the demos \code{GMMN_QMC_paper}, \code{GMMN_QMC_MWE} and \code{GMMN_MTS_paper}.
 }
 \usage{
 % Trained neural networks
@@ -57,6 +69,18 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_G_tau_0.5")
 data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NC55_tau_0.25_0.5_0.75")
 data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_NG55_tau_0.25_0.5_0.75")
 data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
+data("GMMN_dim_3_100_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD")
+data("GMMN_dim_3_300_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD")
+data("GMMN_dim_3_600_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD")
+data("GMMN_dim_4_100_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD")
+data("GMMN_dim_4_300_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD")
+data("GMMN_dim_4_600_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD")
+data("GMMN_dim_5_100_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD")
+data("GMMN_dim_5_300_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD")
+data("GMMN_dim_5_600_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD")
+data("GMMN_dim_6_100_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
+data("GMMN_dim_6_300_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
+data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
 }
 \format{
   % Trained neural networks
@@ -111,7 +135,7 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
       copula (with parameter chosen such that Kendall's tau equals 0.5)
       and a rotated (by 90 degree) $t$ copula (with 4 degrees of freedom
       and correlation parameter chosen such that Kendall's tau equals
-      0.5); see \code{vignette("GMMN_QRNG", package = "gnn")}.
+      0.5); see \code{demo("GMMN_QMC_MWE", package = "gnn")}.
     }
     \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_G_tau_0.5_rot90_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
@@ -211,7 +235,7 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
       300 epochs) from a five-dimensional nested Gumbel copula
       (with sector dimensions 2 and 3, corresponding Kendall's tau 0.5
       and 0.75, and Kendall's tau 0.25 between the two sectors);
-      see \code{vignette("GMMN_QRNG", package = "gnn")}.
+      see \code{demo("GMMN_QMC_MWE", package = "gnn")}.
     }
     \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
@@ -219,7 +243,7 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a five-dimensional $t$ copula (with 4 degrees of freedom
       and equi-correlation parameter chosen such that Kendall's tau equals
-      0.5); see \code{vignette("GMMN_QRNG", package = "gnn")}.
+      0.5); see \code{demo("GMMN_QMC_MWE", package = "gnn")}.
     }
     \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
@@ -259,6 +283,103 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
       and equi-correlation parameter chosen such that Kendall's tau equals
       0.5).
     }
+    \item{GMMN_dim_3_100_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 3-dimensional, the single hidden layer is
+      100-dimensional) trained on 4996 pseudo-observations (with batch size 4996 and
+      1000 epochs) constructed using the top 3 principal components of the ARMA-GARCH 
+      standardized residuals of a 30-dimensional US ZCB yield curve series from 
+      1995-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_3_300_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 3-dimensional, the single hidden layer is
+      300-dimensional) trained on 4996 pseudo-observations (with batch size 4996 and
+      1000 epochs) constructed using the top 3 principal components of the ARMA-GARCH 
+      standardized residuals of a 30-dimensional US ZCB yield curve series from 
+      1995-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_3_600_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 3-dimensional, the single hidden layer is
+      600-dimensional) trained on 4996 pseudo-observations (with batch size 4996 and
+      1000 epochs) constructed using the top 3 principal components of the ARMA-GARCH 
+      standardized residuals of a 30-dimensional US ZCB yield curve series from 
+      1995-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_4_100_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 4-dimensional, the single hidden layer is
+      100-dimensional) trained on 4947 pseudo-observations (with batch size 4947 and
+      1000 epochs) constructed using the top 4 principal components of the ARMA-GARCH 
+      standardized residuals of a 120-dimensional CAD ZCB yield curve series from 
+      1995-01-01 to 2014-12-31.
+    }
+     \item{GMMN_dim_4_300_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 4-dimensional, the single hidden layer is
+      300-dimensional) trained on 4947 pseudo-observations (with batch size 4947 and
+      1000 epochs) constructed using the top 4 principal components of the ARMA-GARCH 
+      standardized residuals of a 120-dimensional CAD ZCB yield curve series from 
+      1995-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_4_600_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 4-dimensional, the single hidden layer is
+      600-dimensional) trained on 4947 pseudo-observations (with batch size 4947 and
+      1000 epochs) constructed using the top 4 principal components of the ARMA-GARCH 
+      standardized residuals of a 120-dimensional CAD ZCB yield curve series from 
+      1995-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_5_100_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 5-dimensional, the single hidden layer is
+      100-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
+      1000 epochs) constructed using the ARMA-GARCH 
+      standardized residuals of a 5-dimensional USD FX return series from 
+      2000-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_5_300_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 5-dimensional, the single hidden layer is
+      300-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
+      1000 epochs) constructed using the ARMA-GARCH 
+      standardized residuals of a 5-dimensional USD FX return series from 
+      2000-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_5_600_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 5-dimensional, the single hidden layer is
+      600-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
+      1000 epochs) constructed using the ARMA-GARCH 
+      standardized residuals of a 5-dimensional USD FX return series from 
+      2000-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_6_100_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 6-dimensional, the single hidden layer is
+      100-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
+      1000 epochs) constructed using the ARMA-GARCH 
+      standardized residuals of a 6-dimensional GBP FX return series from 
+      2000-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_6_300_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 6-dimensional, the single hidden layer is
+      300-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
+      1000 epochs) constructed using the ARMA-GARCH 
+      standardized residuals of a 6-dimensional GBP FX return series from 
+      2000-01-01 to 2014-12-31.
+    }
+    \item{GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}{
+      \code{\link{raw}} \R object representing a GMMN (input and output
+      layer are 6-dimensional, the single hidden layer is
+      600-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
+      1000 epochs) constructed using the ARMA-GARCH 
+      standardized residuals of a 6-dimensional GBP FX return series from 
+      2000-01-01 to 2014-12-31.
+    }
+    
   }
 }
 \source{
@@ -269,6 +390,9 @@ data("GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
   Hofert, M., Prasad, A. and Zhu, M. (2018).
   Quasi-Monte Carlo for multivariate distributions via generative neural networks.
   (See https://arxiv.org/abs/1811.00683 for an early version)
+  Hofert, M. Prasad, A. and Zhu, M. (2019).
+  Multivariate time-series modeling with generative neural networks
+  (See arXiv preprint arXiv:2002.10645 for an early version)
 %% \emph{myjournal} \bold{myversion}(mynumber), --.
 }
 \seealso{

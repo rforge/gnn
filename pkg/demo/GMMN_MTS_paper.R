@@ -21,6 +21,8 @@ library(qrmdata) # for required datasets
 if(packageVersion("qrmdata") < "2019.12.3.1")
     stop('You must update "qrmdata" via install.packages("qrmdata")')
 library(rugarch) # for GARCH fit
+if(packageVersion("rugarch") < "1.4.2")
+  stop('You must update "rugarch" via install.packages("rugarch")')
 library(scoringRules) # for vs_sample()
 
 ## Colors
