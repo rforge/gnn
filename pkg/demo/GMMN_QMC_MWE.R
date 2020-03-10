@@ -38,7 +38,9 @@
 
 ## Packages
 library(keras) # interface to Keras (high-level neural network API)
-library(tensorflow) # interface to TensorFlow (numerical computation with tensors)
+library(tensorflow) # note: access of functions via '::' fails for this package
+## => would allow to set the seed with use_session_with_seed(271), but then no GPU or CPU parallelism
+use_virtualenv(Sys.getenv('VIRTUAL_ENV')) # tensorflow command to access the activated Python environment
 if(packageVersion("qrng") < "0.0-7")
     stop('Consider updating via install.packages("qrng", repos = "http://R-Forge.R-project.org")')
 library(qrng) # for sobol()

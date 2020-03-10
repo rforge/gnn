@@ -9,7 +9,9 @@
 
 ## Packages
 library(keras) # interface to Keras (high-level neural network API)
-library(tensorflow) # interface to TensorFlow (numerical computation with tensors)
+library(tensorflow) # note: access of functions via '::' fails for this package
+## => would allow to set the seed with use_session_with_seed(271), but then no GPU or CPU parallelism
+use_virtualenv(Sys.getenv('VIRTUAL_ENV')) # tensorflow command to access the activated Python environment
 library(qrmtools) # for ES_t(), ARMA_GARCH_fit
 if(packageVersion("copula") < "0.999.19")
     stop('You must update "copula" via install.packages("copula", repos = "http://R-Forge.R-project.org")')
@@ -394,7 +396,7 @@ MMD_metric <- function(type.series, train.period, test.period, with.mu = TRUE,
                            gen.G1         = models$dependence$model.G1[["model"]],
                            gen.G2         = models$dependence$model.G2[["model"]],
                            gen.G3         = models$dependence$model.G3[["model"]])
-        set.seed(271) # for reproducibility
+        set.seed(271) # for reproducibility and to obtain common random numbers
         mmd.vals <- replicate(B, MMD_eval(generators = generators, U.test = U.test))
         saveRDS(mmd.vals, file = file)
     }
@@ -563,7 +565,7 @@ all_distribution_forecast_ts <- function(type.series, train.period, test.period,
     ## and remove the last return in the test dataset (will be the
     ## initial value for the time point outside of the test period).
     initial.ts<-rbind(as.numeric(tail(X$train,n=1)),X$test[-c(n.test),])
-    set.seed(271) # set seed for reproducibility
+    set.seed(271) # for reproducibility and to obtain common random numbers
     distr.pred.models <- lapply(1:length(dep.models), function(i) {
         ## Determine type of dependence
         type.dep <- if (grepl("indep", names(dep.models)[i])) {
