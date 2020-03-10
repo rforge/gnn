@@ -29,7 +29,7 @@ library(latticeExtra) # for contourplot3
 library(parallel) # for parallel computing
 
 ## Global training parameters
-package <- "gnn" # uses pre-trained NNs from 'gnn' (recommended); for retraining, use package = NULL
+package <- NULL # use "gnn" to utilize pre-trained NNs from gnn
 dim.hid <- 300L # dimension of the (single) hidden layer
 ntrn <- 60000L # training dataset size (number of pseudo-random numbers from the copula)
 nbat <- 5000L # batch size for training (number of samples per stochastic gradient step)

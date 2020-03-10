@@ -35,7 +35,7 @@ pal <- colorRampPalette(c("#000000",
 cols <- pal(8) # get colors from that palette
 
 ## Global training parameters
-package <- NULL
+package <- NULL # use "gnn" to utilize pre-trained NNs from gnn
 nepo <- 1000L
 
 
