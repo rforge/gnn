@@ -1,5 +1,4 @@
 \name{GMMN_trained}
-% Trained neural networks
 \alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.25}
 \alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}
 \alias{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_C_tau_0.75}
@@ -287,99 +286,106 @@ data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 3-dimensional, the single hidden layer is
       100-dimensional) trained on 4996 pseudo-observations (with batch size 4996 and
-      1000 epochs) constructed using the top 3 principal components of the ARMA-GARCH 
-      standardized residuals of a 30-dimensional US ZCB yield curve series from 
+      1000 epochs) constructed using the first 3 principal components of
+      the standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 30-dimensional US ZCB yield curve series from
       1995-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_3_300_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 3-dimensional, the single hidden layer is
       300-dimensional) trained on 4996 pseudo-observations (with batch size 4996 and
-      1000 epochs) constructed using the top 3 principal components of the ARMA-GARCH 
-      standardized residuals of a 30-dimensional US ZCB yield curve series from 
+      1000 epochs) constructed using the first 3 principal components of
+      the standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 30-dimensional US ZCB yield curve series from
       1995-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_3_600_3_ntrn_4996_nbat_4996_nepo_1000_PCA_ZCB_USD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 3-dimensional, the single hidden layer is
       600-dimensional) trained on 4996 pseudo-observations (with batch size 4996 and
-      1000 epochs) constructed using the top 3 principal components of the ARMA-GARCH 
-      standardized residuals of a 30-dimensional US ZCB yield curve series from 
+      1000 epochs) constructed using the first 3 principal components of
+      the standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 30-dimensional US ZCB yield curve series from
       1995-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_4_100_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 4-dimensional, the single hidden layer is
       100-dimensional) trained on 4947 pseudo-observations (with batch size 4947 and
-      1000 epochs) constructed using the top 4 principal components of the ARMA-GARCH 
-      standardized residuals of a 120-dimensional CAD ZCB yield curve series from 
+      1000 epochs) constructed using the three 4 principal components of
+      the standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 120-dimensional CAD ZCB yield curve series from
       1995-01-01 to 2014-12-31.
     }
      \item{GMMN_dim_4_300_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 4-dimensional, the single hidden layer is
       300-dimensional) trained on 4947 pseudo-observations (with batch size 4947 and
-      1000 epochs) constructed using the top 4 principal components of the ARMA-GARCH 
-      standardized residuals of a 120-dimensional CAD ZCB yield curve series from 
+      1000 epochs) constructed using the first 4 principal components of
+      the standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 120-dimensional CAD ZCB yield curve series from
       1995-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_4_600_4_ntrn_4947_nbat_4947_nepo_1000_PCA_ZCB_CAD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 4-dimensional, the single hidden layer is
       600-dimensional) trained on 4947 pseudo-observations (with batch size 4947 and
-      1000 epochs) constructed using the top 4 principal components of the ARMA-GARCH 
-      standardized residuals of a 120-dimensional CAD ZCB yield curve series from 
+      1000 epochs) constructed using the first 4 principal components of
+      the standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 120-dimensional CAD ZCB yield curve series from
       1995-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_5_100_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 5-dimensional, the single hidden layer is
       100-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
-      1000 epochs) constructed using the ARMA-GARCH 
-      standardized residuals of a 5-dimensional USD FX return series from 
-      2000-01-01 to 2014-12-31.
+      1000 epochs) constructed using the
+      standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 5-dimensional USD FX return series from 2000-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_5_300_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 5-dimensional, the single hidden layer is
       300-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
-      1000 epochs) constructed using the ARMA-GARCH 
-      standardized residuals of a 5-dimensional USD FX return series from 
+      1000 epochs) constructed using the standardized residuals after
+      de-ARMA(1,1)-GARCH(1,1)-ing a 5-dimensional USD FX return series from
       2000-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_5_600_5_ntrn_5478_nbat_5478_nepo_1000_FX_USD}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 5-dimensional, the single hidden layer is
       600-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
-      1000 epochs) constructed using the ARMA-GARCH 
-      standardized residuals of a 5-dimensional USD FX return series from 
+      1000 epochs) constructed using the
+      standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 5-dimensional USD FX return series from
       2000-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_6_100_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 6-dimensional, the single hidden layer is
       100-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
-      1000 epochs) constructed using the ARMA-GARCH 
-      standardized residuals of a 6-dimensional GBP FX return series from 
-      2000-01-01 to 2014-12-31.
+      1000 epochs) constructed using the
+      standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 6-dimensional GBP FX return series from 2000-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_6_300_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 6-dimensional, the single hidden layer is
       300-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
-      1000 epochs) constructed using the ARMA-GARCH 
-      standardized residuals of a 6-dimensional GBP FX return series from 
-      2000-01-01 to 2014-12-31.
+      1000 epochs) constructed using the
+      standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 6-dimensional GBP FX return series from 2000-01-01 to 2014-12-31.
     }
     \item{GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP}{
       \code{\link{raw}} \R object representing a GMMN (input and output
       layer are 6-dimensional, the single hidden layer is
       600-dimensional) trained on 5478 pseudo-observations (with batch size 5478 and
-      1000 epochs) constructed using the ARMA-GARCH 
-      standardized residuals of a 6-dimensional GBP FX return series from 
-      2000-01-01 to 2014-12-31.
+      1000 epochs) constructed using the
+      standardized residuals after de-ARMA(1,1)-GARCH(1,1)-ing
+      a 6-dimensional GBP FX return series from 2000-01-01 to 2014-12-31.
     }
-    
+
   }
 }
 \source{
