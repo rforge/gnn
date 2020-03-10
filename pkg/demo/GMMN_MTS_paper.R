@@ -2,7 +2,7 @@
 
 ## Reproducing R script for Hofert, Prasad, Zhu ("Multivariate time
 ## series modeling with generative neural networks"). The code was run on an
-## NVIDIA Tesla P100 GPU in about 7h.
+## NVIDIA Tesla P100 GPU in about 2h.
 
 
 ### Setup ######################################################################
@@ -780,7 +780,7 @@ test.period   <- c("2015-01-01", "2015-12-31")
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "FX_USD", # ~= 34min
+human_time(forecast_evaluation_plot(type.series = "FX_USD", # ~= 14min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
@@ -802,11 +802,11 @@ human_time(forecast_evaluation_plot(type.series = "FX_USD", # ~= 3min
 
 ## Results for all MSE, variogram score and VaR exceedance absolute error
 ## (with alpha = 0.05) evaluation metrics
-human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 1.2h
+human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 16min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "MSE"))
-human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 5min
+human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 4min
                                     train.period = train.period1,
                                     test.period = test.period,
                                     type.metric = "variogram_score",
@@ -827,12 +827,12 @@ human_time(forecast_evaluation_plot(type.series = "FX_GBP", # ~= 4min
 ## Obtain results for only MSE, variogram score evaluation metrics
 
 ## pca.dim = 3
-human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 1.8h
+human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 12min
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 3))
-human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 8min
+human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 7min
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "variogram_score", p = 0.25,
@@ -847,12 +847,12 @@ human_time(forecast_evaluation_plot(type.series = "ZCB_USD", # ~= 8min
 ## models projected onto the test dataset
 
 ## pca.dim = 4
-human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 2.4h
+human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 16min
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "MSE",
                                     pca.dim = 4))
-human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 44min
+human_time(forecast_evaluation_plot(type.series = "ZCB_CAD", # ~= 43min
                                     train.period = train.period2,
                                     test.period = test.period,
                                     type.metric = "variogram_score", p = 0.25,
