@@ -13,6 +13,7 @@
 library(keras) # interface to Keras (high-level neural network API)
 library(tensorflow) # note: access of functions via '::' fails for this package
 ## => would allow to set the seed with use_session_with_seed(271), but then no GPU or CPU parallelism
+tf_version() # dummy call to activate connection to TensorFlow (any first call will fail on the cluster; here: NULL)
 use_virtualenv(Sys.getenv('VIRTUAL_ENV')) # tensorflow command to access the activated Python environment
 if(packageVersion("qrmtools") < "0.0.11")
     stop('Consider updating via install.packages("qrmtools", repos = "http://R-Forge.R-project.org")')
