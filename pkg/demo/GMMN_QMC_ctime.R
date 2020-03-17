@@ -175,5 +175,5 @@ computing_times(copula=C.cop.d5,name= paste0("C","_tau_",tau),
 ## Copulas from Section 1.3 above
 computing_times(copula=t.cop.d10,name = paste0("t",nu,"_tau_",tau),
                 file=paste0("computing_times","_dim_",d..,"_t",nu,"_tau_",tau,".rds"))
-computing_times(copula=C.cop.d5,name= paste0("C","_tau_",tau),
+computing_times(copula=C.cop.d10,name= paste0("C","_tau_",tau),
                 file=paste0("computing_times","_dim_",d..,"_C","_tau_",tau,".rds"))
