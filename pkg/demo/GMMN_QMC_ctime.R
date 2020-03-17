@@ -102,7 +102,7 @@ sampling_times <- function(copula,GMMNmod){
 ##' containing (average) computing times for each of the four sampling procedures 
 computing_times <- function(copula,name,file){
   if(file.exists(file)){
-    ctimes <- readRDS(file)  
+    comp.times <- readRDS(file)  
   }
   else {
   ## Perform GMMN training and obtain trained GMMN along with training time  
@@ -118,7 +118,7 @@ computing_times <- function(copula,name,file){
 
 ### 1 Copulas we use ###########################################################
 
-tau <- 0.5
+taus <- c(0.25, 0.5, 0.75) # Kendall's tau considered
 
 ### 1.1 d = 2 ##################################################################
 
@@ -126,54 +126,104 @@ d <- 2 # copula dimension
 
 ## t copula
 nu <- 4 # degrees of freedom of the t copulas
-th.t <- iTau(tCopula(), tau = tau) # parameter
+th.t <- iTau(tCopula(), tau = taus[2]) # parameter
 t.cop.d2 <- tCopula(th.t, dim = d, df = nu)
 
 ## Clayton copula
-th.C <- iTau(claytonCopula(), tau = tau)
+th.C <- iTau(claytonCopula(), tau = taus[2])
 C.cop.d2 <- claytonCopula(th.C, dim = d)
 
-### 1.2 d = 5 ##################################################################
+## Gumbel copula
+th.G <- iTau(gumbelCopula(), tau = taus[2])
+G.cop.d2 <- gumbelCopula(th.G, dim = d)
+
+### 1.1 d = 3 ##################################################################
+## Auxiliary function
+nacList <- function(d, th) {
+  stopifnot(length(d) == 2, d >= 1, length(th) == 3)
+  if(d[1] == 1) {
+    list(th[1], 1, list(list(th[2], 1 + 1:d[2])))
+  } else if(d[2] == 1) {
+    list(th[1], d[1]+1, list(list(th[2], 1:d[1])))
+  } else {
+    list(th[1], NULL, list(list(th[2], 1:d[1]),
+                           list(th[3], (d[1]+1):sum(d))))
+  }
+}
+
+## Nested copulas
+ds <- c(2, 1) # sector dimensions
+th.Gs <- iTau(gumbelCopula(), tau = taus)
+NG.d21 <- onacopulaL("Gumbel",  nacList = nacList(ds, th = th.Gs)) # nested Gumbel
+
+
+### 1.3 d = 5 ##################################################################
 
 d. <- 5 # copula dimension
 
 ## t copula
-th.t <- iTau(tCopula(), tau = tau) # parameter
 t.cop.d5 <- tCopula(th.t, dim = d., df = nu)
-
 ## Clayton copula
-th.C <- iTau(claytonCopula(), tau = tau)
 C.cop.d5 <- claytonCopula(th.C, dim = d.)
+## Gumbel copula
+G.cop.d5 <- gumbelCopula(th.G, dim = d.)
 
-### 1.3 d = 10 ##################################################################
+## Nested copulas
+ds. <- c(2, 3) # sector dimensions
+NG.d23 <- onacopulaL("Gumbel",  nacList = nacList(ds., th = th.Gs)) # nested Gumbel
+
+
+
+### 1.4 d = 10 ##################################################################
 
 d.. <- 10 # copula dimension
 
 ## t copula
-th.t <- iTau(tCopula(), tau = tau) # parameter
 t.cop.d10 <- tCopula(th.t, dim = d.., df = nu)
-
 ## Clayton copula
-th.C <- iTau(claytonCopula(), tau = tau)
 C.cop.d10 <- claytonCopula(th.C, dim = d..)
+## Gumbel copula
+G.cop.d10 <- gumbelCopula(th.G, dim = d..)
+
+## Nested copulas
+ds.. <- c(5, 5) # sector dimensions
+NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(ds.., th = th.Gs)) # nested Gumbel
+
 
 ### 2 Train the GMMNs from a PRNG of the respective copula and measure computing times 
 ### for training and sampling.
 
 ## Copulas from Section 1.1 above
-computing_times(copula=t.cop.d2,name = paste0("t",nu,"_tau_",tau),
-                file=paste0("computing_times","_dim_",d,"_t",nu,"_tau_",tau,".rds"))
-computing_times(copula=C.cop.d2,name= paste0("C","_tau_",tau),
-                file=paste0("computing_times","_dim_",d,"_C","_tau_",tau,".rds"))
+computing_times(copula=t.cop.d2,name = paste0("t",nu,"_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d,"_t",nu,"_tau_",taus[2],".rds"))
+computing_times(copula=C.cop.d2,name= paste0("C","_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d,"_C","_tau_",taus[2],".rds"))
+computing_times(copula=G.cop.d2,name= paste0("G","_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d,"_G","_tau_",taus[2],".rds"))
 
 ## Copulas from Section 1.2 above
-computing_times(copula=t.cop.d5,name = paste0("t",nu,"_tau_",tau),
-                file=paste0("computing_times","_dim_",d.,"_t",nu,"_tau_",tau,".rds"))
-computing_times(copula=C.cop.d5,name= paste0("C","_tau_",tau),
-                file=paste0("computing_times","_dim_",d.,"_C","_tau_",tau,".rds"))
+computing_times(copula=NG.d21,name=paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")),
+               file=paste0("computing_times","_dim_",sum(ds),"_NG21","_tau_",
+                           paste0(taus[1:2], collapse = "_",".rds")))
 
 ## Copulas from Section 1.3 above
-computing_times(copula=t.cop.d10,name = paste0("t",nu,"_tau_",tau),
-                file=paste0("computing_times","_dim_",d..,"_t",nu,"_tau_",tau,".rds"))
-computing_times(copula=C.cop.d10,name= paste0("C","_tau_",tau),
-                file=paste0("computing_times","_dim_",d..,"_C","_tau_",tau,".rds"))
+computing_times(copula=t.cop.d5,name = paste0("t",nu,"_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d.,"_t",nu,"_tau_",taus[2],".rds"))
+computing_times(copula=C.cop.d5,name= paste0("C","_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d.,"_C","_tau_",taus[2],".rds"))
+computing_times(copula=G.cop.d5,name= paste0("G","_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d.,"_G","_tau_",taus[2],".rds"))
+computing_times(copula=NG.d23,name=paste0("NG23_tau_",paste0(taus, collapse = "_")),
+               file=paste0("computing_times","_dim_",sum(ds.),"_NG23","_tau_",
+                           paste0(taus, collapse = "_",".rds")))
+
+## Copulas from Section 1.4 above
+computing_times(copula=t.cop.d10,name = paste0("t",nu,"_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d..,"_t",nu,"_tau_",taus[2],".rds"))
+computing_times(copula=C.cop.d10,name= paste0("C","_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d..,"_C","_tau_",taus[2],".rds"))
+computing_times(copula=G.cop.d10,name= paste0("G","_tau_",taus[2]),
+                file=paste0("computing_times","_dim_",d..,"_G","_tau_",taus[2],".rds"))
+computing_times(copula=NG.d55,name=paste0("NG55_tau_",paste0(taus, collapse = "_")),
+               file=paste0("computing_times","_dim_",sum(ds..),"_NG55","_tau_",
+                           paste0(taus, collapse = "_",".rds")))
