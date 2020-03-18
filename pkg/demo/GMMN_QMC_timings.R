@@ -182,36 +182,36 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(ds.10, th = th.Gs)) # nested G
 ### 2 GMMN Training and Run Time Measurement ###################################
 
 ## Copulas from Section 1.1 above
-timings(copula=t.cop.d2,name = paste0("t",nu,"_tau_",taus[2]),
-       file=paste0("timing","_dim_",d,"_t",nu,"_tau_",taus[2],".rds"))
-timings(copula=C.cop.d2,name= paste0("C","_tau_",taus[2]),
-       file=paste0("timing","_dim_",d,"_C","_tau_",taus[2],".rds"))
-timings(copula=G.cop.d2,name= paste0("G","_tau_",taus[2]),
-       file=paste0("timing","_dim_",d,"_G","_tau_",taus[2],".rds"))
+timings(t.cop.d2, name = paste0("t",nu,"_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.2,"_t",nu,"_tau_",taus[2],".rds"))
+timings(C.cop.d2, name = paste0("C","_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.2,"_C","_tau_",taus[2],".rds"))
+timings(G.cop.d2, name = paste0("G","_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.2,"_G","_tau_",taus[2],".rds"))
 
 ## Copulas from Section 1.2 above
-timings(copula=NG.d21,name=paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")),
-       file=paste0("timing","_dim_",sum(ds),"_NG21","_tau_",
-                   paste0(taus[1:2], collapse = "_",".rds")))
+timings(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")),
+        file = paste0("timing","_dim_",sum(ds.3),"_NG21","_tau_",
+                      paste0(taus[1:2], collapse = "_",".rds")))
 
 ## Copulas from Section 1.3 above
-timings(copula=t.cop.d5,name = paste0("t",nu,"_tau_",taus[2]),
-       file=paste0("timing","_dim_",d.5,"_t",nu,"_tau_",taus[2],".rds"))
-timings(copula=C.cop.d5,name= paste0("C","_tau_",taus[2]),
-       file=paste0("timing","_dim_",d.5,"_C","_tau_",taus[2],".rds"))
-timings(copula=G.cop.d5,name= paste0("G","_tau_",taus[2]),
-       file=paste0("timing","_dim_",d.5,"_G","_tau_",taus[2],".rds"))
-timings(copula=NG.d23,name=paste0("NG23_tau_",paste0(taus, collapse = "_")),
-       file=paste0("timing","_dim_",sum(ds.5),"_NG23","_tau_",
-                   paste0(taus, collapse = "_",".rds")))
+timings(t.cop.d5, name = paste0("t",nu,"_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.5,"_t",nu,"_tau_",taus[2],".rds"))
+timings(C.cop.d5, name = paste0("C","_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.5,"_C","_tau_",taus[2],".rds"))
+timings(G.cop.d5, name = paste0("G","_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.5,"_G","_tau_",taus[2],".rds"))
+timings(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")),
+        file = paste0("timing","_dim_",sum(ds.5),"_NG23","_tau_",
+                      paste0(taus, collapse = "_",".rds")))
 
 ## Copulas from Section 1.4 above
-timings(copula=t.cop.d10,name = paste0("t",nu,"_tau_",taus[2]),
-       file=paste0("timing","_dim_",d.10,"_t",nu,"_tau_",taus[2],".rds"))
-timings(copula=C.cop.d10,name= paste0("C","_tau_",taus[2]),
-       file=paste0("timing","_dim_",d.10,"_C","_tau_",taus[2],".rds"))
-timings(copula=G.cop.d10,name= paste0("G","_tau_",taus[2]),
-       file=paste0("timing","_dim_",d.10,"_G","_tau_",taus[2],".rds"))
-timings(copula=NG.d55,name=paste0("NG55_tau_",paste0(taus, collapse = "_")),
-       file=paste0("timing","_dim_",sum(ds.10),"_NG55","_tau_",
-                   paste0(taus, collapse = "_",".rds")))
+timings(t.cop.d10, name = paste0("t",nu,"_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.10,"_t",nu,"_tau_",taus[2],".rds"))
+timings(C.cop.d10, name = paste0("C","_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.10,"_C","_tau_",taus[2],".rds"))
+timings(G.cop.d10, name = paste0("G","_tau_",taus[2]),
+        file = paste0("timing","_dim_",d.10,"_G","_tau_",taus[2],".rds"))
+timings(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")),
+        file = paste0("timing","_dim_",sum(ds.10),"_NG55","_tau_",
+                      paste0(taus, collapse = "_",".rds")))
