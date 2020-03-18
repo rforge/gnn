@@ -20,12 +20,12 @@ library(copula) # for the considered copulas
 library(gnn) # for the used GMMN models
 library(xts) # for na.fill
 library(MASS)
-library(qrmdata) # for required datasets
 if(packageVersion("qrmdata") < "2019.12.3.1")
     stop('You must update "qrmdata" via install.packages("qrmdata")')
-library(rugarch) # for GARCH fit
+library(qrmdata) # for required datasets
 if(packageVersion("rugarch") < "1.4.2")
-  stop('You must update "rugarch" via install.packages("rugarch")')
+    stop('You must update "rugarch" via install.packages("rugarch")')
+library(rugarch) # for GARCH fit
 library(scoringRules) # for vs_sample()
 
 ## Colors
