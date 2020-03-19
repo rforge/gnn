@@ -49,7 +49,7 @@ training_time <- function(copula, name)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # GMMN model
-    train.time <- system_time(GMMN <- train(GNN, data = U, # train and measure elapsed time
+    train.time <- system.time(GMMN <- train(GNN, data = U, # train and measure elapsed time
                                             batch.size = nbat, nepoch = nepo))["elapsed"] / 60 # in min
     save_rda(to_savable(GMMN), file = NNname, names = rm_ext(basename(NNname))) # save
     ## Note: We use train() instead of train_once() to capture only training time.
