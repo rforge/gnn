@@ -33,7 +33,7 @@ nepo <- 300L # number of epochs (one epoch = one pass through the complete train
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
 ## Other global parameters
-ngen <- 1e6 # sample size of the generated data
+ngen <- 1e5 # sample size of the generated data
 
 
 ### 0 Auxiliary functions ######################################################
@@ -64,16 +64,21 @@ training_time <- function(copula, name)
 ##' @param times number of replications
 ##' @param unit the unit in which run time is measured
 ##' @return list of average run times in s for each of the four sampling methods
-run_times <- function(copula, GMMN, times = 100, unit = "s", seed = 271)
+run_times <- function(copula, GMMN, times = 25, unit = "s", seed = 271)
 {
     ## Set seed (we do that here to use common random variates)
     set.seed(seed)
 
     ## QRNG
     rQRS <- function(n, copula, d, seed) {
-        res <- catch(cCopula(sobol(n, d = d, randomize = "Owen", seed = seed),
-                             copula = copula, inverse = TRUE))
-        if(is.null(res$error)) res$value else NA # NA if not available or if there was an error
+        if(is(copula, "gumbelCopula")) { # catch errors; also use scaling trick to save run time (see (*))
+            res <- catch(cCopula(sobol(n / 1000, d = d, randomize = "Owen", seed = seed),
+                                 copula = copula, inverse = TRUE))
+            if(is.null(res$error)) res$value else NA # NA if not available or if there was an error
+        } else {
+            cCopula(sobol(n, d = d, randomize = "Owen", seed = seed),
+                    copula = copula, inverse = TRUE)
+        }
     }
 
     ## Run time measurement for Copula PRS, Copula QRS, GMMN PRS, GMMN QRS
@@ -85,6 +90,10 @@ run_times <- function(copula, GMMN, times = 100, unit = "s", seed = 271)
         predict(GMMN, x = qnorm(sobol(ngen, d = d, randomize = "Owen", seed = seed))), # GMMN QRS
         times = times, unit = unit))$mean
     names(rt) <- c("Copula PRS", "Copula QRS", "GMMN PRS", "GMMN QRS")
+
+    ## Adjust run time for Gumbel; see (*)
+    if(is(copula, "gumbelCopula"))
+        rt[2] <- 1000 * rt[2]
 
     ## Return
     rt
