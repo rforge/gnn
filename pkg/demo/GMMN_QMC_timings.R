@@ -24,7 +24,6 @@ library(qrmtools) # for catch()
 library(simsalapar) # for toLatex()
 
 ## Global training parameters
-package <- NULL # use "gnn" to utilize pre-trained NNs from gnn
 dim.hid <- 300L # dimension of the (single) hidden layer
 ntrn <- 60000L # training dataset size (number of pseudo-random numbers from the copula)
 nbat <- 5000L # batch size for training (number of samples per stochastic gradient step)
@@ -52,8 +51,8 @@ training_time <- function(copula, name)
                                             batch.size = nbat, nepoch = nepo))["elapsed"] / 60 # in min
     save_rda(to_savable(GMMN), file = NNname, names = rm_ext(basename(NNname))) # save
     ## Note: We use train() instead of train_once() to capture only training time.
-    ##       Also, if a saved GMMN exists in the current working directory or
-    ##       if package = "gnn", train_once() will lead to misleading training times.
+    ##       Also, if a saved GMMN exists in the current working directory
+    ##       train_once() will lead to misleading training times.
     list(GMMN = GMMN, train.time = train.time) # return the trained GMMN along with its training time
 }
 
