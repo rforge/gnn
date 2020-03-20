@@ -20,7 +20,6 @@ if(packageVersion("copula") < "0.999.19")
     stop('Consider updating via install.packages("copula", repos = "http://R-Forge.R-project.org")')
 library(copula) # for the considered copulas
 library(gnn) # for the used GMMN models
-library(microbenchmark) # for measuring run time
 library(qrmtools) # for catch()
 library(simsalapar) # for toLatex()
 
@@ -31,9 +30,6 @@ ntrn <- 60000L # training dataset size (number of pseudo-random numbers from the
 nbat <- 5000L # batch size for training (number of samples per stochastic gradient step)
 nepo <- 300L # number of epochs (one epoch = one pass through the complete training dataset while updating the GNN's parameters)
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
-
-## Other global parameters
-ngen <- 1e6 # sample size of the generated data
 
 
 ### 0 Auxiliary functions ######################################################
@@ -61,38 +57,52 @@ training_time <- function(copula, name)
 ##' @title Measuring Run Times for Copula PRS, Copula QRS, GMMN PRS, GMMN QRS
 ##' @param copula copula object
 ##' @param GMMN GMMN trained on pseudo-random samples from 'copula'
-##' @param times number of replications
-##' @param unit the unit in which run time is measured
+##' @param seed seed to be used for reproducibility
 ##' @return list of average run times in s for each of the four sampling methods
-run_times <- function(copula, GMMN, times = 25, unit = "s", seed = 271)
+run_times <- function(copula, GMMN, seed = 271)
 {
-    ## Set seed (we do that here to use common random variates)
-    set.seed(seed)
+    ## Run time measurement per 1M random variates
+    timer <- function(expr) system.time(expr)[["elapsed"]] # auxiliary function
+    ngen <- 1e6
 
-    ## QRNG
-    scale <- if(is(copula, "gumbelCopula")) 1000 else 1 # for scaling in case of Gumbel
+    ## Copula PRS (here we can easily take replicates as there is no problem with the seed)
+    set.seed(271)
+    rt.cop.PRS <- mean(timer(replicate(100, expr = rCopula(ngen, copula = copula)))) # mean time in sec over 100 replications
+
+    ## Numerically robust QRS
     rQRS <- function(n, copula, d, seed) {
-        ## catch errors
-        res <- catch(cCopula(sobol(n / scale, d = d, randomize = "Owen", seed = seed),
+        res <- catch(cCopula(sobol(n, d = d, randomize = "Owen", seed = seed),
                              copula = copula, inverse = TRUE))
         if(is.null(res$error)) res$value else NA # NA if not available or if there was an error
     }
 
-    ## Run time measurement for Copula PRS, Copula QRS, GMMN PRS, GMMN QRS
+    ## Copula QRS
+    ## Note:
+    ## - Depending on the copulas, we choose a smaller sample size and then scale up
+    ##   run time afterwards.
+    ## - We also need to check whether there were numerical problems and then set
+    ##   the run time to NA
+    cond.cop.avail <- is(copula, "normalCopula") || is(copula, "tCopula") || is(copula, "claytonCopula")
+    ngen. <- if(cond.cop.avail) ngen else ngen / 1000
     d <- dim(copula) # copula dimension
-    rt <- summary(microbenchmark(
-        rCopula(ngen, copula = copula), # Copula PRS
-        rQRS(ngen, copula = copula, d = d, seed = seed), # Copula QRS
-        predict(GMMN, x = matrix(rnorm(ngen * d), ncol = d)), # GMMN PRS
-        predict(GMMN, x = qnorm(sobol(ngen, d = d, randomize = "Owen", seed = seed))), # GMMN QRS
-        times = times, unit = unit))$mean
-    names(rt) <- c("Copula PRS", "Copula QRS", "GMMN PRS", "GMMN QRS")
+    rt.cop.QRS <- timer(res.cop.QRS <- rQRS(ngen., copula = copula, d = d, seed = seed))
+    if(is.na(res.cop.QRS)) {
+        rt.cop.QRS <- NA # if there was an error when generating ngen.-many realizations
+    } else { # no error, then scale again if necessary
+        if(!cond.cop.avail) rt.cop.QRS <- rt.cop.QRS * 1000 # scale up run time
+    }
+    ## Expected behavior: scaled run time for Gumbel, NA for nested Gumbel
 
-    ## Adjust run time for Gumbel; see (*)
-    if(is(copula, "gumbelCopula")) rt[2] <- scale * rt[2]
+    ## GMMN PRS (no need for replicates)
+    set.seed(271)
+    rt.GMMN.PRS <- timer(predict(GMMN, x = matrix(rnorm(ngen * d), ncol = d)))
+
+    ## GMMN QRS (no need for replicates; would also make seed passing more difficult)
+    rt.GMMN.PRS <- timer(predict(GMMN, x = qnorm(sobol(ngen, d = d, randomize = "Owen", seed = seed))))
 
     ## Return
-    rt
+    c("Copula PRS" = rt.cop.PRS,  "Copula QRS" = rt.cop.QRS,
+      "GMMN PRS"   = rt.GMMN.PRS, "GMMN QRS"   = rt.GMMN.QRS)
 }
 
 ##' @title Run Times for GMMN Training and Copula PRS, Copula QRS, GMMN PRS, GMMN QRS
@@ -243,12 +253,12 @@ meths <- c("Copula PRS", "Copula QRS", "GMMN PRS", "GMMN QRS") # methods
 ### 3.1 Training times #########################################################
 
 ## Collect results in a matrix
-res.training <- matrix(c(
+res.training <- matrix(noquote(sprintf("%.2f", c(
     res.t.d2$training.time,   res.t.d5$training.time,   res.t.d10$training.time,
     res.C.d2$training.time,   res.C.d5$training.time,   res.C.d10$training.time,
     res.G.d2$training.time,   res.G.d5$training.time,   res.G.d10$training.time,
-    res.NG.d21$training.time, res.NG.d23$training.time, res.NG.d55$training.time),
-    ncol = 4, byrow = TRUE, dimnames = list("Copula" = cops, "Dimension" = dms))
+    res.NG.d21$training.time, res.NG.d23$training.time, res.NG.d55$training.time))),
+    ncol = 3, byrow = TRUE, dimnames = list("Copula" = cops, "Dimension" = dms))
 
 ## Convert to table
 toLatex(ftable(res.training))
@@ -257,7 +267,7 @@ toLatex(ftable(res.training))
 ### 3.2 Run times when sampling ################################################
 
 ## Collect results in a matrix
-res.sampling <- matrix(c(
+res.sampling <- matrix(noquote(sprintf("%.4f", c(
     ## d = 2 and d = 3 dimensional copulas
     res.t.d2$run.times,
     res.C.d2$run.times,
@@ -272,8 +282,8 @@ res.sampling <- matrix(c(
     res.t.d10$run.times,
     res.C.d10$run.times,
     res.G.d10$run.times,
-    res.NG.d55$run.times), ncol = 4, byrow = TRUE,
-    dimnames = list("Copula" = cops, "Method" = meths))
+    res.NG.d55$run.times))),
+    ncol = 4, byrow = TRUE, dimnames = list("Copula" = rep(cops, 3), "Method" = meths))
 
 ## Convert to table
 toLatex(ftable(res.sampling))
