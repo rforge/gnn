@@ -73,7 +73,8 @@ run_times <- function(copula, GMMN, seed = 271)
     rQRS <- function(n, copula, d, seed) {
         res <- catch(cCopula(sobol(n, d = d, randomize = "Owen", seed = seed),
                              copula = copula, inverse = TRUE))
-        if(is.null(res$error)) res$value else NA # NA if not available or if there was an error
+        if(is.null(res$error)) res$value else NULL # NULL if there was an error
+        ## Note: We use NULL instead of NA as that test works for matrices and NULL
     }
 
     ## Copula QRS
@@ -86,7 +87,7 @@ run_times <- function(copula, GMMN, seed = 271)
     ngen. <- if(cond.cop.avail) ngen else ngen / 1000
     d <- dim(copula) # copula dimension
     rt.cop.QRS <- timer(res.cop.QRS <- rQRS(ngen., copula = copula, d = d, seed = seed))
-    if(is.na(res.cop.QRS)) {
+    if(is.null(res.cop.QRS)) {
         rt.cop.QRS <- NA # if there was an error when generating ngen.-many realizations
     } else { # no error, then scale again if necessary
         if(!cond.cop.avail) rt.cop.QRS <- rt.cop.QRS * 1000 # scale up run time
@@ -98,7 +99,7 @@ run_times <- function(copula, GMMN, seed = 271)
     rt.GMMN.PRS <- timer(predict(GMMN, x = matrix(rnorm(ngen * d), ncol = d)))
 
     ## GMMN QRS (no need for replicates; would also make seed passing more difficult)
-    rt.GMMN.PRS <- timer(predict(GMMN, x = qnorm(sobol(ngen, d = d, randomize = "Owen", seed = seed))))
+    rt.GMMN.QRS <- timer(predict(GMMN, x = qnorm(sobol(ngen, d = d, randomize = "Owen", seed = seed))))
 
     ## Return
     c("Copula PRS" = rt.cop.PRS,  "Copula QRS" = rt.cop.QRS,
