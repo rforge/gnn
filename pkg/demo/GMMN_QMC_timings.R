@@ -33,7 +33,7 @@ nepo <- 300L # number of epochs (one epoch = one pass through the complete train
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
 ## Other global parameters
-ngen <- 1e5 # sample size of the generated data
+ngen <- 1e6 # sample size of the generated data
 
 
 ### 0 Auxiliary functions ######################################################
@@ -70,15 +70,12 @@ run_times <- function(copula, GMMN, times = 25, unit = "s", seed = 271)
     set.seed(seed)
 
     ## QRNG
+    scale <- if(is(copula, "gumbelCopula")) 1000 else 1 # for scaling in case of Gumbel
     rQRS <- function(n, copula, d, seed) {
-        if(is(copula, "gumbelCopula")) { # catch errors; also use scaling trick to save run time (see (*))
-            res <- catch(cCopula(sobol(n / 1000, d = d, randomize = "Owen", seed = seed),
-                                 copula = copula, inverse = TRUE))
-            if(is.null(res$error)) res$value else NA # NA if not available or if there was an error
-        } else {
-            cCopula(sobol(n, d = d, randomize = "Owen", seed = seed),
-                    copula = copula, inverse = TRUE)
-        }
+        ## catch errors
+        res <- catch(cCopula(sobol(n / scale, d = d, randomize = "Owen", seed = seed),
+                             copula = copula, inverse = TRUE))
+        if(is.null(res$error)) res$value else NA # NA if not available or if there was an error
     }
 
     ## Run time measurement for Copula PRS, Copula QRS, GMMN PRS, GMMN QRS
@@ -92,8 +89,7 @@ run_times <- function(copula, GMMN, times = 25, unit = "s", seed = 271)
     names(rt) <- c("Copula PRS", "Copula QRS", "GMMN PRS", "GMMN QRS")
 
     ## Adjust run time for Gumbel; see (*)
-    if(is(copula, "gumbelCopula"))
-        rt[2] <- 1000 * rt[2]
+    if(is(copula, "gumbelCopula")) rt[2] <- scale * rt[2]
 
     ## Return
     rt
