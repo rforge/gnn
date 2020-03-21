@@ -4,7 +4,7 @@
 ## sampling for multivariate distributions via generative neural networks").
 ## Training times are obtained from running this script on an NVIDIA Tesla P100
 ## GPU (about 3h), run times of the various methods are obtained from running
-## this script locally (about 30min) as the GPU's run time measurements
+## this script locally (about 6min) as the GPU's run time measurements
 ## weren't reliable.
 
 
@@ -37,7 +37,7 @@ stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
 ## Number of samples to be generated (for those copulas with cCopula() analytically
 ## available and for all other copulas, respectively)
-ngen <- c(1e5, 1e3)
+ngen <- c(1e5, 1e3) # or 1e6 (about 30min), 1e7 (about 3h)
 
 
 ### 0 Auxiliary functions ######################################################
