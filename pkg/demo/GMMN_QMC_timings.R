@@ -357,19 +357,19 @@ stopifnot(all.equal(U.TF, U.R, tolerance = 1e-7))
 ### 4.2 Run time as a function of n for several GMMNs ##########################
 
 ## Compute run times as a function of n
-n <- 10^seq(1, 6, by = 0.5) # sample sizes considered
+ngen. <- 10^seq(1, 6, by = 0.5) # sample sizes considered
 d <- c(2, 5, 10) # dimensions considered
-set.seed(271); U. <- matrix(rnorm(max(n) * max(d)), ncol = max(d)) # generate for the max. sample size and dimension
-res <- matrix(, nrow = length(n), ncol = length(d)) # (length(n), length(d))-matrix
-pb <- txtProgressBar(max = length(d) * length(n), style = 3)
+set.seed(271); U. <- matrix(rnorm(max(ngen.) * max(d)), ncol = max(d)) # generate for the max. sample size and dimension
+res <- matrix(, nrow = length(ngen.), ncol = length(d)) # (length(n), length(d))-matrix
+pb <- txtProgressBar(max = length(d) * length(ngen.), style = 3)
 for(j in seq_along(d)) {
     mod <- get_model_param_dim(GMMNs[j])
-    for(i in seq_along(n)) {
-        U.. <- U.[1:n[i], 1:d[j], drop = FALSE]
+    for(i in seq_along(ngen.)) {
+        U.. <- U.[1:ngen.[i], 1:d[j], drop = FALSE]
         res[i, j] <-
             mean(replicate(10, expr = system.time(predictR(U.., param = mod$param))[["elapsed"]] /
                                    system.time(predict(mod$model, x = U..))[["elapsed"]]))
-        setTxtProgressBar(pb, length(n) * (j-1) + i)
+        setTxtProgressBar(pb, length(ngen.) * (j-1) + i)
     }
 }
 close(pb)
@@ -378,13 +378,13 @@ close(pb)
 file <- "fig_elapsed_time_R_over_TensorFlow.pdf"
 pdf(file, bg = "transparent", width = 7, height = 7)
 opar <- par(pty = "s")
-plot(n, res[,1], type = "l", log = "x", ylim = range(res), xaxt = "n",
+plot(ngen., res[,1], type = "l", log = "x", ylim = range(res), xaxt = "n",
      xlab = expression(n[gen]),
      ylab = "Elapsed time of R implementation / TensorFlow implementation")
-labels <- sapply(1:length(n), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
-axis(1, at = n, labels = labels)
-lines(n, res[,2], lty = 2)
-lines(n, res[,3], lty = 3)
+labels <- sapply(1:length(ngen.), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
+axis(1, at = ngen., labels = labels)
+lines(ngen., res[,2], lty = 2)
+lines(ngen., res[,3], lty = 3)
 abline(h = 1, lty = 4)
 legend("bottomright", bty = "n", col = 1, lty = 1:3, legend = paste("d =", d))
 mtext(substitute(italic(t)[nu.]~"copula with Kendall's tau"~tau==tau.,
