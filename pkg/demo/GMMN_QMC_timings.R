@@ -11,8 +11,10 @@
 library(keras) # interface to Keras (high-level neural network API)
 library(tensorflow) # note: access of functions via '::' fails for this package
 ## => would allow to set the seed with use_session_with_seed(271), but then no GPU or CPU parallelism
-tf_version() # dummy call to activate connection to TensorFlow (any first call will fail on the cluster; here: NULL)
-use_virtualenv(Sys.getenv('VIRTUAL_ENV')) # tensorflow command to access the activated Python environment
+if(grepl("gra", Sys.info()[["nodename"]])) {
+    tf_version() # dummy call to activate connection to TensorFlow (any first call will fail on the cluster; here: NULL)
+    use_virtualenv(Sys.getenv('VIRTUAL_ENV')) # tensorflow command to access the activated Python environment
+}
 if(packageVersion("qrng") < "0.0.7")
     stop('Consider updating via install.packages("qrng", repos = "http://R-Forge.R-project.org")')
 library(qrng) # for sobol()
@@ -38,21 +40,28 @@ ngen <- 1e6
 
 ##' @title Measuring Training Time of a GMMN
 ##' @param copula copula object
-##' @param name character string (copula and taus together) for the trained GMMN
+##' @param cstrng character string (copula and taus together) for the trained GMMN
 ##' @return list containing the trained GMMN and elapsed training time
-training_time <- function(copula, name)
+training_time <- function(copula, cstrng)
 {
     U <- rCopula(ntrn, copula = copula) # pseudo-random training data
     dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
-    NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
-                     "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
-    GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # GMMN model
-    train.time <- system.time(GMMN <- train(GNN, data = U, # train and measure elapsed time
-                                            batch.size = nbat, nepoch = nepo))["elapsed"] / 60 # in min
-    save_rda(to_savable(GMMN), file = NNname, names = rm_ext(basename(NNname))) # save
-    ## Note: We use train() instead of train_once() to capture only training time.
-    ##       Also, if a saved GMMN exists in the current working directory
-    ##       train_once() will lead to misleading training times.
+    file <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
+                   "_nbat_",nbat,"_nepo_",nepo,"_",cstrng,".rda")
+    name <- rm_ext(basename(file))
+    if(exists_rda(file, names = name)) {
+        read.gnn <- read_rda(file, names = name)
+        GMMN <- to_callable(read.gnn)
+        train.time <- NA
+    } else {
+        GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # GMMN model
+        train.time <- system.time(GMMN <- train(GNN, data = U, # train and measure elapsed time
+                                                batch.size = nbat, nepoch = nepo))["elapsed"] / 60 # in min
+        save_rda(to_savable(GMMN), file = file, names = name) # save
+        ## Note: We use train() instead of train_once() to capture only training time.
+        ##       Also, if a saved GMMN exists in the current working directory
+        ##       train_once() will lead to misleading training times.
+    }
     list(GMMN = GMMN, train.time = train.time) # return the trained GMMN along with its training time
 }
 
@@ -109,16 +118,16 @@ run_times <- function(copula, GMMN, seed = 271)
 
 ##' @title Run Times for GMMN Training and Copula PRS, Copula QRS, GMMN PRS, GMMN QRS
 ##' @param copula see ?training_time or ?sampling_time
-##' @param name see ?training_time
+##' @param cstrng see ?training_time
 ##' @param file character string specifying the file name used to save results
 ##' @return list containing GMMN training time and sub-list containing (average)
 ##'         run time for each of the four sampling methods
-timings <- function(copula, name, file)
+timings <- function(copula, cstrng, file)
 {
     if(file.exists(file)) {
         res <- readRDS(file)
     } else {
-        training <- training_time(copula, name = name) # GMMN training
+        training <- training_time(copula, cstrng = cstrng) # GMMN training
         res <- list(training.time = training$train.time, # measure run times
                     run.times = run_times(copula, GMMN = training$GMMN[["model"]]))
         saveRDS(res, file = file) # save
@@ -210,37 +219,37 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(ds.10, th = th.Gs)) # nested G
 ### 2 GMMN Training and Run Time Measurement ###################################
 
 ## d = 2 dimensional copulas
-res.t.d2 <- timings(t.cop.d2, name = paste0("t",nu,"_tau_",taus[2]),
+res.t.d2 <- timings(t.cop.d2, cstrng = paste0("t",nu,"_tau_",taus[2]),
                     file = paste0("timing","_dim_",d.2,"_t",nu,"_tau_",taus[2],".rds"))
-res.C.d2 <- timings(C.cop.d2, name = paste0("C","_tau_",taus[2]),
+res.C.d2 <- timings(C.cop.d2, cstrng = paste0("C","_tau_",taus[2]),
                     file = paste0("timing","_dim_",d.2,"_C","_tau_",taus[2],".rds"))
-res.G.d2 <- timings(G.cop.d2, name = paste0("G","_tau_",taus[2]),
+res.G.d2 <- timings(G.cop.d2, cstrng = paste0("G","_tau_",taus[2]),
                     file = paste0("timing","_dim_",d.2,"_G","_tau_",taus[2],".rds"))
 
 ## d = 3 dimensional copulas
-res.NG.d21 <- timings(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")),
+res.NG.d21 <- timings(NG.d21, cstrng = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")),
                       file = paste0("timing","_dim_",sum(ds.3),"_NG21","_tau_",
                                     paste0(taus[1:2], collapse = "_",".rds")))
 
 ## d = 5 dimensional copulas
-res.t.d5 <- timings(t.cop.d5, name = paste0("t",nu,"_tau_",taus[2]),
+res.t.d5 <- timings(t.cop.d5, cstrng = paste0("t",nu,"_tau_",taus[2]),
                     file = paste0("timing","_dim_",d.5,"_t",nu,"_tau_",taus[2],".rds"))
-res.C.d5 <- timings(C.cop.d5, name = paste0("C","_tau_",taus[2]),
+res.C.d5 <- timings(C.cop.d5, cstrng = paste0("C","_tau_",taus[2]),
                     file = paste0("timing","_dim_",d.5,"_C","_tau_",taus[2],".rds"))
-res.G.d5 <- timings(G.cop.d5, name = paste0("G","_tau_",taus[2]),
+res.G.d5 <- timings(G.cop.d5, cstrng = paste0("G","_tau_",taus[2]),
                     file = paste0("timing","_dim_",d.5,"_G","_tau_",taus[2],".rds"))
-res.NG.d23 <- timings(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")),
+res.NG.d23 <- timings(NG.d23, cstrng = paste0("NG23_tau_",paste0(taus, collapse = "_")),
                       file = paste0("timing","_dim_",sum(ds.5),"_NG23","_tau_",
                                     paste0(taus, collapse = "_",".rds")))
 
 ## d = 10 dimensional copulas
-res.t.d10 <- timings(t.cop.d10, name = paste0("t",nu,"_tau_",taus[2]),
+res.t.d10 <- timings(t.cop.d10, cstrng = paste0("t",nu,"_tau_",taus[2]),
                      file = paste0("timing","_dim_",d.10,"_t",nu,"_tau_",taus[2],".rds"))
-res.C.d10 <- timings(C.cop.d10, name = paste0("C","_tau_",taus[2]),
+res.C.d10 <- timings(C.cop.d10, cstrng = paste0("C","_tau_",taus[2]),
                      file = paste0("timing","_dim_",d.10,"_C","_tau_",taus[2],".rds"))
-res.G.d10 <- timings(G.cop.d10, name = paste0("G","_tau_",taus[2]),
+res.G.d10 <- timings(G.cop.d10, cstrng = paste0("G","_tau_",taus[2]),
                      file = paste0("timing","_dim_",d.10,"_G","_tau_",taus[2],".rds"))
-res.NG.d55 <- timings(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")),
+res.NG.d55 <- timings(NG.d55, cstrng = paste0("NG55_tau_",paste0(taus, collapse = "_")),
                       file = paste0("timing","_dim_",sum(ds.10),"_NG55","_tau_",
                                     paste0(taus, collapse = "_",".rds")))
 
