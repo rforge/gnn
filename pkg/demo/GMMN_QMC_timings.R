@@ -35,8 +35,9 @@ nbat <- 5000L # batch size for training (number of samples per stochastic gradie
 nepo <- 300L # number of epochs (one epoch = one pass through the complete training dataset while updating the GNN's parameters)
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
-## Number of samples to be generated
-ngen <- 10
+## Number of samples to be generated (for those copulas with cCopula() analytically
+## available and for all other copulas, respectively)
+ngen <- c(1e7, 1e3)
 
 
 ### 0 Auxiliary functions ######################################################
@@ -80,7 +81,7 @@ run_times <- function(copula, GMMN, seed = 271)
 
     ## Copula PRS (here we can easily take replicates as there is no problem with the seed)
     set.seed(271)
-    rt.cop.PRS <- mean(replicate(100, expr = timer(rCopula(ngen, copula = copula)))) # mean time in sec over 100 replications
+    rt.cop.PRS <- mean(replicate(100, expr = timer(rCopula(ngen[1], copula = copula)))) # mean time in sec over 100 replications
 
     ## Numerically robust QRS
     rQRS <- function(n, copula, seed) {
@@ -97,22 +98,22 @@ run_times <- function(copula, GMMN, seed = 271)
     ## - We also need to check whether there were numerical problems and then set
     ##   the run time to NA
     cond.cop.analytical <- is(copula, "normalCopula") || is(copula, "tCopula") || is(copula, "claytonCopula")
-    ngen. <- if(cond.cop.analytical) ngen else ngen / 1000
+    ngen. <- if(cond.cop.analytical) ngen[1] else ngen[2]
     rt.cop.QRS <- timer(res.cop.QRS <- rQRS(ngen., copula = copula, seed = seed))
     if(is.null(res.cop.QRS)) {
-        rt.cop.QRS <- NA # if there was an error when generating ngen.-many realizations
+        rt.cop.QRS <- NA # if there was an error when generating ngen.-many realizations (e.g. for NG)
     } else { # no error, then scale again if necessary
-        if(!cond.cop.analytical) rt.cop.QRS <- rt.cop.QRS * 1000 # scale up run time
+        if(!cond.cop.analytical) rt.cop.QRS <- rt.cop.QRS * ngen[1]/ngen[2] # scale up run time (e.g. for G)
     }
     ## Expected behavior: scaled run time for Gumbel, NA for nested Gumbel
 
     ## GMMN PRS (no need for replicates)
     d <- dim(copula)
     set.seed(271)
-    rt.GMMN.PRS <- timer(predict(GMMN, x = matrix(rnorm(ngen * d), ncol = d)))
+    rt.GMMN.PRS <- timer(predict(GMMN, x = matrix(rnorm(ngen[1] * d), ncol = d)))
 
     ## GMMN QRS (no need for replicates; would also make seed passing more difficult)
-    rt.GMMN.QRS <- timer(predict(GMMN, x = qnorm(sobol(ngen, d = d, randomize = "Owen", seed = seed))))
+    rt.GMMN.QRS <- timer(predict(GMMN, x = qnorm(sobol(ngen[2], d = d, randomize = "Owen", seed = seed))))
 
     ## Return
     c("Copula PRS" = rt.cop.PRS,  "Copula QRS" = rt.cop.QRS,
