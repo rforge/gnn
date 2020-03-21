@@ -628,7 +628,7 @@ appendix <- function(copula, name, model, randomize)
 
 ### 1 Copulas we use ###########################################################
 
-taus <- c(0.25, 0.5, 0.75) # Kendall's tau considered
+taus <- c(0.25, 0.5, 0.75) # Kendall's taus considered
 
 
 ### 1.1 d = 2 ##################################################################

@@ -2,7 +2,7 @@
 
 ## Measuring run time for certain examples in Hofert, Prasad, Zhu ("Quasi-random
 ## sampling for multivariate distributions via generative neural networks"). The
-## NNs were trained on an NVIDIA Tesla P100 GPU.
+## NNs were trained on an NVIDIA Tesla P100 GPU. This script runs in about 3h.
 
 
 ### Setup ######################################################################
