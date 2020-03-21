@@ -379,7 +379,7 @@ file <- "fig_elapsed_time_R_over_TensorFlow.pdf"
 pdf(file, bg = "transparent", width = 7, height = 7)
 opar <- par(pty = "s")
 plot(n, res[,1], type = "l", log = "x", ylim = range(res), xaxt = "n",
-     xlab = "Sample size n",
+     xlab = expression(n[gen]),
      ylab = "Elapsed time of R implementation / TensorFlow implementation")
 labels <- sapply(1:length(n), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
 axis(1, at = n, labels = labels)
