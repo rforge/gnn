@@ -1,8 +1,10 @@
 ## By Marius Hofert and Avinash Prasad
 
 ## Measuring run time for certain examples in Hofert, Prasad, Zhu ("Quasi-random
-## sampling for multivariate distributions via generative neural networks"). The
-## NNs were trained on an NVIDIA Tesla P100 GPU. This script runs in about 3h.
+## sampling for multivariate distributions via generative neural networks").
+## Training times are obtained from running this script on an NVIDIA Tesla P100
+## GPU (about 3h), run times of the various methods are obtained from running
+## this script locally (as the GPU's run time measurements weren't reliable).
 
 
 ### Setup ######################################################################
