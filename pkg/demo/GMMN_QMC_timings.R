@@ -139,6 +139,36 @@ timings <- function(copula, cstrng, file)
     res
 }
 
+##' @title Load and Extract the Model, Parameters and Dimensions
+##' @param x string specifying the GMMN
+##' @return 3-list containing the model, parameters and dimensions of all layers
+##' @author Marius Hofert
+get_model_param_dim <- function(x)
+{
+    load(paste0(x,".rda"))
+    gnn <- get(x)
+    model <- to_callable(gnn)[["model"]] # get trained model
+    param <- get_weights(model)
+    names(param) <- paste0(c("W", "b"), rep(seq_len(length(gnn[["dim"]]) -1), each = 2))
+    list(model = model, param = param, dim = gnn[["dim"]])
+}
+
+##' @title Compute a Linear Transformation
+##' @param x input
+##' @param A matrix
+##' @param b vector
+##' @return x A + b
+##' @author Marius Hofert
+trafo <- function(x, A, b) x %*% A + rep(b, each = nrow(x))
+
+##' @title R Implementation of predict()
+##' @param x evaluation points
+##' @param params GMMN parameters
+##' @return GMMN output
+##' @author Marius Hofert
+predictR <- function(x, param)
+    plogis(trafo(pmax(trafo(x, A = param$W1, b = param$b1), 0), A = param$W2, b = param$b2))
+
 
 ### 1 Copula objects used ######################################################
 
@@ -302,3 +332,63 @@ res.sampling <- matrix(noquote(sprintf("%.4f", c(
 
 ## Convert to table
 toLatex(ftable(res.sampling))
+
+
+### 4 Run time comparison of R implementation in comparison to TensorFlow ######
+
+## GMMNs considered
+GMMNs <- c("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5",
+           "GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5",
+           "GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
+
+
+### 4.1 Accuracy ###############################################################
+
+mod <- get_model_param_dim(GMMNs[1])
+d <- mod$dim[1]
+n <- 1e5
+set.seed(271)
+U. <- matrix(rnorm(n * d), ncol = d)
+system.time(U.TF <- predict(mod$model, x = U.))
+system.time(U.R  <- predictR(U., param = mod$param))
+stopifnot(all.equal(U.TF, U.R, tolerance = 1e-7))
+
+
+### 4.2 Run time as a function of n for several GMMNs ##########################
+
+## Compute run times as a function of n
+n <- 10^seq(1, 6, by = 0.5) # sample sizes considered
+d <- c(2, 5, 10) # dimensions considered
+set.seed(271); U. <- matrix(rnorm(max(n) * max(d)), ncol = max(d)) # generate for the max. sample size and dimension
+res <- matrix(, nrow = length(n), ncol = length(d)) # (length(n), length(d))-matrix
+pb <- txtProgressBar(max = length(d) * length(n), style = 3)
+for(j in seq_along(d)) {
+    mod <- get_model_param_dim(GMMNs[j])
+    for(i in seq_along(n)) {
+        U.. <- U.[1:n[i], 1:d[j], drop = FALSE]
+        res[i, j] <-
+            mean(replicate(10, expr = system.time(predictR(U.., param = mod$param))[["elapsed"]] /
+                                   system.time(predict(mod$model, x = U..))[["elapsed"]]))
+        setTxtProgressBar(pb, length(n) * (j-1) + i)
+    }
+}
+close(pb)
+
+## Plot
+file <- "fig_elapsed_time_R_over_TensorFlow.pdf"
+pdf(file, bg = "transparent", width = 7, height = 7)
+opar <- par(pty = "s")
+plot(n, res[,1], type = "l", log = "x", ylim = range(res), xaxt = "n",
+     xlab = "Sample size n",
+     ylab = "Elapsed time of R implementation / TensorFlow implementation")
+labels <- sapply(1:length(n), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
+axis(1, at = n, labels = labels)
+lines(n, res[,2], lty = 2)
+lines(n, res[,3], lty = 3)
+abline(h = 1, lty = 4)
+legend("bottomright", bty = "n", col = 1, lty = 1:3, legend = paste("d =", d))
+mtext(substitute(italic(t)[nu.]~"copula with Kendall's tau"~tau==tau.,
+                 list(nu. = nu, tau. = taus[2])),
+      side = 4, line = 0.5, adj = 0)
+par(opar)
+if(require(crop)) dev.off.crop(file) else dev.off(file)
