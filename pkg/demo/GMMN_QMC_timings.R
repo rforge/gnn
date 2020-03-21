@@ -4,7 +4,8 @@
 ## sampling for multivariate distributions via generative neural networks").
 ## Training times are obtained from running this script on an NVIDIA Tesla P100
 ## GPU (about 3h), run times of the various methods are obtained from running
-## this script locally (as the GPU's run time measurements weren't reliable).
+## this script locally (about 30min) as the GPU's run time measurements
+## weren't reliable.
 
 
 ### Setup ######################################################################
@@ -35,7 +36,7 @@ nepo <- 300L # number of epochs (one epoch = one pass through the complete train
 stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
 ## Number of samples to be generated
-ngen <- 1e6
+ngen <- 10
 
 
 ### 0 Auxiliary functions ######################################################
