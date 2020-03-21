@@ -37,7 +37,7 @@ stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 
 ## Number of samples to be generated (for those copulas with cCopula() analytically
 ## available and for all other copulas, respectively)
-ngen <- c(1e7, 1e3)
+ngen <- c(1e5, 1e3)
 
 
 ### 0 Auxiliary functions ######################################################
@@ -113,7 +113,7 @@ run_times <- function(copula, GMMN, seed = 271)
     rt.GMMN.PRS <- timer(predict(GMMN, x = matrix(rnorm(ngen[1] * d), ncol = d)))
 
     ## GMMN QRS (no need for replicates; would also make seed passing more difficult)
-    rt.GMMN.QRS <- timer(predict(GMMN, x = qnorm(sobol(ngen[2], d = d, randomize = "Owen", seed = seed))))
+    rt.GMMN.QRS <- timer(predict(GMMN, x = qnorm(sobol(ngen[1], d = d, randomize = "Owen", seed = seed))))
 
     ## Return
     c("Copula PRS" = rt.cop.PRS,  "Copula QRS" = rt.cop.QRS,
