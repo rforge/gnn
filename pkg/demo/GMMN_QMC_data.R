@@ -369,7 +369,7 @@ VRF_boxplot <- function(obj.vals,fn.name)
   boxplot(list(GPRS = GPRS, GQRS = GQRS), 
           names=c("GMMN PRS","GMMN QRS"),ylab=fn.name)
   mtext(substitute(B.~"replications, d ="~d.~", n ="~n.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
-                   list(B. = B, d. = d, n. = n, VQ = VarQ,PQ= PIM.Q)),
+                   list(B. = B, d. = d, n. = n, VQ = VRF.Q,PQ= PIM.Q)),
         side = 4, line = 0.5, adj = 0)
 }
 
@@ -436,21 +436,21 @@ res <- objective_functions(B=B, n=n,marginal.fits=marginal.models$fit,
 ## 2.2  Visual assessment of variance reduction effect for estimating each of four objective functions
 
 file <- paste0("fig_boxplot_exceedprob99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file))
+if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(obj.vals=res[1,,],fn.name=dimnames(res)[[1]][1])
 if(doPDF) dev.off.crop(file)
 
 file <- paste0("fig_boxplot_ES99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file))
+if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(obj.vals=res[2,,],fn.name=dimnames(res)[[1]][2])
 if(doPDF) dev.off.crop(file)
 
 file <- paste0("fig_boxplot_firstlloc","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file))
+if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
 VRF_boxplot(obj.vals=res[3,,],fn.name=dimnames(res)[[1]][3])
 if(doPDF) dev.off.crop(file)
 
 file <- paste0("fig_boxplot_callpayoff","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file))
+if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(obj.vals=res[4,,],fn.name=dimnames(res)[[1]][4])
 if(doPDF) dev.off.crop(file)
