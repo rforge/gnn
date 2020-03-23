@@ -440,7 +440,7 @@ if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(obj.vals=res[1,,],fn.name=dimnames(res)[[1]][1])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_ES99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_VaR99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(obj.vals=res[2,,],fn.name=dimnames(res)[[1]][2])
 if(doPDF) dev.off.crop(file)
