@@ -287,7 +287,7 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
 objective_functions <- function(B, n,marginal.fits,GMMN, randomize, series.strng)
 {
 ## File name for loading and saving realizations of objective functions
-file <- paste0("objective_functions","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.strng,".rds")
+file <- paste0("objective_functions","_dim_",d,"_B_",B,"_",series.strng,".rds")
   if (file.exists(file)) {
     readRDS(file)
   } else {
