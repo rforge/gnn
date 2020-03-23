@@ -334,8 +334,8 @@ file <- paste0("objective_functions","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.
         
         ## 4) Compute Basket Call option payoff with strike K=2
         BC_pay <- function(X,K=2) pmax(rowMeans(X)-K,0)
-        r[4,] <- c(BC_pay(qfittedt(U.GMMN.PRS)),
-                   BC_pay(qfittedt(U.GMMN.QRS)))
+        r[4,] <- c(mean(BC_pay(qfittedt(U.GMMN.PRS))),
+                   mean(BC_pay(qfittedt(U.GMMN.QRS))))
         
       ## Return of aux()
       r
@@ -430,7 +430,7 @@ if(doPDF) dev.off.crop(file)
 set.seed(271)  # For reproducibility 
 B <- 200 # Number of replications
 n <- 1000
-res <- objective_functions(B=B, n=n,marginal.fits=marginal.models,
+res <- objective_functions(B=B, n=n,marginal.fits=marginal.models$fit,
                     GMMN=dep.models$model.GMMN, randomize="Owen", series.strng=series.strng)
 
 ## 2.2  Visual assessment of variance reduction effect for estimating each of four objective functions
