@@ -145,6 +145,10 @@ dependence_fit <- function(U,GMMN.dim, file)
                        fitCopula(normalCopula(dim = d),
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
+                   "norm_un" = {
+                       fitCopula(normalCopula(dim = d, disptstr = "un"),
+                                 data = U, method = "mpl", estimate.variance = FALSE)
+                   },
                    "t_ex" = {
                        fitCopula(tCopula(dim = d),
                                  data = U, method = "mpl", estimate.variance = FALSE)
@@ -164,7 +168,7 @@ dependence_fit <- function(U,GMMN.dim, file)
                    },
                    stop("Wrong 'method'"))
         ## Since train_once() already saves GMMN models we only need to save the copula models
-        if(!grepl("GMMN",file)) save_rda(fitted.model, file = file)
+        if(!grepl("GMMN", file)) save_rda(fitted.model, file = file)
     }
     fitted.model
 }
@@ -173,16 +177,16 @@ dependence_fit <- function(U,GMMN.dim, file)
 ### 0.4 Modeling multivariate time series ######################################
 
 ##' @title Fitting all Dependence Models for a Specified Dataset
-##' @param type.series see get.ts()
-##' @param train.period see get.ts()
-##' @param test.period see get.ts()
+##' @param type.series see get_ts()
+##' @param train.period see get_ts()
+##' @param test.period see get_ts()
 ##' @param with.mu see marginal_ts_fit()
 ##' @param pca.dim numeric value specifying the number of PCs to be used for
 ##'        dimension reduction
 ##' @return list containing the fitted marginal models, the PCA model (if used)
 ##'         and a list of fitted dependence models (4 copulas and 3 GMMNs)
-all_multivariate_ts_fit <- function(type.series, train.period, test.period,
-                                    pca.dim = NULL, with.mu = TRUE)
+all_MTS_fits <- function(type.series, train.period, test.period,
+                         pca.dim = NULL, with.mu = TRUE)
 {
     ## For interest rate data we have a handful of different specifications
     if (grepl("ZCB", type.series)) {
@@ -194,12 +198,12 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
                     test.period = test.period)
     }
 
-    ## File name for loading-saving ARMA-GARCH associated with type.series
+    ## File name for loading-saving ARMA-GARCH models associated with type.series
     marginal.file <- paste0("ARMA_GARCH_", paste0(train.period, collapse = "_"),
                             "_", type.series, ".rds")
 
     ## 1) First we feed the training dataset to marginal_ts_fit()
-    marginal.models <- marginal_ts_fit(data = X$train, with.mu = with.mu,
+    marginal.models <- marginal_ts_fit(X$train, with.mu = with.mu,
                                        file = marginal.file) # fit marginal time series models
     standard.resid <- lapply(marginal.models$fit, residuals, standardize = TRUE) # grab out standardized residuals
     Y <- as.matrix(do.call(merge, standard.resid)) # converting residuals to matrix data
@@ -223,9 +227,9 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
     dim.hid1 <- 100 # GMMN hyperparameters
     dim.hid2 <- 300
     dim.hid3 <- 600
-    nbat <- ntrn
+    nbat <- ntrn # batch optimization
 
-    ## 4) Fitting the four copula models
+    ## 4) Fitting the copula models
     file.gumbel  <- paste0("cop_","gumbel", "_dim_",dim.in.out,
                            if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.norm.ex <- paste0("cop_","norm_ex","_dim_",dim.in.out,
@@ -239,7 +243,7 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
     model.t.ex    <- dependence_fit(U = U, file = file.t.ex)
     model.t.un    <- dependence_fit(U = U, file = file.t.un)
 
-    ## 5) Fitting the three GMMN models
+    ## 5) Fitting the GMMN models
     file.G1 <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid1,"_",dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
                       "_nepo_",nepo, if(!is.null(pca.dim)) "_PCA","_",type.series,".rda")
     file.G2 <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid2,"_",dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
@@ -266,11 +270,11 @@ all_multivariate_ts_fit <- function(type.series, train.period, test.period,
 ### 0.5 Evaluating fitted dependence models using Maximum Mean Discrepancy (MMD)
 
 ##' @title Extract the Dependence of Multivariate Time Series in the Test Period
-##' @param type.series see get.ts()
-##' @param train.period see get.ts()
-##' @param test.period see get.ts()
+##' @param type.series see get_ts()
+##' @param train.period see get_ts()
+##' @param test.period see get_ts()
 ##' @param with.mu see marginal_ts_fit()
-##' @param pca.dim see all_multivariate_ts_fit()
+##' @param pca.dim see all_MTS_fits()
 ##' @return (tau, d*)-matrix containing the underlying dependence of the test dataset
 extract_dependence_ts <- function(type.series,train.period,test.period,pca.dim=NULL,with.mu=TRUE)
 {
@@ -365,11 +369,11 @@ MMD_eval <- function(generators, U.test, bandwidth = seq(0.1, 0.9, by = 0.2))
 }
 
 ##' @title B Realizations of the MMD Metric
-##' @param type.series see get.ts()
-##' @param train.period see get.ts()
-##' @param test.period see get.ts()
+##' @param type.series see get_ts()
+##' @param train.period see get_ts()
+##' @param test.period see get_ts()
 ##' @param with.mu see marginal_ts_fit()
-##' @param pca.dim see all_multivariate_ts_fit()
+##' @param pca.dim see all_MTS_fits()
 ##' @param B numeric value specifying the number of realization of the MMD
 ##'        statistic to compute
 ##' @return (8,B) matrix containing B realizations for 8 models
@@ -388,8 +392,8 @@ MMD_metric <- function(type.series, train.period, test.period, with.mu = TRUE,
     if(file.exists(file)) {
         mmd.vals <- readRDS(file)
     } else {
-        models <- all_multivariate_ts_fit(type.series = type.series, train.period = train.period,
-                                          test.period = test.period, with.mu = with.mu, pca.dim = pca.dim)
+        models <- all_MTS_fits(type.series = type.series, train.period = train.period,
+                               test.period = test.period, with.mu = with.mu, pca.dim = pca.dim)
         ## List of dependence model generators
         generators <- list(gen.indep      = models$dependence$model.indep,
                            gen.copgumbel  = models$dependence$model.gumbel@copula,
@@ -528,11 +532,11 @@ distribution_forecast_ts <- function(n.samples, n.test, margin.model, dep.model,
 }
 
 ##' @title Empirical Distribution Forecasts for all Fitted Multivariate Time Series Models
-##' @param type.series see get.ts()
-##' @param train.period see get.ts()
-##' @param test.period see get.ts()
+##' @param type.series see get_ts()
+##' @param train.period see get_ts()
+##' @param test.period see get_ts()
 ##' @param with.mu see marginal_ts_fit()
-##' @param pca.dim see all_multivariate_ts_fit()
+##' @param pca.dim see all_MTS_fits()
 ##' @param n.samples see distribution_forecast_ts()
 ##' @param h see distribution_forecast_ts()
 ##' @return 8-list corresponding to the 8 dependence models considered
@@ -554,10 +558,10 @@ all_distribution_forecast_ts <- function(type.series, train.period, test.period,
 
     ## Grab out models
     n.test <- nrow(X$test) # number of observation in the test dataset
-    models <- all_multivariate_ts_fit(type.series  = type.series, # all fitted multiv. time series models
-                                      train.period = train.period,
-                                      test.period  = test.period,
-                                      with.mu = with.mu, pca.dim = pca.dim)
+    models <- all_MTS_fits(type.series  = type.series, # all fitted multiv. time series models
+                           train.period = train.period,
+                           test.period  = test.period,
+                           with.mu = with.mu, pca.dim = pca.dim)
     margin.models <- models$marginal # marginal models
     PCA.model     <- models$PCA # PCA
     dep.models    <- models$dependence # dependence models
@@ -671,15 +675,15 @@ distribution_forecast_eval <- function(distribution.forecasts, X,
 ### 0.8 Plot ###################################################################
 
 ##' @title Scatter plot of MMD metrics vs forecast metrics
-##' @param type.series see get.ts()
-##' @param train.period see get.ts()
-##' @param test.period see get.ts()
+##' @param type.series see get_ts()
+##' @param train.period see get_ts()
+##' @param test.period see get_ts()
 ##' @param type.metric forecast evaluation metric: variogram score, MSE and
 ##'        absolute error of portfolio VaR exceedance, i.e.
 ##'        abs(actual exceedance - expected exceedance)
 ##' @param alpha The alpha used for calculating the portfolio VaR exceedance
 ##' @param with.mu see marginal_ts_fit()
-##' @param pca.dim see all_multivariate_ts_fit()
+##' @param pca.dim see all_MTS_fits()
 ##' @param n.samples see distribution_forecast_ts()
 ##' @param B see MMD_metric()
 ##' @param p see distribution_forecast_eval()
