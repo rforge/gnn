@@ -27,7 +27,6 @@ library(qrmtools) # for ES_t(), ARMA_GARCH_fit()
 library(qrmdata) # for required datasets
 
 ## Global training parameters
-package <- NULL # TODO: needed?
 dim.hid <- 300L # dimension of the (single) hidden layer
 nepo <- 300L # number of epochs (one epoch = one pass through the complete training dataset while updating the GNN's parameters)
 ngen <- 10000L # sample size of the generated data
@@ -82,7 +81,7 @@ marginal_ts_fit <- function(data, file, garch.order = c(1,1), arma.order = c(1,1
 ##' @return fitted copula or GMMN models
 dependence_fit <- function(U, GMMN.dim, file)
 {
-    if (exists_rda(file, names = rm_ext(basename(file)), package = package)) {
+    if (exists_rda(file, names = rm_ext(basename(file)))) {
         fitted.model <- read_rda(file = file, names = rm_ext(basename(file)))
         if(grepl("GMMN",file)) fitted.model <- to_callable(fitted.model) # unserialization for GMMNs
     } else { # fitting and saving copulas and GMMNs
@@ -120,8 +119,7 @@ dependence_fit <- function(U, GMMN.dim, file)
                    },
                    "GMMN" = {
                        train_once(GMMN_model(GMMN.dim), data = U,
-                                  batch.size = n, nepoch = nepo, file = file,
-                                  package = package)
+                                  batch.size = n, nepoch = nepo, file = file)
                    },
                    stop("Wrong 'method'"))
         ## Since train_once() already saves GMMN models we only need to save the copula models
@@ -433,7 +431,7 @@ pairs2(U.trn, pch = ".")
 if(doPDF) dev.off.crop(file)
 
 ## Computing two-sample gof test statistics
-B <- 100 
+B <- 100
 gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng)
 
 ## Visual assessment of the two-sample gof test statistics
