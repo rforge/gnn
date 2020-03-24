@@ -53,8 +53,8 @@ stopifnot(ncores == 1) # as of 2019, TensorFlow does not allow multicore calcula
 
 ### 0.1 Computing ingredients ##################################################
 
-##' @title Compute Cramer-von Mises Statistic for B Replications of Samples of Size n
-##'        from a Copula PRNG and a GMMN PRNG
+##' @title Compute Cramer-von Mises Statistic for B Replications of Copula PRS,
+##'        GMMN PRS and GMMN QRS of Size n Each
 ##' @param B number of replications
 ##' @param n sample size of the generated (copula and GMMN) samples
 ##' @param copula copula object
@@ -63,10 +63,10 @@ stopifnot(ncores == 1) # as of 2019, TensorFlow does not allow multicore calcula
 ##' @param file character string (with ending .rds) specifying the file
 ##'        to save the results in
 ##' @return (B, 3)-matrix containing the B replications of the Cramer-von Mises
-##'         statistic evaluated based on the generated pseudo-samples from
-##'         'copula', the GMMN PRNs and the GMMN QRNs
+##'         statistic evaluated based on the generated copula PRS, GMMN PRS and
+##'         GMMN QRS
 ##' @author Marius Hofert
-##' @note Could have added QRNGs based on cCopula() for those copulas available
+##' @note Could have added QRS based on cCopula() for those copulas available
 CvM <- function(B, n, copula, GMMN, randomize, file)
 {
     if (file.exists(file)) {
@@ -78,16 +78,16 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
 
         ## Auxiliary function
         aux <- function(b) { # the following is independent of 'b'
-            ## Draw PRNs and QRNs
-            U.cop.PRNG  <- rCopula(n, copula = copula) # generate PRNs from copula
-            N.PRNG <- matrix(rnorm(n * d), ncol = d) # PRNs from the prior
-            U.GMMN.PRNG <- pobs(predict(GMMNmod, x = N.PRNG)) # generate from the GMMN PRNG
-            N.QRNG <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # QRNs from the prior
-            U.GMMN.QRNG <- pobs(predict(GMMNmod, x = N.QRNG)) # generate from the GMMN QRNG
+            ## Draw PRS and QRS
+            U.cop.PRS  <- rCopula(n, copula = copula) # copula PRS
+            N.PRS <- matrix(rnorm(n * d), ncol = d) # prior PRS
+            U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
+            N.QRS <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # prior QRS
+            U.GMMN.QRS <- pobs(predict(GMMNmod, x = N.QRS)) # GMMN QRS
             ## Compute the Cramer-von Mises statistic for each of the samples
-            c(gofTstat(U.cop.PRNG,  copula = copula), # CvM statistic for PRNs
-              gofTstat(U.GMMN.PRNG, copula = copula), # CvM statistic for GMMN PRNs
-              gofTstat(U.GMMN.QRNG, copula = copula)) # CvM statistic for GMMN QRNs
+            c(gofTstat(U.cop.PRS,  copula = copula), # CvM statistic for copula PRS
+              gofTstat(U.GMMN.PRS, copula = copula), # CvM statistic for GMMN PRS
+              gofTstat(U.GMMN.QRS, copula = copula)) # CvM statistic for GMMN QRS
         }
 
         ## Replications
@@ -98,14 +98,14 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
 
         ## Check, save and return
         stopifnot(dim(res) == c(B, 3)) # sanity check
-        colnames(res) <- c("CvM.cop.PRNG", "CvM.GMMN.PRNG", "CvM.GMMN.QRNG")
+        colnames(res) <- c("CvM.cop.PRS", "CvM.GMMN.PRS", "CvM.GMMN.QRS")
         saveRDS(res, file = file)
         res
     }
 }
 
-##' @title Compute Errors for Four Test Functions for B Replications of Samples
-##'        of Sizes n from a Copula PRNG and QRNG and a GMMN PRNG and QRNG
+##' @title Compute Errors for Test Functions for B Replications of Copula PRS,
+##'        GMMN PRS, GMMN QRS and Copula QRS of Size n Each
 ##' @param B number of replications
 ##' @param n vector of sample sizes of the generated (copula and GMMN) samples
 ##' @param copula copula object
@@ -113,12 +113,11 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
 ##' @param randomize type or randomization used
 ##' @param file character string (with ending .rds) specifying the file
 ##'        to save the results in
-##' @return (<4 test functions>, <4 RNGs>, <n>)-array containing the
-##'         errors (2x mad(), 2x sd()) based on B replications of the four
-##'         test functions (sum of squares, Sobol' g, 99% exceedance probability
-##'         and 99% ES) evaluated for four types of RNGs (copula PRNG,
-##'         GMMN PRNG, GMMN QRNG, copula QRNG) based on the sample sizes
-##'         specified by 'n'.
+##' @return (<2 test functions>, <2 random sampling types>, <n>)-array
+##'         containing the errors (1x mad(), 1x sd()) based on B replications
+##'         of the test functions (Sobol' g and 99% ES) evaluated for four types
+##'         of RS (copula PRS, GMMN PRS, GMMN QRS, copula QRS) based
+##'         on the sample sizes specified by 'n'.
 ##' @author Marius Hofert
 ##' @note Could have made this faster by only generating the largest sample
 ##'       and then take sub-samples (not so for sobol()-calls, though)
@@ -131,76 +130,72 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
         GMMNmod <- GMMN[["model"]]
         d <- dim(copula) # copula dimension
         nlen <- length(n)
-        dmnms <- list("Test function" = c("Sum of squares", "Sobol' g",
-                                          "Exceedance probability", "ES"),
-                      "RNG" = c("PRNG", "GMMN PRNG", "GMMN QRNG", "QRNG"),
+        dmnms <- list("Test function" = c("Sobol' g", "ES"),
+                      "RS" = c("Copula PRS", "GMMN PRS", "GMMN QRS", "Copula QRS"),
                       "n" = as.character(ns)) # dimnames of result object
 
         ## Helper function for the big iteration
         aux <- function(b) {
             ## Result object of aux()
-            r <- array(, dim = c(4, 4, nlen), dimnames = dmnms) # test function, type of RNG, sample size
+            r <- array(, dim = c(2, 4, nlen), dimnames = dmnms) # test function, type of RNG, sample size
 
             ## Loop
             for(nind in seq_len(nlen)) { # iterate over sample sizes
-                ## 0) Random number generation
-                ## Draw PRNs
+                ## Random number generation
                 n. <- n[nind]
-                U.cop.PRNG  <- rCopula(n., copula = copula) # generate PRNs from copula
-                ## Draw GMMN PRNs
-                N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
-                U.GMMN.PRNG <- predict(GMMNmod, x = N.PRNG) # generate from the GMMN PRNG
-                U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG) # compute pseudo-observations
-                ## Draw GMMN QRNs
+                U.cop.PRS  <- rCopula(n., copula = copula) # copula PRS
+                N.PRS <- matrix(rnorm(n. * d), ncol = d) # PRS from the prior
+                U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
-                N.QRNG <- qnorm(sob) # QRNs from the prior
-                U.GMMN.QRNG <- predict(GMMNmod, x = N.QRNG) # generate from the GMMN QRNG
-                U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
-                ## If available in analytical form, draw from a real QRNG
+                N.QRS <- qnorm(sob) # prior QRS
+                U.GMMN.QRS <- pobs(predict(GMMNmod, x = N.QRS)) # GMMN QRS
+                ## If available in analytical form, draw real QRS
                 ## Note: cCopula() now exists for moCopula() but wasn't included here
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
                     is(copula, "claytonCopula")
                 if(cCopula.inverse.avail)
-                    U.cop.QRNG <- cCopula(sob, copula = copula, inverse = TRUE)
+                    U.cop.QRS <- cCopula(sob, copula = copula, inverse = TRUE)
 
-                ## 1) Compute the sum of squares test function
-                ##    Note: We use the raw samples here (without pobs()) as this
-                ##          test function checks the quality of the margins.
-                r[1,,nind] <- c(mean(sum_of_squares(U.cop.PRNG)),
-                                mean(sum_of_squares(U.GMMN.PRNG)),
-                                mean(sum_of_squares(U.GMMN.QRNG)),
-                                if(cCopula.inverse.avail) # otherwise U.cop.QRNG doesn't exist
-                                    mean(sum_of_squares(U.cop.QRNG)) else NA)
-
-                ## 2) Compute the Sobol' g test function
+                ## 1) Compute the Sobol' g test function
                 ##    Note: Requires cCopula() to be available (which holds for all 'copula'
                 ##          we call this function with except NACs)
                 cCopula.avail <- !is(copula, "outer_nacopula")
-                r[2,,nind] <- if(cCopula.avail) {
-                                  c(mean(sobol_g(U.cop.PRNG,       copula = copula)),
-                                    mean(sobol_g(U.GMMN.PRNG.pobs, copula = copula)),
-                                    mean(sobol_g(U.GMMN.QRNG.pobs, copula = copula)),
-                                    if(cCopula.inverse.avail) # otherwise U.cop.QRNG doesn't exist
-                                        mean(sobol_g(U.cop.QRNG, copula = copula)) else NA)
+                r[1,,nind] <- if(cCopula.avail) {
+                                  c(mean(sobol_g(U.cop.PRS,  copula = copula)),
+                                    mean(sobol_g(U.GMMN.PRS, copula = copula)),
+                                    mean(sobol_g(U.GMMN.QRS, copula = copula)),
+                                    if(cCopula.inverse.avail) # otherwise U.cop.QRS doesn't exist
+                                        mean(sobol_g(U.cop.QRS, copula = copula)) else NA)
                               } else rep(NA, 4)
 
-                ## 3) Compute the exceedance probability over the (0.99,..,0.99) threshold
+                ## 2) Compute the p-level expected shortfall
                 ##    Note: Instead of Clayton, we use the survival Clayton copula here
+                trafo <- function(u) if(is(copula, "claytonCopula")) 1 - u else u # instead of Clayton we use survival Clayton here
                 p <- 0.99
-                trafo <- function(u) if(is(copula, "claytonCopula")) 1 - u else u
-                r[3,,nind] <- c(mean(exceedance(trafo(U.cop.PRNG),       q = p)),
-                                mean(exceedance(trafo(U.GMMN.PRNG.pobs), q = p)),
-                                mean(exceedance(trafo(U.GMMN.QRNG.pobs), q = p)),
-                                if(cCopula.inverse.avail) # otherwise U.cop.QRNG doesn't exist
-                                    mean(exceedance(trafo(U.cop.QRNG), q = p)) else NA)
+                r[2,,nind] <- c(ES_np(qnorm(trafo(U.cop.PRS)),  level = p),
+                                ES_np(qnorm(trafo(U.GMMN.PRS)), level = p),
+                                ES_np(qnorm(trafo(U.GMMN.QRS)), level = p),
+                                if(cCopula.inverse.avail) # otherwise U.cop.QRS doesn't exist
+                                    ES_np(qnorm(trafo(U.cop.QRS)), level = p) else NA)
 
-                ## 4) Compute the p-level expected shortfall
-                ##    Note: Instead of Clayton, we use the survival Clayton copula here
-                r[4,,nind] <- c(ES_np(qnorm(trafo(U.cop.PRNG)),       level = p),
-                                ES_np(qnorm(trafo(U.GMMN.PRNG.pobs)), level = p),
-                                ES_np(qnorm(trafo(U.GMMN.QRNG.pobs)), level = p),
-                                if(cCopula.inverse.avail) # otherwise U.cop.QRNG doesn't exist
-                                    ES_np(qnorm(trafo(U.cop.QRNG)), level = p) else NA)
+                ## Other possible test functions
+                ## 1) Sum of squares
+                ##    Note: - This test function checks the margins only anyways.
+                ##          - This would need to be evaluated without pobs() for the GMMN samples
+                ##            as pobs() can be shown to always lead to the same value.
+                ## r[.,,nind] <- c(mean(sum_of_squares(U.cop.PRS)),
+                ##                 mean(sum_of_squares(U.GMMN.PRS.)), # without pobs()
+                ##                 mean(sum_of_squares(U.GMMN.QRS.)), # without pobs()
+                ##                 if(cCopula.inverse.avail) # otherwise U.cop.QRS doesn't exist
+                ##                     mean(sum_of_squares(U.cop.QRS)) else NA)
+                ## 2) Exceedance probability over
+                ##    Note: This most likely requires much larger n's (to have at least some
+                ##          exceedances)
+                ## r[.,,nind] <- c(mean(exceedance(trafo(U.cop.PRS),  q = p)),
+                ##                 mean(exceedance(trafo(U.GMMN.PRS), q = p)),
+                ##                 mean(exceedance(trafo(U.GMMN.QRS), q = p)),
+                ##                 if(cCopula.inverse.avail) # otherwise U.cop.QRS doesn't exist
+                ##                     mean(exceedance(trafo(U.cop.QRS), q = p)) else NA)
             }
 
             ## Return of aux()
@@ -216,11 +211,9 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
         dimnames(res.)[[4]] <- 1:B  # update dimnames
 
         ## Compute errors, save and return
-        res <- array(, dim = c(4, 4, nlen), dimnames = dmnms[1:3]) # result object
+        res <- array(, dim = c(2, 4, nlen), dimnames = dmnms[1:3]) # result object
         res[1,,] <- apply(res.[1,,,], 1:2, mad) # apply mad() for fixed RNG, n combinations
-        res[2,,] <- apply(res.[2,,,], 1:2, mad) # apply mad() for fixed RNG, n combinations
-        res[3,,] <- apply(res.[3,,,], 1:2, sd)  # apply sd()  for fixed RNG, n combinations
-        res[4,,] <- apply(res.[4,,,], 1:2, sd)  # apply sd()  for fixed RNG, n combinations
+        res[2,,] <- apply(res.[2,,,], 1:2, sd)  # apply sd()  for fixed RNG, n combinations
         saveRDS(res, file = file)
         res
     }
@@ -230,10 +223,10 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
 ### 0.2 Plotting ###############################################################
 
 ##' @title Contours of the True Copula and Empirical Copulas based on
-##'        GMMN PRNG and GMMN QRNG
+##'        GMMN PRS and GMMN QRS
 ##' @param copula copula object
-##' @param uPRNG PRNG sample from GMMN
-##' @param uQRNG QRNG sample from GMMN
+##' @param uPRS GMMN PRS
+##' @param uQRS GMMN QRS
 ##' @param file character string (with ending .pdf) specifying the PDF file
 ##'        to plot to or not (if not provided)
 ##' @param n.grid number of grid points where to evaluate contours
@@ -241,10 +234,10 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
 ##' @param text text of legend
 ##' @return nothing (plot by side-effect)
 ##' @author Marius Hofert
-contourplot3 <- function(copula, uPRNG, uQRNG, file,
+contourplot3 <- function(copula, uPRS, uQRS, file,
                          n.grid = 26, corner = c(0.04, 0.02),
-                         text = c("True copula", "Empirical copula of GMMN PRNG",
-                                  "Empirical copula of GMMN QRNG"))
+                         text = c("True copula", "Empirical copula of GMMN PRS",
+                                  "Empirical copula of GMMN QRS"))
 {
     ## Contour plot of (true) copula
     cpTRUE <- contourplot2(copula, FUN = pCopula, region = FALSE, col = "gray50",
@@ -255,13 +248,13 @@ contourplot3 <- function(copula, uPRNG, uQRNG, file,
     ## Grid
     u <- seq(0, 1, length.out = n.grid)
     grid <- as.matrix(expand.grid(u1 = u, u2 = u))
-    ## Contour plots based on PRNG and QRNG
-    cpPRNG <- contourplot2(cbind(grid, z = C.n(grid, X = uPRNG)),
-                           region = FALSE, labels = FALSE, lty = 2, lwd = 1.3)
-    cpQRNG <- contourplot2(cbind(grid, z = C.n(grid, X = uQRNG)),
+    ## Contour plots based on PRS and QRS
+    cpPRS <- contourplot2(cbind(grid, z = C.n(grid, X = uPRS)),
+                          region = FALSE, labels = FALSE, lty = 2, lwd = 1.3)
+    cpQRS <- contourplot2(cbind(grid, z = C.n(grid, X = uQRS)),
                            region = FALSE, labels = FALSE, lty = 3, lwd = 2.3)
     ## Build plot object
-    plt <- cpTRUE + cpPRNG + cpQRNG # overlaid plot
+    plt <- cpTRUE + cpPRS + cpQRS # overlaid plot
     doPDF <- hasArg(file) && is.character(file)
     if(doPDF) pdf(file = file, bg = "transparent")
     par(pty = "s")
@@ -271,7 +264,7 @@ contourplot3 <- function(copula, uPRNG, uQRNG, file,
 
 ##' @title Plotting Rosenblatt-Transformed Bivariate Copula Samples
 ##' @param copula copula object
-##' @param u observations (from a PRNG, QRNG, GMMN PRNG or GMMN QRNG)
+##' @param u copula PRS, copula QRS, GMMN PRS or GMMN QRS
 ##' @param file character string (with ending .pdf) specifying the PDF file
 ##'        to plot to or not (if not provided)
 ##' @param xlab x-axis label
@@ -290,7 +283,7 @@ rosenplot <- function(copula, u, file,
 }
 
 ##' @title Scatter Plots
-##' @param u observations (from a PRNG, QRNG, GMMN PRNG or GMMN QRNG)
+##' @param u copula PRS, copula QRS, GMMN PRS or GMMN QRS
 ##' @param file character string (with ending .pdf) specifying the PDF file
 ##'        to plot to or not (if not provided)
 ##' @return nothing (plot by side-effect)
@@ -325,8 +318,8 @@ CvM_boxplot <- function(CvM, dim, model, file)
     doPDF <- hasArg(file) && is.character(file)
     if(doPDF) pdf(file = file, width = 7.4, height = 7.4)
     par(pty = "s")
-    boxplot(list(CvM[,"CvM.cop.PRNG"], CvM[,"CvM.GMMN.PRNG"], CvM[,"CvM.GMMN.QRNG"]),
-            names = c("Copula PRNG", "GMMN PRNG", "GMMN QRNG"),
+    boxplot(list(CvM[,"CvM.cop.PRS"], CvM[,"CvM.GMMN.PRS"], CvM[,"CvM.GMMN.QRS"]),
+            names = c("Copula PRS", "GMMN PRS", "GMMN QRS"),
             ylab = expression(S[n[gen]]))
     mtext(substitute(B~"replications, d ="~d*","~m,
                      list(B = nrow(CvM), d = dim., m = model)),
@@ -375,11 +368,11 @@ convergence_plot <- function(err, dim, model, filebname, B)
 
         ## Compute convergence rates (the larger alpha, the faster the convergence;
         ## for MC, alpha ~= 1/2 for sd [~= 1 for variance])
-        a <- round(c(PRNG      = ccoef(err.["PRNG",]),
-                     GMMN.QRNG = ccoef(err.["GMMN QRNG",]),
-                     QRNG      = ccoef(err.["QRNG",])), digits = 2)
+        a <- round(c(PRS      = ccoef(err.["PRS",]),
+                     GMMN.QRS = ccoef(err.["GMMN QRS",]),
+                     QRS      = ccoef(err.["QRS",])), digits = 2)
         if(all(is.na(a))) next # no plot; happens for Sobol' g test function and copulas without available cCopula()
-        ## Now it could still happen that a["QRNG"] is NA (omit this case from the plot then)
+        ## Now it could still happen that a["QRS"] is NA (omit this case from the plot then)
 
         ## Plot
         doPDF <- hasArg(filebname) && is.character(filebname)
@@ -390,15 +383,15 @@ convergence_plot <- function(err, dim, model, filebname, B)
         par(pty = "s")
         ylim <- range(err.[,], na.rm = TRUE)
         lgnd <- as.expression(
-            c(substitute("Copula PRNG,"~alpha == a., list(a. = a["PRNG"])),
-              substitute("GMMN QRNG,"~  alpha == a., list(a. = a["GMMN.QRNG"])),
-              if(!is.na(a["QRNG"]))
-                  substitute("Copula QRNG,"~alpha == a., list(a. = a["QRNG"]))))
-        plot(ns, err.["PRNG",], ylim = ylim, log = "xy", type = "l",
+            c(substitute("Copula PRS,"~alpha == a., list(a. = a["PRS"])),
+              substitute("GMMN QRS,"~  alpha == a., list(a. = a["GMMN.QRS"])),
+              if(!is.na(a["QRS"]))
+                  substitute("Copula QRS,"~alpha == a., list(a. = a["QRS"]))))
+        plot(ns, err.["PRS",], ylim = ylim, log = "xy", type = "l",
              xlab = expression(n[gen]), ylab = ylabels[ind])
-        lines(ns, err.["GMMN QRNG",], type = "l", lty = 2, lwd = 1.3)
-        if(!is.na(a["QRNG"])) {
-            lines(ns, err.["QRNG",], type = "l", lty = 3, lwd = 1.6)
+        lines(ns, err.["GMMN QRS",], type = "l", lty = 2, lwd = 1.3)
+        if(!is.na(a["QRS"])) {
+            lines(ns, err.["QRS",], type = "l", lty = 3, lwd = 1.6)
             legend("bottomleft", bty = "n", lty = 1:3, lwd = c(1, 1.3, 1.6), legend = lgnd)
         } else {
             legend("bottomleft", bty = "n", lty = 1:2, lwd = c(1, 1.3), legend = lgnd)
@@ -432,7 +425,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
 
     ## Generate training data
     set.seed(271) # for reproducibility
-    U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
+    U <- rCopula(ntrn, copula = copula) # generate training dataset (PRS)
     ## Train
     dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
@@ -450,23 +443,23 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
     seed <- 314
     set.seed(seed) # for reproducibility
-    N01.prior.PRNG <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRNs
-    N01.prior.QRNG <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRNs
-    U.GMMN.PRNG <- pobs(predict(GMMNmod, x = N01.prior.PRNG)) # GMMN PRNs
-    U.GMMN.QRNG <- pobs(predict(GMMNmod, x = N01.prior.QRNG)) # GMMN QRNs
+    N01.prior.PRS <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRS
+    N01.prior.QRS <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRS
+    U.GMMN.PRS <- pobs(predict(GMMNmod, x = N01.prior.PRS)) # GMMN PRS
+    U.GMMN.QRS <- pobs(predict(GMMNmod, x = N01.prior.QRS)) # GMMN QRS
 
     ## Contour, Rosenblatt and scatter plots
     cat("=> Computing contour, Rosenblatt and scatter plots\n")
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
-        contourplot3(copula, uPRNG = U.GMMN.PRNG, uQRNG = U.GMMN.QRNG,
+        contourplot3(copula, uPRS = U.GMMN.PRS, uQRS = U.GMMN.QRS,
                      file = paste0("GMMN_QMC_paper_fig_contours_",bname,".pdf"))
-        rosenplot(copula, u = U.GMMN.QRNG,
+        rosenplot(copula, u = U.GMMN.QRS,
                   file = paste0("GMMN_QMC_paper_fig_rosenblatt_",bname,".pdf"))
     }
     ## Scatter plots
     if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
-        lst <- list(PRNG = U[seq_len(ngen),], GMMN.PRNG = U.GMMN.PRNG, GMMN.QRNG = U.GMMN.QRNG)
-        nms <- c("PRNG", "GMMN_PRNG", "GMMN_QRNG")
+        lst <- list(PRS = U[seq_len(ngen),], GMMN.PRS = U.GMMN.PRS, GMMN.QRS = U.GMMN.QRS)
+        nms <- c("PRS", "GMMN_PRS", "GMMN_QRS")
         for(i in seq_along(lst))
             scatterplot(lst[[i]], file = paste0("GMMN_QMC_paper_fig_scatter_",bname,"_",nms[i],".pdf"))
     }
@@ -530,7 +523,7 @@ appendix <- function(copula, name, model, randomize)
 
     ## Generate training data
     set.seed(271) # for reproducibility
-    U <- rCopula(ntrn, copula = copula) # generate training dataset from a PRNG
+    U <- rCopula(ntrn, copula = copula) # generate training dataset (PRS)
     ## Train
     dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
@@ -554,7 +547,7 @@ appendix <- function(copula, name, model, randomize)
         n <- ns
         B <- B.conv
         nlen <- length(n)
-        dmnms <- list("RNG" = c("PRNG", "GMMN PRNG", "GMMN QRNG", "QRNG"),
+        dmnms <- list("RS" = c("PRS", "GMMN PRS", "GMMN QRS", "QRS"),
                       "n" = as.character(ns)) # dimnames of result object
 
         ## Helper function for the big iteration
@@ -565,33 +558,28 @@ appendix <- function(copula, name, model, randomize)
             ## Loop
             for(nind in seq_len(nlen)) { # iterate over sample sizes
                 ## 0) Random number generation
-                ## Draw PRNs
                 n. <- n[nind]
-                U.cop.PRNG  <- rCopula(n., copula = copula) # generate PRNs from copula
-                ## Draw GMMN PRNs
-                N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
-                U.GMMN.PRNG <- predict(GMMNmod, x = N.PRNG) # generate from the GMMN PRNG
-                U.GMMN.PRNG.pobs <- pobs(U.GMMN.PRNG) # compute pseudo-observations
-                ## Draw GMMN QRNs
+                U.cop.PRS  <- rCopula(n., copula = copula) # copula PRS
+                N.PRS <- matrix(rnorm(n. * d), ncol = d) # prior PRS
+                U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
-                N.QRNG <- qnorm(sob) # QRNs from the prior
-                U.GMMN.QRNG <- predict(GMMNmod, x = N.QRNG) # generate from the GMMN QRNG
-                U.GMMN.QRNG.pobs <- pobs(U.GMMN.QRNG) # compute pseudo-observations
-                ## If available in analytical form, draw from a real QRNG
+                N.QRS <- qnorm(sob) # prior QRS
+                U.GMMN.QRS <- pobs(predict(GMMNmod, x = N.QRS)) # GMMN QRS
+                ## If available in analytical form, draw real QRS
                 ## Note: cCopula() now exists for moCopula() but wasn't included here
                 cCopula.inverse.avail <- is(copula, "normalCopula") || is(copula, "tCopula") ||
                     is(copula, "claytonCopula")
                 if(cCopula.inverse.avail)
-                    U.cop.QRNG <- cCopula(sob, copula = copula, inverse = TRUE)
+                    U.cop.QRS <- cCopula(sob, copula = copula, inverse = TRUE)
                 ## 1) Compute the p-level expected shortfall
                 ##    Note: Instead of Clayton, we use the survival Clayton copula here
                 p <- 0.99
                 trafo <- function(u) if(is(copula, "claytonCopula")) 1 - u else u
-                r[,nind] <- c(ES_np(qnorm(trafo(U.cop.PRNG)),       level = p),
-                              ES_np(qnorm(trafo(U.GMMN.PRNG.pobs)), level = p),
-                              ES_np(qnorm(trafo(U.GMMN.QRNG.pobs)), level = p),
-                              if(cCopula.inverse.avail) # otherwise U.cop.QRNG doesn't exist
-                                  ES_np(qnorm(trafo(U.cop.QRNG)), level = p) else NA)
+                r[,nind] <- c(ES_np(qnorm(trafo(U.cop.PRS)),  level = p),
+                              ES_np(qnorm(trafo(U.GMMN.PRS)), level = p),
+                              ES_np(qnorm(trafo(U.GMMN.QRS)), level = p),
+                              if(cCopula.inverse.avail) # otherwise U.cop.QRS doesn't exist
+                                  ES_np(qnorm(trafo(U.cop.QRS)), level = p) else NA)
             }
 
             ## Return of aux()
@@ -719,7 +707,7 @@ NC.d55 <- onacopulaL("Clayton", nacList = nacList(d, th = th.C)) # nested Clayto
 NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 
 
-### 2 Train the GMMNs from a PRNG of the respective copula and analyze the results
+### 2 Train the GMMNs from PRS of the respective copula and analyze the results
 
 ### 2.1 Main part of the paper #################################################
 

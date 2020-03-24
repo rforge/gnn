@@ -283,7 +283,7 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
 ##' @param sig estimated marginal volatilities for financial objective functions
 ##' @param series.strng character string specifying the financial time series to
 ##'        be used
-##' @return (<4 objective functions>, <2 random sampling (RS) types>, <B replications>)-array
+##' @return (<4 objective functions>, <2 random sampling types>, <B replications>)-array
 ##' @author Avinash Prasad
 objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, series.strng)
 {
