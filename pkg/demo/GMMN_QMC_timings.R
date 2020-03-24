@@ -110,10 +110,10 @@ run_times <- function(copula, GMMN, seed = 271)
     ## GMMN PRS (no need for replicates)
     d <- dim(copula)
     set.seed(271)
-    rt.GMMN.PRS <- timer(predict(GMMN, x = matrix(rnorm(ngen[1] * d), ncol = d)))
+    rt.GMMN.PRS <- timer(pobs(predict(GMMN, x = matrix(rnorm(ngen[1] * d), ncol = d))))
 
     ## GMMN QRS (no need for replicates; would also make seed passing more difficult)
-    rt.GMMN.QRS <- timer(predict(GMMN, x = qnorm(sobol(ngen[1], d = d, randomize = "Owen", seed = seed))))
+    rt.GMMN.QRS <- timer(pobs(predict(GMMN, x = qnorm(sobol(ngen[1], d = d, randomize = "Owen", seed = seed)))))
 
     ## Return
     c("Copula PRS" = rt.cop.PRS,  "Copula QRS" = rt.cop.QRS,
