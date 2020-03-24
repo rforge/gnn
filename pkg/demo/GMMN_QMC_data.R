@@ -329,7 +329,7 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
             ## 1) ES_alpha
             ## Note: Survival copula used since log-returns are modeled
             level <- 0.99
-            r[1,] <- c(VaR_np(Z.PRS, level = level), VaR_np(Z.QRS, level = level))
+            r[1,] <- c(ES_np(Z.PRS, level = level), ES_np(Z.QRS, level = level))
 
             ## 2) CA_alpha for first risk according to Euler principle
             r[2,] <- c(alloc_np(Z.PRS, level = level)$allocation[1],
