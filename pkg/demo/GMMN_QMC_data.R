@@ -279,9 +279,9 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
 ##' @param series.strng character string specifying the financial time series to
 ##'        be used
 ##' @return (<4 objective functions>, <2 RS>, <B>)-array B realizations of the four
-##'         objective functions (99% exceedance probability, 99% VaR, Allocation (First) based on  
-##'         99% VaR and Basket Call payoff ) evaluated 
-##'          for two types of random sampling (GMMN PRS and GMMN QRS) based on 
+##'         objective functions (99% exceedance probability, 99% VaR, Allocation (First) based on
+##'         99% VaR and Basket Call payoff ) evaluated
+##'          for two types of random sampling (GMMN PRS and GMMN QRS) based on
 ##'         the sample size specified by 'n'.
 ##' @author Avinash Prasad
 objective_functions <- function(B, n,marginal.fits,GMMN, randomize, series.strng)
@@ -299,66 +299,67 @@ file <- paste0("objective_functions","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,
     ## in the evaluation of certain objective functions.
     qfittedt <- function(u) sapply(1:d, function(j)
       sqrt((nus.fits[j]-2)/nus.fits[j]) * qt(u[,j], df = nus.fits[j]))
-    
+
     dmnms <- list("Objective function" = c("Exceedance probability", "VaR",
                                       "Allocation first", "Basket call payoff"),
                   "RS" = c( "GMMN PRS", "GMMN QRS")) # dimnames of result object
-    
-    ## Helper function 
+
+    ## Helper function
     aux <- function(b) {
       ## Result object of aux()
       r <- array(, dim = c(4, 2), dimnames = dmnms) # objective function, type of RS
-    
+
         ## 0) Generate random samples
         ## Generate GMMN PRS
         U.GMMN.PRS <- pobs(predict(GMMNmod, x = matrix(rnorm(n * d), ncol = d)))
-        
+
         ## Generate GMMN QRS using randomized Sobol' sequence
-        U.GMMN.QRS <- pobs(predict(GMMNmod, x = qnorm(sobol(n,d=d,randomize=randomize,seed=b)))) 
-        
+        U.GMMN.QRS <- pobs(predict(GMMNmod, x = qnorm(sobol(n,d=d,randomize=randomize,seed=b))))
+
         ## 1) Compute the exceedance probability over the (0.99,..,0.99) threshold
         ## Note: Survival copula used since log-returns are modeled
         p <- 0.99
         r[1,] <- c(mean(exceedance(1-U.GMMN.PRS,   q = p)),
                        mean(exceedance(1-U.GMMN.QRS,  q = p)))
-                       
+
         ## 2) Compute the p-level Value-at-Risk
         ## Note: Survival copula used since log-returns are modeled
         r[2,] <- c(VaR_np(qfittedt(1-U.GMMN.PRS), level = p),
                        VaR_np(qfittedt(1-U.GMMN.QRS), level = p))
-        
+
         ## 3) Compute the p-level first (marginal) allocation; Euler principle
         ## Note: Survival copula used since log-returns are modeled
         r[3,] <- c(alloc_np(qfittedt(1-U.GMMN.PRS), level = p)$allocation[1],
                    alloc_np(qfittedt(1-U.GMMN.QRS), level = p)$allocation[1])
-        
+
         ## 4) Compute Basket Call option payoff with strike K=2
         BC_pay <- function(X,K=2) pmax(rowMeans(X)-K,0)
         r[4,] <- c(mean(BC_pay(qfittedt(U.GMMN.PRS))),
                    mean(BC_pay(qfittedt(U.GMMN.QRS))))
-        
+
       ## Return of aux()
       r
     } # aux()
-    
+
     ## Replications
     raw <- lapply(seq_len(B), function(b) aux(b))
     res <- simplify2array(raw) # convert list of 2-arrays to 3-array (dimension 'B' is added as last component)
     names(dimnames(res))[3] <- "Replication" # update name of dimnames
     dimnames(res)[[3]] <- 1:B  # update dimnames
-    
+
     ## Save results object
     saveRDS(res, file = file)
     res
   }
 }
-##' @title Boxplots of Objective Function realizations 
+
+##' @title Boxplots of Objective Function realizations
 ##' @param obj.vals return object of objective_functions()
 ##' @param fn.name Name of objective function
 ##' @return invisible (boxplot by side-effect)
 VRF_boxplot <- function(obj.vals,fn.name)
   {
-  ## Retrieve objective value realizations and compute variances 
+  ## Retrieve objective value realizations and compute variances
   varP <- var(GPRS <- obj.vals["GMMN PRS",])
   varQ <- var(GQRS <- obj.vals["GMMN QRS",])
 
@@ -366,12 +367,13 @@ VRF_boxplot <- function(obj.vals,fn.name)
   VRF.Q <- varP / varQ # VRF for QRS
   PIM.Q <- (varP - varQ) / varP * 100 # % improvement for QRS
   ## Box plot
-  boxplot(list(GPRS = GPRS, GQRS = GQRS), 
+  boxplot(list(GPRS = GPRS, GQRS = GQRS),
           names=c("GMMN PRS","GMMN QRS"),ylab=fn.name)
   mtext(substitute(B.~"replications, d ="~d.~", n ="~n.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
                    list(B. = B, d. = d, n. = n, VQ = VRF.Q,PQ= PIM.Q)),
         side = 4, line = 0.5, adj = 0)
 }
+
 
 ### 1 Retrieve financial time series data using qrmtools package ###############
 
@@ -423,34 +425,38 @@ if(doPDF) pdf(file = (file <- file), height = 9.5, width = 9.5)
 gof2stats_boxplot(gof.stats, ntrn = ntrn)
 if(doPDF) dev.off.crop(file)
 
-### 2  Assessing Variance reduction effects of GMMN QRS vs GMMN PRS #####################################
 
-### 2.1 Computing realizations of four objective functions based on GMMN PRS and GMMN QRS (n=1000)
+### 2  Assessing Variance reduction effects of GMMN QRS vs GMMN PRS ############
 
-set.seed(271)  # For reproducibility 
-B <- 200 # Number of replications
-n <- 1000
-res <- objective_functions(B=B, n=n,marginal.fits=marginal.models$fit,
-                    GMMN=dep.models$model.GMMN, randomize="Owen", series.strng=series.strng)
+### 2.1 Realizations of four objective functions based on GMMN PRS and GMMN QRS
 
-## 2.2  Visual assessment of variance reduction effect for estimating each of four objective functions
+## Evaluation each objective function B times based on n samples
+set.seed(271) # for reproducibility
+B <- 200 # number of replications
+n <- 1000 # sample size
+res <- objective_functions(B, n = n, marginal.fits = marginal.models$fit,
+                           GMMN = dep.models$model.GMMN,
+                           randomize = "Owen", series.strng = series.strng)
+
+
+### 2.2 Visual assessment of variance reduction effects ########################
 
 file <- paste0("fig_boxplot_exceedprob99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-VRF_boxplot(obj.vals=res[1,,],fn.name=dimnames(res)[[1]][1])
+VRF_boxplot(res[1,,], fn.name = dimnames(res)[[1]][1])
 if(doPDF) dev.off.crop(file)
 
 file <- paste0("fig_boxplot_VaR99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-VRF_boxplot(obj.vals=res[2,,],fn.name=dimnames(res)[[1]][2])
+VRF_boxplot(res[2,,], fn.name = dimnames(res)[[1]][2])
 if(doPDF) dev.off.crop(file)
 
 file <- paste0("fig_boxplot_firstlloc","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
-VRF_boxplot(obj.vals=res[3,,],fn.name=dimnames(res)[[1]][3])
+VRF_boxplot(res[3,,], fn.name = dimnames(res)[[1]][3])
 if(doPDF) dev.off.crop(file)
 
 file <- paste0("fig_boxplot_callpayoff","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-VRF_boxplot(obj.vals=res[4,,],fn.name=dimnames(res)[[1]][4])
+VRF_boxplot(res[4,,], fn.name = dimnames(res)[[1]][4])
 if(doPDF) dev.off.crop(file)
