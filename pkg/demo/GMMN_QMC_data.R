@@ -168,22 +168,22 @@ all_multivariate_ts_fits <- function(X, series.strng, train.period)
 
     ## 4) Fitting the copula models
     print("Fitting a Gumbel copula")
-    model.gumbel  <- dependence_fit(U,
+    model.cop.gumbel  <- dependence_fit(U,
                                     file = paste0("copula_","gumbel", "_dim_",dim.in.out,"_",series.strng,".rda"))
     print("Fitting a Clayton copula")
-    model.clayton <- dependence_fit(U,
+    model.cop.clayton <- dependence_fit(U,
                                     file = paste0("copula_","clayton","_dim_",dim.in.out,"_",series.strng,".rda"))
     print("Fitting an exchangeable normal copula")
-    model.norm.ex <- dependence_fit(U,
+    model.cop.norm.ex <- dependence_fit(U,
                                     file = paste0("copula_","norm_ex","_dim_",dim.in.out,"_",series.strng,".rda"))
     print("Fitting an unstructured normal copula")
-    model.norm.un <- dependence_fit(U,
+    model.cop.norm.un <- dependence_fit(U,
                                     file = paste0("copula_","norm_un","_dim_",dim.in.out,"_",series.strng,".rda"))
     print("Fitting an exchangeable t copula")
-    model.t.ex    <- dependence_fit(U,
+    model.cop.t.ex    <- dependence_fit(U,
                                     file = paste0("copula_","t_ex","_dim_",dim.in.out,"_",series.strng,".rda"))
     print("Fitting an unstructured t copula")
-    model.t.un    <- dependence_fit(U,
+    model.cop.t.un    <- dependence_fit(U,
                                     file = paste0("copula_","t_un","_dim_",dim.in.out,"_",series.strng,".rda"))
 
     ## 5) Fitting the GMMN model
@@ -194,12 +194,12 @@ all_multivariate_ts_fits <- function(X, series.strng, train.period)
                                                "_nepo_",nepo,"_",series.strng,".rda"))
 
     ## 6) Results
-    dependence.models = list(model.gumbel  = model.gumbel,
-                             model.clayton = model.clayton,
-                             model.norm.ex = model.norm.ex,
-                             model.norm.un = model.norm.un,
-                             model.t.ex    = model.t.ex,
-                             model.t.un    = model.t.un,
+    dependence.models = list(model.cop.gumbel  = model.cop.gumbel,
+                             model.cop.clayton = model.cop.clayton,
+                             model.cop.norm.ex = model.cop.norm.ex,
+                             model.cop.norm.un = model.cop.norm.un,
+                             model.cop.t.ex    = model.cop.t.ex,
+                             model.cop.t.un    = model.cop.t.un,
                              model.GMMN    = model.GMMN)
     list(marginal = marginal.models, pobs.train = U, dependence = dependence.models) # return
 }
