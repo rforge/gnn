@@ -306,8 +306,9 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         t <- 0 # now
         T <- 1 # maturity in years
         r <- 0.01 # risk-free annual interest rate
-        K <- round(1.05 * sum(S.t)) # strike (~= 5% larger than mean(S.t))
-        cat("Chosen strike price K:", K, "\n")
+        K.basked <- round(1.05 * sum(S.t)) # strike for basked call
+        K.bestof <- round(1.05 * max(S.t)) # strike for best-of call
+        cat("Note: Chosen strike prices K for basked and best-of calls:", paste0(K.basked,", ",K.bestof), "\n")
 
         ## Main function
         aux <- function(b) {
