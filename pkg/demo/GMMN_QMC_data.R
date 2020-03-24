@@ -433,7 +433,7 @@ pairs2(U.trn, pch = ".")
 if(doPDF) dev.off.crop(file)
 
 ## Computing two-sample gof test statistics
-B <- 100 ## TODO: Has to be global variable? if no wrapper
+B <- 100 
 gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng)
 
 ## Visual assessment of the two-sample gof test statistics
@@ -450,30 +450,31 @@ if(doPDF) dev.off.crop(file)
 ## Evaluation each objective function B times based on n samples
 set.seed(271) # for reproducibility
 B <- 200 # number of replications
-n <- 1000 # sample size
+n <- 1e5 # sample size
 res <- objective_functions(B, n = n, marginal.fits = marginal.models$fit,
                            GMMN = dep.models$model.GMMN,
-                           randomize = "Owen", series.strng = series.strng)
+                           randomize = "Owen",S.t=S.t,sig=sig,
+                           series.strng = series.strng)
 
 
 ### 2.2 Visual assessment of variance reduction effects ########################
 
-file <- paste0("fig_boxplot_exceedprob99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_ES99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(res[1,,], fn.name = dimnames(res)[[1]][1])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_VaR99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_allocationfirst","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(res[2,,], fn.name = dimnames(res)[[1]][2])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_firstlloc","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_basketcall","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
 VRF_boxplot(res[3,,], fn.name = dimnames(res)[[1]][3])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_callpayoff","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_bestofcall","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(res[4,,], fn.name = dimnames(res)[[1]][4])
 if(doPDF) dev.off.crop(file)
