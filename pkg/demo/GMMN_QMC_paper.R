@@ -43,7 +43,7 @@ firstkind <- c("normalCopula", "tCopula", "claytonCopula") # those copulas for w
 ngen <- 1000L # sample size of the generated data
 B.CvM <- 100 # number of replications for Cramer-von Mises statistic
 B.conv <- 25 # number of replications for convergence plots
-ns <- round(2^seq(9, 18, by = 0.5)) # sequence of sample sizes for convergence plots
+ns <- round(2^seq(10, 18, by = 0.5)) # sequence of sample sizes for convergence plots
 ncores <- 1 # detectCores() # number of cores to be used for parallel computing
 stopifnot(ncores == 1) # as of 2019, TensorFlow does not allow multicore calculations in R
 ## Note: See the discussion on https://stat.ethz.ch/pipermail/r-sig-hpc/2019-August/002092.html
@@ -79,7 +79,7 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
         ## Auxiliary function
         aux <- function(b) { # the following is independent of 'b'
             ## Draw PRNs and QRNs
-            U.cop.PRNG  <- pobs(rCopula(n, copula = copula)) # generate pobs of PRNs from copula
+            U.cop.PRNG  <- rCopula(n, copula = copula) # generate PRNs from copula
             N.PRNG <- matrix(rnorm(n * d), ncol = d) # PRNs from the prior
             U.GMMN.PRNG <- pobs(predict(GMMNmod, x = N.PRNG)) # generate from the GMMN PRNG
             N.QRNG <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # QRNs from the prior
@@ -146,7 +146,7 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
                 ## 0) Random number generation
                 ## Draw PRNs
                 n. <- n[nind]
-                U.cop.PRNG  <- rCopula(n., copula = copula) # generate pobs of PRNs from copula
+                U.cop.PRNG  <- rCopula(n., copula = copula) # generate PRNs from copula
                 ## Draw GMMN PRNs
                 N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
                 U.GMMN.PRNG <- predict(GMMNmod, x = N.PRNG) # generate from the GMMN PRNG
@@ -567,7 +567,7 @@ appendix <- function(copula, name, model, randomize)
                 ## 0) Random number generation
                 ## Draw PRNs
                 n. <- n[nind]
-                U.cop.PRNG  <- rCopula(n., copula = copula) # generate pobs of PRNs from copula
+                U.cop.PRNG  <- rCopula(n., copula = copula) # generate PRNs from copula
                 ## Draw GMMN PRNs
                 N.PRNG <- matrix(rnorm(n. * d), ncol = d) # PRNs from the prior
                 U.GMMN.PRNG <- predict(GMMNmod, x = N.PRNG) # generate from the GMMN PRNG
