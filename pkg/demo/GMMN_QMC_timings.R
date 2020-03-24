@@ -4,7 +4,7 @@
 ## sampling for multivariate distributions via generative neural networks").
 ## Training times are obtained from running this script on an NVIDIA Tesla P100
 ## GPU (about 3h), run times of the various methods are obtained from running
-## this script locally (about 6min) as the GPU's run time measurements
+## this script locally (about 30min) as the GPU's run time measurements
 ## weren't reliable.
 
 
@@ -342,7 +342,7 @@ GMMNs <- c("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5",
            "GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
 
 
-### 4.1 Accuracy ###############################################################
+### 4.1 Do we match the output of TensorFlow ###################################
 
 mod <- get_model_param_dim(GMMNs[1])
 d <- mod$dim[1]
