@@ -449,9 +449,8 @@ if(doPDF) dev.off.crop(file)
 set.seed(271) # for reproducibility
 B <- 200 # number of replications
 n <- 1e5 # sample size
-res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,B=B,n=n,
-                           GMMN = dep.models$model.GMMN,
-                           randomize = "Owen",S.t=S.t,sig=sig,
+res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
+                           B=B,n=n,randomize = "Owen",S.t=S.t,sig=sig,
                            series.strng = series.strng)
 
 
