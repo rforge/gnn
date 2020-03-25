@@ -347,10 +347,10 @@ convergence_plot <- function(err, dim, model, filebname, B)
     ## Note: error(n) = O(n^{-alpha}) => error(n) = c*n^{-alpha} => ccoef(error) = alpha
     ld <- length(dim(err))
     if(ld == 3) { # for all test functions
-        ylabels <- rep(c(expression("Median absolute deviation estimate,"~O(n[gen]^{-alpha})),
-                         expression("Standard deviation estimate,"~O(n[gen]^{-alpha}))), each = 2)
-        tfname <- c("sumofsq", "sobolg", "exceedprob99", "ES99") # test function names for PDF files
-        tfnum <- 4 # number of test functions
+        ylabels <- c(expression("Median absolute deviation estimate,"~O(n[gen]^{-alpha})),
+                     expression("Standard deviation estimate,"~O(n[gen]^{-alpha})))
+        tfname <- c("sobolg", "ES99") # test function names for PDF files
+        tfnum <- 2 # number of test functions
     } else if(ld == 2) { # for the ES test function
         ylabels <- expression("Standard deviation estimate,"~O(n[gen]^{-alpha}))
         tfname <- "ES99"
@@ -368,11 +368,11 @@ convergence_plot <- function(err, dim, model, filebname, B)
 
         ## Compute convergence rates (the larger alpha, the faster the convergence;
         ## for MC, alpha ~= 1/2 for sd [~= 1 for variance])
-        a <- round(c(PRS      = ccoef(err.["PRS",]),
+        a <- round(c(cop.PRS  = ccoef(err.["Copula PRS",]),
                      GMMN.QRS = ccoef(err.["GMMN QRS",]),
-                     QRS      = ccoef(err.["QRS",])), digits = 2)
+                     cop.QRS  = ccoef(err.["Copula QRS",])), digits = 2)
         if(all(is.na(a))) next # no plot; happens for Sobol' g test function and copulas without available cCopula()
-        ## Now it could still happen that a["QRS"] is NA (omit this case from the plot then)
+        ## Now it could still happen that a["cop.QRS"] is NA (omit this case from the plot then)
 
         ## Plot
         doPDF <- hasArg(filebname) && is.character(filebname)
@@ -383,15 +383,15 @@ convergence_plot <- function(err, dim, model, filebname, B)
         par(pty = "s")
         ylim <- range(err.[,], na.rm = TRUE)
         lgnd <- as.expression(
-            c(substitute("Copula PRS,"~alpha == a., list(a. = a["PRS"])),
+            c(substitute("Copula PRS,"~alpha == a., list(a. = a["cop.PRS"])),
               substitute("GMMN QRS,"~  alpha == a., list(a. = a["GMMN.QRS"])),
-              if(!is.na(a["QRS"]))
-                  substitute("Copula QRS,"~alpha == a., list(a. = a["QRS"]))))
-        plot(ns, err.["PRS",], ylim = ylim, log = "xy", type = "l",
+              if(!is.na(a["cop.QRS"]))
+                  substitute("Copula QRS,"~alpha == a., list(a. = a["cop.QRS"]))))
+        plot(ns, err.["Copula PRS",], ylim = ylim, log = "xy", type = "l",
              xlab = expression(n[gen]), ylab = ylabels[ind])
         lines(ns, err.["GMMN QRS",], type = "l", lty = 2, lwd = 1.3)
-        if(!is.na(a["QRS"])) {
-            lines(ns, err.["QRS",], type = "l", lty = 3, lwd = 1.6)
+        if(!is.na(a["cop.QRS"])) {
+            lines(ns, err.["Copula QRS",], type = "l", lty = 3, lwd = 1.6)
             legend("bottomleft", bty = "n", lty = 1:3, lwd = c(1, 1.3, 1.6), legend = lgnd)
         } else {
             legend("bottomleft", bty = "n", lty = 1:2, lwd = c(1, 1.3), legend = lgnd)
@@ -459,7 +459,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     ## Scatter plots
     if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
         lst <- list(PRS = U[seq_len(ngen),], GMMN.PRS = U.GMMN.PRS, GMMN.QRS = U.GMMN.QRS)
-        nms <- c("PRS", "GMMN_PRS", "GMMN_QRS")
+        nms <- c("Copula_PRS", "GMMN_PRS", "GMMN_QRS")
         for(i in seq_along(lst))
             scatterplot(lst[[i]], file = paste0("GMMN_QMC_paper_fig_scatter_",bname,"_",nms[i],".pdf"))
     }
@@ -547,7 +547,7 @@ appendix <- function(copula, name, model, randomize)
         n <- ns
         B <- B.conv
         nlen <- length(n)
-        dmnms <- list("RS" = c("PRS", "GMMN PRS", "GMMN QRS", "QRS"),
+        dmnms <- list("RS" = c("Copula PRS", "GMMN PRS", "GMMN QRS", "Copula QRS"),
                       "n" = as.character(ns)) # dimnames of result object
 
         ## Helper function for the big iteration
