@@ -304,8 +304,8 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         t <- 0 # now
         T <- 1 # maturity in years
         r <- 0.01 # risk-free annual interest rate
-        K.basket <- round(1.05 * mean(S.t)) # strike for basked call
-        K.bestof <- round(1.05 * max(S.t)) # strike for best-of call
+        K.basket <- round(1.005 * mean(S.t)) # strike for basked call
+        K.bestof <- round(1.005 * max(S.t)) # strike for best-of call
         cat("Note: Chosen strike prices K for basked and best-of calls:", paste0(K.basket,", ",K.bestof), "\n")
 
         ## Main function
