@@ -281,12 +281,12 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
 ##' @param sig estimated marginal volatilities for financial objective functions
 ##' @param series.strng character string specifying the financial time series to
 ##'        be used
-##' @return (<4 objective functions>, <2 random sampling types>, <B replications>)-array
+##' @return (<3 objective functions>, <2 random sampling types>, <B replications>)-array
 ##' @author Avinash Prasad
 objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, series.strng)
 {
     ## File name for loading and saving realizations of objective functions
-    file <- paste0("objective_functions","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".rds")
+    file <- paste0("objective_functions","_dim_",d,"_ngen_",n,"_B_",B,"_",series.strng,".rds")
     if (file.exists(file)) {
         readRDS(file)
     } else {
@@ -298,21 +298,19 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         qS <- function(u, S.t, t, T, r, sig) sapply(1:d, function(j) # transformation to margins from Black-Scholes model
             qlnorm(u[,j], meanlog = log(S.t[j]) + (r-sig[j]^2/2) * (T-t), sdlog = sqrt(sig[j]^2 * (T-t))))
         basket_call <- function(x, K, t, T, r) exp(-r*(T-t)) * mean(pmax(rowMeans(x) - K, 0)) # basked call objective function
-        bestof_call <- function(x, K, t, T, r) exp(-r*(T-t)) * mean(pmax(apply(x, 1, max) - K, 0)) # best-of call objective function
 
         ## Fixed parameter choices for financial applications
         t <- 0 # now
         T <- 1 # maturity in years
         r <- 0.01 # risk-free annual interest rate
         K.basket <- round(1.005 * mean(S.t)) # strike for basked call
-        K.bestof <- round(1.005 * max(S.t)) # strike for best-of call
-        cat("Note: Chosen strike prices K for basked and best-of calls:", paste0(K.basket,", ",K.bestof), "\n")
+        cat("Note: Chosen strike prices K for basket  calls:", paste0(K.basket))
 
         ## Main function
         aux <- function(b) {
             ## Result object
-            r. <- matrix(, nrow = 4, ncol = 2,
-                        dimnames = list("Objective" = c("ES", "Allocation first", "Basket call", "Best-of call"),
+            r. <- matrix(, nrow = 3, ncol = 2,
+                        dimnames = list("Objective" = c("ES", "Allocation first", "Basket call"),
                                         "RS" = c("GMMN PRS", "GMMN QRS")))
 
             ## Generate PRS and QRS
@@ -342,10 +340,6 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
             ## 3) Compute expected payoff of a basket call option with strike K
             r.[3,] <- c(basket_call(X.PRS, K = K.basket, t = t, T = T, r = r),
                        basket_call(X.QRS, K = K.basket, t = t, T = T, r = r))
-
-            ## 4) Compute expected payoff of a basket call option with strike K
-            r.[4,] <- c(bestof_call(X.PRS, K = K.bestof, t = t, T = T, r = r),
-                       bestof_call(X.QRS, K = K.bestof, t = t, T = T, r = r))
 
             ## Return
             r.
@@ -379,8 +373,8 @@ VRF_boxplot <- function(obj.vals,fn.name)
     ## Box plot
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
             names=c("GMMN PRS","GMMN QRS"),ylab=fn.name)
-    mtext(substitute(B.~"replications, d ="~d.~", n ="~n.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
-                     list(B. = B, d. = d, n. = n, VQ = VRF.Q,PQ= PIM.Q)),
+    mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~n.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
+                     list(B. = B, d. = d, n. = ngen., VQ = VRF.Q,PQ= PIM.Q)),
           side = 4, line = 0.5, adj = 0)
 }
 
@@ -401,8 +395,7 @@ X. <- returns(S.) # compute log-returns
 tickers <- c("INTC", "ORCL", "IBM", # technology
              "COF", "JPM", "AIG", # financial
              "MMM", "BA", "GE", "CAT") # industrial
-## tickers <- c("AAPL", "MSFT", "IBM", # technology
-##              "BAC", "C") # financial
+
 X <- X.[, tickers] # final risk factor changes we work with
 ntrn <- nrow(X)
 d <- ncol(X)
@@ -447,30 +440,27 @@ if(doPDF) dev.off.crop(file)
 
 ## Evaluation each objective function B times based on n samples
 B <- 200 # number of replications
-n <- 1e5 # sample size
+ngen. <- 1e5 # sample size
 res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
-                           B=B,n=n,randomize = "Owen",S.t=S.t,sig=sig,
+                           B=B,n=ngen.,randomize = "Owen",S.t=S.t,sig=sig,
                            series.strng = series.strng)
 
 
 ### 2.2 Visual assessment of variance reduction effects ########################
 
-file <- paste0("fig_boxplot_ES99","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(res[1,,], fn.name = dimnames(res)[[1]][1])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_allocationfirst","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_allocationfirst","_dim_",d,"_ngen_",ngen.,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
 VRF_boxplot(res[2,,], fn.name = dimnames(res)[[1]][2])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_basketcall","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
+file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.,"_B_",B,"_",series.strng,".pdf")
 if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
 VRF_boxplot(res[3,,], fn.name = dimnames(res)[[1]][3])
 if(doPDF) dev.off.crop(file)
 
-file <- paste0("fig_boxplot_bestofcall","_dim_",d,"_n_",n,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-VRF_boxplot(res[4,,], fn.name = dimnames(res)[[1]][4])
-if(doPDF) dev.off.crop(file)
+
