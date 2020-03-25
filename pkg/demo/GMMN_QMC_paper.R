@@ -431,7 +431,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
-    cat(paste0("=> Starting training (unless pre-trained). "))
+    cat("=> Starting training (unless pre-trained).\n")
     human_time(GMMN <- train_once(GNN, data = U,
                                   batch.size = nbat, nepoch = nepo,
                                   file = NNname, package = package)) # training and saving
@@ -480,7 +480,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         ## 3.1 CVM statistics ##################################################
 
         ## Compute B.CvM replications of the CvM statistic
-        cat("=> Starting to compute Cramer-von Mises statistics. ")
+        cat("=> Starting to compute Cramer-von Mises statistics.\n")
         human_time(CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
                                   randomize = randomize,
                                   file = paste0("GMMN_QMC_paper_res_CvMstat_",bname,".rds")))
@@ -493,7 +493,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
 
         ## Compute errors over B.conv replications; an (4, 4, length(ns))-array
         ## (<test function>, <RNG>, <sample size>)
-        cat("=> Starting to compute errors for test functions. ")
+        cat("=> Starting to compute errors for test functions.\n")
         human_time(errTFs <- error_test_functions(B.conv, n = ns,
                                                   copula = copula, GMMN = GMMN,
                                                   randomize = randomize,
@@ -529,7 +529,7 @@ appendix <- function(copula, name, model, randomize)
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
-    cat(paste0("=> Starting training (unless pre-trained). "))
+    cat("=> Starting training (unless pre-trained).\n")
     human_time(GMMN <- train_once(GNN, data = U,
                                   batch.size = nbat, nepoch = nepo,
                                   file = NNname, package = package)) # training and saving
@@ -587,7 +587,7 @@ appendix <- function(copula, name, model, randomize)
         } # aux()
 
         ## Replications
-        cat("=> Starting to compute errors for test functions. ")
+        cat("=> Starting to compute errors for test functions.\n")
         RNGkind("L'Ecuyer-CMRG") # switch PRNG to CMRG (for reproducible parallel computing)
         human_time(raw <- mclapply(seq_len(B), function(b) aux(b), mc.cores = ncores))
         RNGkind("Mersenne-Twister") # switch back to default RNG
