@@ -304,9 +304,9 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         t <- 0 # now
         T <- 1 # maturity in years
         r <- 0.01 # risk-free annual interest rate
-        K.basked <- round(1.05 * sum(S.t)) # strike for basked call
+        K.basket <- round(1.05 * sum(S.t)) # strike for basked call
         K.bestof <- round(1.05 * max(S.t)) # strike for best-of call
-        cat("Note: Chosen strike prices K for basked and best-of calls:", paste0(K.basked,", ",K.bestof), "\n")
+        cat("Note: Chosen strike prices K for basked and best-of calls:", paste0(K.basket,", ",K.bestof), "\n")
 
         ## Main function
         aux <- function(b) {
@@ -340,12 +340,12 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
             X.QRS <- qS(U.PRS, S.t = S.t, t = t, T = T, r = r, sig = sig)
 
             ## 3) Compute expected payoff of a basket call option with strike K
-            r.[3,] <- c(basket_call(X.PRS, K = K, t = t, T = T, r = r),
-                       basket_call(X.QRS, K = K, t = t, T = T, r = r))
+            r.[3,] <- c(basket_call(X.PRS, K = K.basket, t = t, T = T, r = r),
+                       basket_call(X.QRS, K = K.basket, t = t, T = T, r = r))
 
             ## 4) Compute expected payoff of a basket call option with strike K
-            r.[4,] <- c(bestof_call(X.PRS, K = K, t = t, T = T, r = r),
-                       bestof_call(X.QRS, K = K, t = t, T = T, r = r))
+            r.[4,] <- c(bestof_call(X.PRS, K = K.bestof, t = t, T = T, r = r),
+                       bestof_call(X.QRS, K = K.bestof, t = t, T = T, r = r))
 
             ## Return
             r.
