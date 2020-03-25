@@ -459,7 +459,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     ## Scatter plots
     if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
         lst <- list(PRS = U[seq_len(ngen),], GMMN.PRS = U.GMMN.PRS, GMMN.QRS = U.GMMN.QRS)
-        nms <- c("Copula_PRS", "GMMN_PRS", "GMMN_QRS")
+        nms <- c("copula_PRS", "GMMN_PRS", "GMMN_QRS")
         for(i in seq_along(lst))
             scatterplot(lst[[i]], file = paste0("GMMN_QMC_paper_fig_scatter_",bname,"_",nms[i],".pdf"))
     }
