@@ -409,7 +409,7 @@ d <- ncol(X)
 
 ## For financial examples
 S <- S.[, tickers]
-S.t <- tail(S, n = 1) # last available values
+S.t <- t(tail(S, n = 1)) # last available values
 X.past.two <- X[paste0(c(2014-01-01, train.period[2]), collapse = "/"), ]
 sig <- apply(X.past.two, 2, sd) # estimate marginal volas based on past two years
 
