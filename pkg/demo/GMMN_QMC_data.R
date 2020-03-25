@@ -304,7 +304,7 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         t <- 0 # now
         T <- 1 # maturity in years
         r <- 0.01 # risk-free annual interest rate
-        K.basket <- round(1.05 * sum(S.t)) # strike for basked call
+        K.basket <- round(1.05 * mean(S.t)) # strike for basked call
         K.bestof <- round(1.05 * max(S.t)) # strike for best-of call
         cat("Note: Chosen strike prices K for basked and best-of calls:", paste0(K.basket,", ",K.bestof), "\n")
 
@@ -337,7 +337,7 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
             ## Financial applications: Use log-returns and map them to fitted log-normal
             ## margins as in Black-Scholes framework
             X.PRS <- qS(U.PRS, S.t = S.t, t = t, T = T, r = r, sig = sig)
-            X.QRS <- qS(U.PRS, S.t = S.t, t = t, T = T, r = r, sig = sig)
+            X.QRS <- qS(U.QRS, S.t = S.t, t = t, T = T, r = r, sig = sig)
 
             ## 3) Compute expected payoff of a basket call option with strike K
             r.[3,] <- c(basket_call(X.PRS, K = K.basket, t = t, T = T, r = r),
