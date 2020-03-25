@@ -3,8 +3,8 @@
 ## Reproducing R script for Hofert, Prasad, Zhu ("Quasi-random sampling for
 ## multivariate distributions via generative neural networks"). The NNs were
 ## trained on an NVIDIA Tesla P100 GPU. Timings below are from a 13" MacBook
-## Pro (2018) without training. With pre-trained NNs, the code runs in a bit
-## less than 11h (via R CMD BATCH GMMN_QMC_paper.R, for example).
+## Pro (2018) without training. With pre-trained NNs, the code runs in about
+## 15h (via R CMD BATCH GMMN_QMC_paper.R, for example).
 
 
 ### Setup ######################################################################
@@ -449,7 +449,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     U.GMMN.QRS <- pobs(predict(GMMNmod, x = N01.prior.QRS)) # GMMN QRS
 
     ## Contour, Rosenblatt and scatter plots
-    cat("=> Computing contour, Rosenblatt and scatter plots\n")
+    cat("=> Computing contour, Rosenblatt and scatter plots.\n")
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRS = U.GMMN.PRS, uQRS = U.GMMN.QRS,
                      file = paste0("GMMN_QMC_paper_fig_contours_",bname,".pdf"))
@@ -712,72 +712,72 @@ NG.d55 <- onacopulaL("Gumbel",  nacList = nacList(d, th = th.G)) # nested Gumbel
 ### 2.1 Main part of the paper #################################################
 
 ## Copulas from Section 1.1 above
-human_time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 3.6s
+human_time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 7s
                 model = quote(italic(t)[4]), randomize = "Owen",
                 CvM.testfun = FALSE))
-human_time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 16.0m
+human_time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 23min
                 model = quote(italic(t)[4]), randomize = "Owen"))
-human_time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 2.3s
+human_time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 2s
                 model = quote(italic(t)[4]), randomize = "Owen",
                 CvM.testfun = FALSE))
-human_time(main(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # ~= 2.3s
+human_time(main(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # ~= 2s
                 model = quote(Clayton), randomize = "Owen",
                 CvM.testfun = FALSE))
-human_time(main(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 7.0m
+human_time(main(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 14min
                 model = quote(Clayton), randomize = "Owen"))
-human_time(main(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # ~= 2.4s
+human_time(main(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # ~= 2s
                 model = quote(Clayton), randomize = "Owen",
                 CvM.testfun = FALSE))
-human_time(main(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # ~= 2.5s
+human_time(main(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # ~= 2s
                 model = quote(Gumbel), randomize = "Owen",
                 CvM.testfun = FALSE))
-human_time(main(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 12.3m
+human_time(main(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 19min
                 model = quote(Gumbel), randomize = "Owen"))
-human_time(main(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # ~= 2.6s
+human_time(main(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # ~= 2s
                 model = quote(Gumbel), randomize = "Owen",
                 CvM.testfun = FALSE))
-human_time(main(MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")), # ~= 2.2s
+human_time(main(MO.cop.d2, name = paste0("MO_",paste0(alpha,collapse = "_")), # ~= 2s
                 model = quote(MO), randomize = "Owen",
                 CvM.testfun = FALSE)) # argument 'model' actually not used here
-human_time(main(mix.cop.C.t90, name = "eqmix_C_tau_0.5_rot90_t4_tau_0.5", # ~= 3.4s
+human_time(main(mix.cop.C.t90, name = "eqmix_C_tau_0.5_rot90_t4_tau_0.5", # ~= 2.5s
                 model = quote(Clayton-italic(t)[4](90)), randomize = "Owen",
                 CvM.testfun = FALSE)) # argument 'model' actually not used here
-human_time(main(mix.cop.G.t90,  name = "eqmix_G_tau_0.5_rot90_t4_tau_0.5", # ~= 3.4s
+human_time(main(mix.cop.G.t90,  name = "eqmix_G_tau_0.5_rot90_t4_tau_0.5", # ~= 2.5s
                 model = quote(Gumbel-italic(t)[4](90)), randomize = "Owen",
                 CvM.testfun = FALSE)) # argument 'model' actually not used here
-human_time(main(mix.cop.MO.t90, # ~= 2.4s
+human_time(main(mix.cop.MO.t90, # ~= 1.5s
                 name = paste0("eqmix_MO_",paste0(alpha,collapse = "_"),"_rot90_t4_tau_0.5"),
                 model = quote(MO-italic(t)[4](90)), randomize = "Owen",
                 CvM.testfun = FALSE)) # argument 'model' actually not used here
 
 ## Copulas from Section 1.2 above
-human_time(main(NC.d21, name = paste0("NC21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 5.5m
+human_time(main(NC.d21, name = paste0("NC21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 11min
                 model = quote("(2,1)-nested Clayton"), randomize = "Owen"))
-human_time(main(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 5.3m
+human_time(main(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 11min
                 model = quote("(2,1)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.3 above
-human_time(main(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 58.1m
+human_time(main(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 1.05h
                 model = quote(italic(t)[4]), randomize = "Owen"))
-human_time(main(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 10.6m
+human_time(main(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 16min
                 model = quote(Clayton), randomize = "Owen"))
-human_time(main(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 33.6m
+human_time(main(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 40min
                 model = quote(Gumbel), randomize = "Owen"))
-human_time(main(NC.d23, name = paste0("NC23_tau_",paste0(taus, collapse = "_")), # ~= 7.0m
+human_time(main(NC.d23, name = paste0("NC23_tau_",paste0(taus, collapse = "_")), # ~= 12min
                 model = quote("(2,3)-nested Clayton"), randomize = "Owen"))
-human_time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 6.6m
+human_time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 12min
                 model = quote("(2,3)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.4 above
-human_time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.4h
+human_time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.55h
                 model = quote(italic(t)[4]), randomize = "Owen"))
-human_time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 13.8m
+human_time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 20min
                 model = quote(Clayton), randomize = "Owen"))
-human_time(main(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 1.1h
+human_time(main(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 1.3h
                 model = quote(Gumbel), randomize = "Owen"))
-human_time(main(NC.d55, name = paste0("NC55_tau_",paste0(taus, collapse = "_")), # ~= 9.1m
+human_time(main(NC.d55, name = paste0("NC55_tau_",paste0(taus, collapse = "_")), # ~= 14min
                 model = quote("(5,5)-nested Clayton"), randomize = "Owen"))
-human_time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 8.7m
+human_time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 14min
                 model = quote("(5,5)-nested Gumbel"), randomize = "Owen"))
 
 
@@ -786,32 +786,32 @@ human_time(main(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")),
 ## Note: No .rds will be written in this case (just the plots generated directly)
 
 ## Row 1
-human_time(appendix(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 7.4m
+human_time(appendix(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 12min
                     model = quote(italic(t)[4]), randomize = "digital.shift"))
-human_time(appendix(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 12.7m
+human_time(appendix(t.cop.d5.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 18min
                     model = quote(italic(t)[4]), randomize = "digital.shift"))
-human_time(appendix(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 21.3m
+human_time(appendix(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 26min
                     model = quote(italic(t)[4]), randomize = "digital.shift"))
 ## Row 2
-human_time(appendix(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 6.1m
+human_time(appendix(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 10min
                     model = quote(Clayton), randomize = "digital.shift"))
-human_time(appendix(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 7.4m
+human_time(appendix(C.cop.d5.tau2, name = paste0("C","_tau_",taus[2]), # ~= 12min
                     model = quote(Clayton), randomize = "digital.shift"))
-human_time(appendix(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 9.1m
+human_time(appendix(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 14min
                     model = quote(Clayton), randomize = "digital.shift"))
 ## Row 3
-human_time(appendix(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 6.4m
+human_time(appendix(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 10min
                     model = quote(Gumbel), randomize = "digital.shift"))
-human_time(appendix(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 7.4m
+human_time(appendix(G.cop.d5.tau2, name = paste0("G","_tau_",taus[2]), # ~= 12min
                     model = quote(Gumbel), randomize = "digital.shift"))
-human_time(appendix(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 8.9m
+human_time(appendix(G.cop.d10.tau2, name = paste0("G","_tau_",taus[2]), # ~= 13min
                     model = quote(Gumbel), randomize = "digital.shift"))
 ## Row 4
-human_time(appendix(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 7.1m
+human_time(appendix(NG.d21, name = paste0("NG21_tau_",paste0(taus[1:2], collapse = "_")), # ~= 11min
                     model = quote("(2,1)-nested Gumbel"), randomize = "digital.shift"))
-human_time(appendix(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 8.0m
+human_time(appendix(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")), # ~= 12min
                     model = quote("(2,3)-nested Gumbel"), randomize = "digital.shift"))
-human_time(appendix(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 9.5m
+human_time(appendix(NG.d55, name = paste0("NG55_tau_",paste0(taus, collapse = "_")), # ~= 13min
                     model = quote("(5,5)-nested Gumbel"), randomize = "digital.shift"))
 
 

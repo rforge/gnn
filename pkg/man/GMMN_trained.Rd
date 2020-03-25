@@ -39,7 +39,7 @@
 \title{Trained Generative Moment Matching Networks}
 \description{
   Trained generative moment matching networks (GMMNs); see also
-  the demos \code{GMMN_QMC_paper}, \code{GMMN_QMC_MWE} and \code{GMMN_MTS_paper}.
+  the demos \code{GMMN_QMC_paper} and \code{GMMN_MTS_paper}.
 }
 \usage{
 % Trained neural networks
@@ -134,7 +134,7 @@ data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
       copula (with parameter chosen such that Kendall's tau equals 0.5)
       and a rotated (by 90 degree) $t$ copula (with 4 degrees of freedom
       and correlation parameter chosen such that Kendall's tau equals
-      0.5); see \code{demo("GMMN_QMC_MWE", package = "gnn")}.
+      0.5).
     }
     \item{GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_G_tau_0.5_rot90_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
@@ -233,8 +233,7 @@ data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a five-dimensional nested Gumbel copula
       (with sector dimensions 2 and 3, corresponding Kendall's tau 0.5
-      and 0.75, and Kendall's tau 0.25 between the two sectors);
-      see \code{demo("GMMN_QMC_MWE", package = "gnn")}.
+      and 0.75, and Kendall's tau 0.25 between the two sectors).
     }
     \item{GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
@@ -242,7 +241,7 @@ data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
       300-dimensional) trained on 60000 pseudo-samples (with batch size 5000 and
       300 epochs) from a five-dimensional $t$ copula (with 4 degrees of freedom
       and equi-correlation parameter chosen such that Kendall's tau equals
-      0.5); see \code{demo("GMMN_QMC_MWE", package = "gnn")}.
+      0.5).
     }
     \item{GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_C_tau_0.5}{
       \code{\link{raw}} \R object representing a GMMN (input and output
