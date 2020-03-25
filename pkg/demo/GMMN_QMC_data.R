@@ -291,7 +291,7 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         readRDS(file)
     } else {
         ## Setup
-        GMMNmod <- GMMN[["model"]] # dependence model
+        GMMNmod <- gnn[["model"]] # dependence model
         nus.fits <- sapply(marginal.fits, function(x) x@fit$coef[["shape"]]) # marginal fitted d.o.f.
         qInnovations <- function(u) sapply(1:d, function(j) # transformation back to fitted innovations
             sqrt((nus.fits[j]-2)/nus.fits[j]) * qt(u[,j], df = nus.fits[j]))
@@ -311,7 +311,7 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         ## Main function
         aux <- function(b) {
             ## Result object
-            r <- matrix(, nrow = 4, ncol = 2,
+            r. <- matrix(, nrow = 4, ncol = 2,
                         dimnames = list("Objective" = c("ES", "Allocation first", "Basket call", "Best-of call"),
                                         "RS" = c("GMMN PRS", "GMMN QRS")))
 
@@ -328,10 +328,10 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
             ## 1) ES_alpha
             ## Note: Survival copula used since log-returns are modeled
             level <- 0.99
-            r[1,] <- c(ES_np(Z.PRS, level = level), ES_np(Z.QRS, level = level))
+            r.[1,] <- c(ES_np(Z.PRS, level = level), ES_np(Z.QRS, level = level))
 
             ## 2) CA_alpha for first risk according to Euler principle
-            r[2,] <- c(alloc_np(Z.PRS, level = level)$allocation[1],
+            r.[2,] <- c(alloc_np(Z.PRS, level = level)$allocation[1],
                        alloc_np(Z.QRS, level = level)$allocation[1])
 
             ## Financial applications: Use log-returns and map them to fitted log-normal
@@ -340,15 +340,15 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
             X.QRS <- qS(U.PRS, S.t = S.t, t = t, T = T, r = r, sig = sig)
 
             ## 3) Compute expected payoff of a basket call option with strike K
-            r[3,] <- c(basket_call(X.PRS, K = K, t = t, T = T, r = r),
+            r.[3,] <- c(basket_call(X.PRS, K = K, t = t, T = T, r = r),
                        basket_call(X.QRS, K = K, t = t, T = T, r = r))
 
             ## 4) Compute expected payoff of a basket call option with strike K
-            r[4,] <- c(bestof_call(X.PRS, K = K, t = t, T = T, r = r),
+            r.[4,] <- c(bestof_call(X.PRS, K = K, t = t, T = T, r = r),
                        bestof_call(X.QRS, K = K, t = t, T = T, r = r))
 
             ## Return
-            r
+            r.
         }
 
         ## Replications
@@ -446,7 +446,6 @@ if(doPDF) dev.off.crop(file)
 ### 2.1 Realizations of four objective functions based on GMMN PRS and GMMN QRS
 
 ## Evaluation each objective function B times based on n samples
-set.seed(271) # for reproducibility
 B <- 200 # number of replications
 n <- 1e5 # sample size
 res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
