@@ -376,9 +376,9 @@ VRF_boxplot <- function(obj.vals,name,d,K.basket)
     
     ## Create labels for y-axis depending on the objective function
     ylabel <- if(grepl("ES",name)) {
-      substitute(ES[alpha], list(alpha = 0.99))
+      substitute("ES"[alpha], list(alpha = 0.99))
       } else if (grepl("AC", name)) {
-      substitute(AC[1,alpha], list(alpha = 0.99)) 
+      substitute("AC"[list(1,alpha)], list(alpha = 0.99)) 
      } else if (grepl("Basket call", name)) {
       substitute("Basket call payoff, strike ="~K, list(K = K.basket))
     }
