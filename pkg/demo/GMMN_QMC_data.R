@@ -134,16 +134,16 @@ dependence_fit <- function(U, GMMN.dim, file)
 ##' @param X matrix containing time series data (i.e. training data)
 ##' @param series.strng character string specifying the financial time series to
 ##'        be used
-##' @param train.period character string of type "YYYY-MM-DD_YYY_MM_DD"
+##' @param trn.period character string of type "YYYY-MM-DD_YYY_MM_DD"
 ##'        specifying the start and end date of the training period
 ##' @return list containing the fitted (list of) marginal models, matrix of
 ##'         pseudo-observations (training data for the dependence models)
 ##'         and list of all fitted dependence models (6 parametric copulas and
 ##'         one GMMN)
-all_multivariate_ts_fits <- function(X, series.strng, train.period)
+all_multivariate_ts_fits <- function(X, series.strng, trn.period)
 {
     ## File name for loading-saving ARMA-GARCH models associated with series.strng
-    marginal.file <- paste0("ARMA_GARCH_", train.period,
+    marginal.file <- paste0("ARMA_GARCH_", trn.period,
                             "_", series.strng, ".rds")
 
     ## 1) First we feed training dataset to marginal_ts_fit()
@@ -205,20 +205,18 @@ all_multivariate_ts_fits <- function(X, series.strng, train.period)
 ### 0.4 Metric to compare the fitted dependence models (two-sample statistic) ##
 
 ##' @title B Realizations of Two-Sample GoF Statistics
+##' @param B number of realization of the two-sample gof statistic
+##' @param ngen sample size
 ##' @param pobs.train matrix containing the pseudo-observations (i.e. the training data)
 ##' @param dep.models list of all fitted dependence models (6 copulas, one GMMN)
 ##' @param series.strng character string specifying the financial time series to
 ##'        be used
-##' @param B number of realization of the two-sample gof statistic to compute
 ##' @return (B, 7)-matrix containing the B replications of the Cramer-von Mises
 ##'         statistic for each of the 7 competing dependence models
-gof2stats <- function(pobs.train, dep.models, series.strng, B = 100)
+gof2stats <- function(B, ngen, pobs.train, dep.models, series.strng)
 {
-    dm <- dim(pobs.train)
-    n <- dm[1] # number of observations in training data
-    d <- dm[2] # dimension of training data
-
     ## File name for loading and saving realizations of gof 2 sample test statistics
+    d <- ncol(pobs.train)
     file <- paste0("gof2stat","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.strng,".rds")
     if(file.exists(file)) {
         gof.stats <- readRDS(file)
@@ -245,9 +243,11 @@ gof2stats <- function(pobs.train, dep.models, series.strng, B = 100)
 ##' @title Boxplots of the Two-Sample GoF Statistics
 ##' @param gof.stats return object of gof2stats()
 ##' @param ntrn training dataset sample size
+##' @param B number of realization of the two-sample gof statistic
+##' @param ngen sample size
 ##' @param d dimension of data
 ##' @return invisible (boxplot by side-effect)
-gof2stats_boxplot <- function(gof.stats, ntrn,d)
+gof2stats_boxplot <- function(gof.stats, ntrn, B, ngen, d)
 {
     ## Create a vector of names with each names corresponding to a fitted dependence model
     nms <- rep(NA, ncol(gof.stats))
@@ -276,7 +276,7 @@ gof2stats_boxplot <- function(gof.stats, ntrn,d)
 ##' @param gnn trained GMMN
 ##' @param marginal.fits list of fitted marginal models
 ##' @param B number of realizations
-##' @param n sample size
+##' @param ngen sample size
 ##' @param d dimension of data
 ##' @param randomize type or randomization used for QRS
 ##' @param S.t last available stock prices for financial objective functions
@@ -286,10 +286,10 @@ gof2stats_boxplot <- function(gof.stats, ntrn,d)
 ##'        be used
 ##' @return (<3 objective functions>, <2 random sampling types>, <B replications>)-array
 ##' @author Avinash Prasad
-objective_functions <- function(gnn, marginal.fits, B, n,d, randomize, S.t, K, sig, series.strng)
+objective_functions <- function(gnn, marginal.fits, B, ngen, d, randomize, S.t, K, sig, series.strng)
 {
     ## File name for loading and saving realizations of objective functions
-    file <- paste0("objective_functions","_dim_",d,"_ngen_",n,"_B_",B,"_",series.strng,".rds")
+    file <- paste0("objective_functions","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.strng,".rds")
     if (file.exists(file)) {
         readRDS(file)
     } else {
@@ -316,8 +316,8 @@ objective_functions <- function(gnn, marginal.fits, B, n,d, randomize, S.t, K, s
 
             ## Generate PRS and QRS
             set.seed(b) # for GMMN PRS
-            U.PRS <- pobs(predict(GMMNmod, x = matrix(rnorm(n * d), ncol = d))) # GMMN PRS
-            U.QRS <- pobs(predict(GMMNmod, x = qnorm(sobol(n, d = d, randomize = randomize, seed = b)))) # GMMN QRS
+            U.PRS <- pobs(predict(GMMNmod, x = matrix(rnorm(ngen * d), ncol = d))) # GMMN PRS
+            U.QRS <- pobs(predict(GMMNmod, x = qnorm(sobol(ngen, d = d, randomize = randomize, seed = b)))) # GMMN QRS
 
             ## Risk management applications: Use survival copula (as we model log-returns) and
             ## map to fitted t innovations
@@ -361,11 +361,12 @@ objective_functions <- function(gnn, marginal.fits, B, n,d, randomize, S.t, K, s
 ##' @title Boxplots of Objective Function Realizations
 ##' @param obj.vals return object of objective_functions()
 ##' @param name name of objective function
+##' @param ngen sample size
 ##' @param d dimension of data
 ##' @param K strike price of basket call option
 ##' @param level confidence level
 ##' @return invisible (boxplot by side-effect)
-VRF_boxplot <- function(obj.vals, name, d, K, level = 0.99)
+VRF_boxplot <- function(obj.vals, name, ngen, d, K, level = 0.99)
 {
     ## Objective value realizations and their variances
     varP <- var(GPRS <- obj.vals["GMMN PRS",])
@@ -388,8 +389,8 @@ VRF_boxplot <- function(obj.vals, name, d, K, level = 0.99)
     opar <- par(pty = "s")
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
             names = c("GMMN PRS", "GMMN QRS"), ylab = ylab)
-    mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~n.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
-                     list(B. = B, d. = d, n. = ngen., VQ = VRF.Q,PQ= PIM.Q)),
+    mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~ngen.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
+                     list(B. = B, d. = d, ngen. = ngen, VQ = VRF.Q,PQ= PIM.Q)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
 }
@@ -399,15 +400,15 @@ VRF_boxplot <- function(obj.vals, name, d, K, level = 0.99)
 
 ##' @title Results for Data Application
 ##' @param tickers ticker symbols of portfolio considered
-##' @param B 2-vector containing the number of replications for the two-sample
+##' @param B.vec 2-vector containing the number of replications for the two-sample
 ##'        test statistic and the evaluation of the objective functions.
-##' @param ngen 2-vector containing the sample sizes for the two-sample
+##' @param ngen.vec 2-vector containing the sample sizes for the two-sample
 ##'        test statistic and the evaluation of the objective functions.
 ##' @param S all stock prices of S&P 500
-##' @param train.period period of training dataset
+##' @param trn.period period of training dataset
 ##' @param sig.period period to estimate marginal volas over
 ##' @return invisible (plots by side-effect)
-main <- function(tickers, B, ngen, S, train.period, sig.period)
+main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
 {
     ## 0) Data handling
     S. <- S[, tickers] # stocks we use
@@ -422,7 +423,7 @@ main <- function(tickers, B, ngen, S, train.period, sig.period)
 
     ## 1) Fitting
     fits <- all_multivariate_ts_fits(X, series.strng = series.strng, # fitting
-                                     train.period = paste0(train.period, collapse = "_"))
+                                     trn.period = paste0(trn.period, collapse = "_"))
     marginal.models <- fits$marginal # fitted marginal models
     U.trn <- fits$pobs.train # pobs of the standardized residuals
     dep.models <- fits$dependence # fitted dependence models
@@ -435,33 +436,33 @@ main <- function(tickers, B, ngen, S, train.period, sig.period)
     if(doPDF) dev.off.crop(file)
 
     ## 3) Two-sample GoF test statistics
-    gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng, B = B[1])
+    gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng, B = B.vec[1])
 
     ## 4) Visual assessment of the two-sample gof test statistics
-    file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen[1],"_B_",B[1],"_",series.strng,".pdf")
+    file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen.vec[1],"_B_",B.vec[1],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 10, width = 10)
     gof2stats_boxplot(gof.stats, ntrn = ntrn, d = d)
     if(doPDF) dev.off.crop(file)
 
     ## 5) Realizations of all objective functions using GMMN PRS and GMMN QRS
     res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
-                               B = B[2], n = ngen[2], d = d, randomize = "Owen",
+                               B = B.vec[2], ngen = ngen.vec[2], d = d, randomize = "Owen",
                                S.t = S.t, K = K, sig = sig,
                                series.strng = series.strng)
 
     ## 6) Visual assessment of variance reduction effects of GMMN QRS vs GMMN PRS
     ##    for all objective functions
-    file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen[2],"_B_",B[2],"_",series.strng,".pdf")
+    file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
     VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
-    file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen[2],"_B_",B[2],"_",series.strng,".pdf")
+    file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
     VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
-    file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen[2],"_B_",B[2],"_",series.strng,".pdf")
+    file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
     VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], d = d, K = K)
     if(doPDF) dev.off.crop(file)
@@ -490,9 +491,9 @@ tickers.10 <- c("INTC", "ORCL", "IBM", # technology
 
 ## S&P 500 constituent dataset (NAs removed)
 data("SP500_const")
-train.period <- c("1995-01-01", "2015-12-31") # training time period
+trn.period <- c("1995-01-01", "2015-12-31") # training time period
 sig.period <- c("2014-01-01", "2015-12-31") # period to estimate marginal volas over
-raw <- SP500_const[paste0(train.period, collapse = "/"),] # data
+raw <- SP500_const[paste0(trn.period, collapse = "/"),] # data
 keep <- apply(raw, 2, function(x) mean(is.na(x)) <= 0.01) # keep those with <= 1% NA
 S <- na.fill(raw[, keep], fill = "extend") # fill NAs
 
@@ -501,12 +502,15 @@ S <- na.fill(raw[, keep], fill = "extend") # fill NAs
 
 ## Sample sizes of generated data for two-sample GoF statistic and for evaluating
 ## all objective functions.
-ngen <- c(1e4, 1e5)
+ngen.vec <- c(1e4, 1e5)
 
 ## Same here, just for number of replications
-B <- c(100, 200)
+B.vec <- c(100, 200)
 
 ## Plots for portfolio of stocks identified in 1.1
-main(tickers.3,  B = B, ngen = ngen, S = S, train.period = train.period, sig.period = sig.period)
-main(tickers.5,  B = B, ngen = ngen, S = S, train.period = train.period, sig.period = sig.period)
-main(tickers.10, B = B, ngen = ngen, S = S, train.period = train.period, sig.period = sig.period)
+main(tickers.3,  B.vec = B.vec, ngen.vec = ngen.vec, S = S,
+     trn.period = trn.period, sig.period = sig.period)
+main(tickers.5,  B.vec = B.vec, ngen.vec = ngen.vec, S = S,
+     trn.period = trn.period, sig.period = sig.period)
+main(tickers.10, B.vec = B.vec, ngen.vec = ngen.vec, S = S,
+     trn.period = trn.period, sig.period = sig.period)
