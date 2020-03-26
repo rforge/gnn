@@ -41,7 +41,8 @@ stopifnot(dim.hid >= 1, ntrn >= 1, 1 <= nbat, nbat <= ntrn, nepo >= 1)
 ## Other global parameters
 firstkind <- c("normalCopula", "tCopula", "claytonCopula") # those copulas for which cCopula() works
 ngen <- 1000L # sample size of the generated data
-B.CvM <- 100 # number of replications for Cramer-von Mises statistic
+ngen.CvM <- 1000L # sample size for Cramer-von Mises (CvM) boxplots
+B.CvM <- 100 # number of replications for CvM statistic
 B.conv <- 25 # number of replications for convergence plots
 ns <- round(2^seq(10, 18, by = 0.5)) # sequence of sample sizes for convergence plots
 ncores <- 1 # detectCores() # number of cores to be used for parallel computing
@@ -79,7 +80,7 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
         ## Auxiliary function
         aux <- function(b) { # the following is independent of 'b'
             ## Draw PRS and QRS
-            U.cop.PRS  <- rCopula(n, copula = copula) # copula PRS
+            U.cop.PRS <- pobs(rCopula(n, copula = copula)) # copula PRS
             N.PRS <- matrix(rnorm(n * d), ncol = d) # prior PRS
             U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
             N.QRS <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # prior QRS
@@ -316,13 +317,13 @@ CvM_boxplot <- function(CvM, dim, model, file)
                 paste0("(",paste0(dim, collapse = ", "),")")
             }
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, width = 7.4, height = 7.4)
+    if(doPDF) pdf(file = file, width = 7.5, height = 7.5)
     par(pty = "s")
     boxplot(list(CvM[,"CvM.cop.PRS"], CvM[,"CvM.GMMN.PRS"], CvM[,"CvM.GMMN.QRS"]),
             names = c("Copula PRS", "GMMN PRS", "GMMN QRS"),
             ylab = expression(S[n[gen]]))
-    mtext(substitute(B~"replications, d ="~d*","~m,
-                     list(B = nrow(CvM), d = dim., m = model)),
+    mtext(substitute(B~"replications,"~n[gen]==n.*", d ="~d*","~m,
+                     list(B = nrow(CvM), n. = ngen.CvM, d = dim., m = model)),
           side = 4, line = 0.5, adj = 0)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
 }
@@ -481,7 +482,8 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
 
         ## Compute B.CvM replications of the CvM statistic
         cat("=> Starting to compute Cramer-von Mises statistics.\n")
-        human_time(CvMstat <- CvM(B.CvM, n = ngen, copula = copula, GMMN = GMMN,
+        human_time(CvMstat <- CvM(B.CvM, n = ngen.CvM, # larger sample size here
+                                  copula = copula, GMMN = GMMN,
                                   randomize = randomize,
                                   file = paste0("GMMN_QMC_paper_res_CvMstat_",bname,".rds")))
 
@@ -716,7 +718,8 @@ human_time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 7s
                 model = quote(italic(t)[4]), randomize = "Owen",
                 CvM.testfun = FALSE))
 human_time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 23min
-                model = quote(italic(t)[4]), randomize = "Owen"))
+                model = quote(italic(t)[4]), randomize = "Owen",
+                CvM.testfun = FALSE))
 human_time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 2s
                 model = quote(italic(t)[4]), randomize = "Owen",
                 CvM.testfun = FALSE))
@@ -724,7 +727,8 @@ human_time(main(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # ~= 2s
                 model = quote(Clayton), randomize = "Owen",
                 CvM.testfun = FALSE))
 human_time(main(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 14min
-                model = quote(Clayton), randomize = "Owen"))
+                model = quote(Clayton), randomize = "Owen",
+                CvM.testfun = FALSE))
 human_time(main(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # ~= 2s
                 model = quote(Clayton), randomize = "Owen",
                 CvM.testfun = FALSE))
@@ -732,7 +736,8 @@ human_time(main(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # ~= 2s
                 model = quote(Gumbel), randomize = "Owen",
                 CvM.testfun = FALSE))
 human_time(main(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 19min
-                model = quote(Gumbel), randomize = "Owen"))
+                model = quote(Gumbel), randomize = "Owen",
+                CvM.testfun = FALSE))
 human_time(main(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # ~= 2s
                 model = quote(Gumbel), randomize = "Owen",
                 CvM.testfun = FALSE))
@@ -769,7 +774,7 @@ human_time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")),
                 model = quote("(2,3)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.4 above
-human_time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.55h
+human_time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.55h (largely due to Cramer--von Mises statistic evaluation)
                 model = quote(italic(t)[4]), randomize = "Owen"))
 human_time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 20min
                 model = quote(Clayton), randomize = "Owen"))
