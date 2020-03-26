@@ -510,5 +510,3 @@ B <- c(100, 200)
 main(tickers.3,  B = B, ngen = ngen, S = S, train.period = train.period, sig.period = sig.period)
 main(tickers.5,  B = B, ngen = ngen, S = S, train.period = train.period, sig.period = sig.period)
 main(tickers.10, B = B, ngen = ngen, S = S, train.period = train.period, sig.period = sig.period)
-
-
