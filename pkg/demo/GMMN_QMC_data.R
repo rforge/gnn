@@ -280,12 +280,13 @@ gof2stats_boxplot <- function(gof.stats, ntrn,d)
 ##' @param d dimension of data
 ##' @param randomize type or randomization used for QRS
 ##' @param S.t last available stock prices for financial objective functions
+##' @param K.basket strike price of basket call option
 ##' @param sig estimated marginal volatilities for financial objective functions
 ##' @param series.strng character string specifying the financial time series to
 ##'        be used
 ##' @return (<3 objective functions>, <2 random sampling types>, <B replications>)-array
 ##' @author Avinash Prasad
-objective_functions <- function(gnn, marginal.fits, B, n,d, randomize, S.t, sig, series.strng)
+objective_functions <- function(gnn, marginal.fits, B, n,d, randomize, S.t,K.basket, sig, series.strng)
 {
     ## File name for loading and saving realizations of objective functions
     file <- paste0("objective_functions","_dim_",d,"_ngen_",n,"_B_",B,"_",series.strng,".rds")
@@ -434,7 +435,7 @@ main <- function(tickers){
   
   ## Computing realizations of objective functions using GMMN PRS and GMMNQ QRS samples
   res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
-                             B=B.,n=ngen.,randomize = "Owen",S.t=S.t,sig=sig,
+                             B=B.,n=ngen.,d=d,randomize = "Owen",S.t=S.t,K.basket=K.basket,sig=sig,
                              series.strng = series.strng)
   
   ###  Visual assessment of variance reduction effects of GMMN QRS vs GMMN PRS
