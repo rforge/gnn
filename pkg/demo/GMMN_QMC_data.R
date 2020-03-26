@@ -29,7 +29,7 @@ library(qrmdata) # for required datasets
 ## Global training parameters
 dim.hid <- 300L # dimension of the (single) hidden layer
 nepo <- 300L # number of epochs (one epoch = one pass through the complete training dataset while updating the GNN's parameters)
-ngen <- 10000L # sample size of the generated data
+
 
 ## Plots
 doPDF <- require(crop) # crop if 'crop' is available
@@ -246,8 +246,9 @@ gof2stats <- function(pobs.train, dep.models, series.strng, B = 100)
 ##' @title Boxplots of the Two-Sample GoF Statistics
 ##' @param gof.stats return object of gof2stats()
 ##' @param ntrn training dataset sample size
+##' @param d dimension of data
 ##' @return invisible (boxplot by side-effect)
-gof2stats_boxplot <- function(gof.stats, ntrn)
+gof2stats_boxplot <- function(gof.stats, ntrn,d)
 {
     ## Create a vector of names with each names corresponding to a fitted dependence model
     nms <- rep(NA, ncol(gof.stats))
@@ -276,6 +277,7 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
 ##' @param marginal.fits list of fitted marginal models
 ##' @param B number of realizations
 ##' @param n sample size
+##' @param d dimension of data
 ##' @param randomize type or randomization used for QRS
 ##' @param S.t last available stock prices for financial objective functions
 ##' @param sig estimated marginal volatilities for financial objective functions
@@ -283,7 +285,7 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
 ##'        be used
 ##' @return (<3 objective functions>, <2 random sampling types>, <B replications>)-array
 ##' @author Avinash Prasad
-objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, series.strng)
+objective_functions <- function(gnn, marginal.fits, B, n,d, randomize, S.t, sig, series.strng)
 {
     ## File name for loading and saving realizations of objective functions
     file <- paste0("objective_functions","_dim_",d,"_ngen_",n,"_B_",B,"_",series.strng,".rds")
@@ -358,8 +360,10 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
 ##' @title Boxplots of Objective Function realizations
 ##' @param obj.vals return object of objective_functions()
 ##' @param name Name of objective function
+##' @param d dimension of data
+##' @param K.basket strike price of basket call option 
 ##' @return invisible (boxplot by side-effect)
-VRF_boxplot <- function(obj.vals,name)
+VRF_boxplot <- function(obj.vals,name,d,K.basket)
 {
     ## Retrieve objective value realizations and compute variances
     varP <- var(GPRS <- obj.vals["GMMN PRS",])
@@ -420,18 +424,15 @@ main <- function(tickers){
   if(doPDF) dev.off.crop(file)
   
   ## Computing two-sample gof test statistics
-  B <- 100
   gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng,B=B)
   
   ## Visual assessment of the two-sample gof test statistics
   file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.strng,".pdf")
-  if(doPDF) pdf(file = (file <- file), height = 9.5, width = 9.5)
-  gof2stats_boxplot(gof.stats, ntrn = ntrn)
+  if(doPDF) pdf(file = (file <- file), height = 10, width = 10)
+  gof2stats_boxplot(gof.stats, ntrn = ntrn,d=d)
   if(doPDF) dev.off.crop(file)
   
   ## Computing realizations of objective functions using GMMN PRS and GMMNQ QRS samples
-  B. <- 200 # number of replications
-  ngen. <- 1e5 # sample size
   res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
                              B=B.,n=ngen.,randomize = "Owen",S.t=S.t,sig=sig,
                              series.strng = series.strng)
@@ -441,17 +442,17 @@ main <- function(tickers){
   
   file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.,"_B_",B.,"_",series.strng,".pdf")
   if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-  VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1])
+  VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1],d=d,K.basket=K.basket)
   if(doPDF) dev.off.crop(file)
   
   file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.,"_B_",B.,"_",series.strng,".pdf")
   if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-  VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2])
+  VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2],d=d,K.basket=K.basket)
   if(doPDF) dev.off.crop(file)
   
   file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.,"_B_",B.,"_",series.strng,".pdf")
   if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
-  VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3])
+  VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3],d=d,K.basket=K.basket)
   if(doPDF) dev.off.crop(file)
   
 }
@@ -487,6 +488,14 @@ tickers.P10 <- c("INTC", "ORCL", "IBM", # technology
 
 
 ### 2 Computing all results ############################################
+
+## Define some parameters for producing results in the global enviroment 
+
+ngen <- 1e4 # sample size of the generated data used in computation of two-sample gof statistics
+ngen. <- 1e5 # sample size of the generated data used in evaluating various objective functions
+
+B <- 100  #  number of replications used for boxplots of two-sample gof statistics
+B. <- 200 # number of replications used for boxplots of various objective function values
 
 ## 2.1 Plots for portfolio of stocks identified in 1.2.1
 main(tickers.P3)
