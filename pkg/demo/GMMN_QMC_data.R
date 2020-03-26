@@ -258,12 +258,12 @@ gof2stats_boxplot <- function(gof.stats, ntrn)
     nms[which(grepl("t.ex",    colnames(gof.stats)))] <- "t (ex)"
     nms[which(grepl("t.un",    colnames(gof.stats)))] <- "t (un)"
     nms[which(grepl("GMMN",    colnames(gof.stats)))] <- "GMMN"
-
+    par(pty = 's')
     ## Boxplot
     boxplot(gof.stats, log = "y", names = nms,
-            ylab = expression(S[list(n[gen],n[trn])]))
-    mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~ngen.~", "~n[trn]~"="~ntrn.,
-                     list(B. = B, d. = d, ngen. = ngen, ntrn. = ntrn)),
+            ylab = expression(S[list(n[trn],n[gen])]))
+    mtext(substitute(B.~"replications, d ="~d.~", "~n[trn]~"="~ntrn.~", "~n[gen]~"="~ngen.,
+                     list(B. = B, d. = d, ntrn. = ntrn, ngen. = ngen)),
           side = 4, line = 0.5, adj = 0)
 }
 
@@ -303,14 +303,12 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
         t <- 0 # now
         T <- 1 # maturity in years
         r <- 0.01 # risk-free annual interest rate
-        K.basket <- round(1.005 * mean(S.t)) # strike for basked call
-        cat("Note: Chosen strike prices K for basket  calls:", paste0(K.basket))
 
         ## Main function
         aux <- function(b) {
             ## Result object
             r. <- matrix(, nrow = 3, ncol = 2,
-                        dimnames = list("Objective" = c("ES", "Allocation first", "Basket call"),
+                        dimnames = list("Objective" = c("ES", "AC", "Basket call"),
                                         "RS" = c("GMMN PRS", "GMMN QRS")))
 
             ## Generate PRS and QRS
@@ -359,23 +357,103 @@ objective_functions <- function(gnn, marginal.fits, B, n, randomize, S.t, sig, s
 
 ##' @title Boxplots of Objective Function realizations
 ##' @param obj.vals return object of objective_functions()
-##' @param fn.name Name of objective function
+##' @param name Name of objective function
 ##' @return invisible (boxplot by side-effect)
-VRF_boxplot <- function(obj.vals,fn.name)
+VRF_boxplot <- function(obj.vals,name)
 {
     ## Retrieve objective value realizations and compute variances
     varP <- var(GPRS <- obj.vals["GMMN PRS",])
     varQ <- var(GQRS <- obj.vals["GMMN QRS",])
 
     ## Compute the VRF and % improvements w.r.t. PRS
-    VRF.Q <- varP / varQ # VRF for QRS
-    PIM.Q <- (varP - varQ) / varP * 100 # % improvement for QRS
+    VRF.Q <- formatC(varP / varQ,digits=2,format="f") # VRF for QRS
+    PIM.Q <- formatC((varP - varQ) / varP * 100,digits=2,format="f") # % improvement for QRS
+    
+    ## Create labels for y-axis depending on the objective function
+    ylabel <- if(grepl("ES",name)) {
+      substitute(ES[alpha], list(alpha = 0.99))
+      } else if (grepl("AC", name)) {
+      substitute(AC[1,alpha], list(alpha = 0.99)) 
+     } else if (grepl("Basket call", name)) {
+      substitute("Basket call payoff, strike ="~K, list(K = K.basket))
+    }
+    
+    
+    
     ## Box plot
+    par(pty = 's')
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
-            names=c("GMMN PRS","GMMN QRS"),ylab=fn.name)
+            names=c("GMMN PRS","GMMN QRS"),ylab=ylabel)
     mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~n.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
                      list(B. = B, d. = d, n. = ngen., VQ = VRF.Q,PQ= PIM.Q)),
           side = 4, line = 0.5, adj = 0)
+}
+
+##' @title Results for data application
+##' @param tickers list of character strings representing ticker symbols for S&P 500 stocks
+##' @return invisible (plots by side-effect)
+main <- function(tickers){
+  ## Construct final risk factors to work with
+  X <- X.[,tickers]
+  d <- ncol(X)
+  
+  ## For financial examples
+  S <- S.[, tickers]
+  S.t <- t(tail(S, n = 1)) # last available values
+  X.past.two <- X[paste0(c(2014-01-01, train.period[2]), collapse = "/"), ]
+  sig <- apply(X.past.two, 2, sd) # estimate marginal volas based on past two years
+  K.basket <- round(1.005 * mean(S.t)) # strike for basket call
+  
+  ## Fitting
+  series.strng <- paste0(tickers, collapse = "_")
+  train.period.strng <- paste0(train.period, collapse = "_")
+  fits <- all_multivariate_ts_fits(X, series.strng = series.strng, # fitting
+                                   train.period = train.period.strng)
+  marginal.models <- fits$marginal ## fitted marginal models
+  U.trn <- fits$pobs.train # pobs of the standardized residuals
+  dep.models <- fits$dependence # fitted dependence models
+  
+  ## Visual assessment of the pobs after removing the marginal time series
+  if(doPDF) pdf(file = (file <- paste0("fig_scatter_dim_",d,"_",series.strng,".pdf")))
+  par(pty = "s")
+  pairs2(U.trn, pch = ".")
+  if(doPDF) dev.off.crop(file)
+  
+  ## Computing two-sample gof test statistics
+  B <- 100
+  gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng,B=B)
+  
+  ## Visual assessment of the two-sample gof test statistics
+  file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.strng,".pdf")
+  if(doPDF) pdf(file = (file <- file), height = 9.5, width = 9.5)
+  gof2stats_boxplot(gof.stats, ntrn = ntrn)
+  if(doPDF) dev.off.crop(file)
+  
+  ## Computing realizations of objective functions using GMMN PRS and GMMNQ QRS samples
+  B. <- 200 # number of replications
+  ngen. <- 1e5 # sample size
+  res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
+                             B=B.,n=ngen.,randomize = "Owen",S.t=S.t,sig=sig,
+                             series.strng = series.strng)
+  
+  ###  Visual assessment of variance reduction effects of GMMN QRS vs GMMN PRS
+  ### for three objective functions
+  
+  file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.,"_B_",B.,"_",series.strng,".pdf")
+  if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
+  VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1])
+  if(doPDF) dev.off.crop(file)
+  
+  file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.,"_B_",B.,"_",series.strng,".pdf")
+  if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
+  VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2])
+  if(doPDF) dev.off.crop(file)
+  
+  file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.,"_B_",B.,"_",series.strng,".pdf")
+  if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
+  VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3])
+  if(doPDF) dev.off.crop(file)
+  
 }
 
 
@@ -390,77 +468,33 @@ raw <- SP500_const[paste0(train.period, collapse = "/"),] # data
 keep <- apply(raw, 2, function(x.) mean(is.na(x.)) <= 0.01) # keep those with <= 1% NA
 S. <- na.fill(raw[, keep], fill = "extend") # fill NAs
 X. <- returns(S.) # compute log-returns
+ntrn <- nrow(X.) # Training data size (constant for all selected portfolio of stocks)
 
-## Select constituents we work with
-tickers <- c("INTC", "ORCL", "IBM", # technology
+## 1.2  Select constituents for each portfolio we work with ############################
+
+## 1.2.1 Portfolio 1: d = 3 ########
+tickers.P3 <- c("INTC", "IBM", # technology
+                   "AIG") # financial
+
+## 1.2.2  Portfolio 2: d = 5 #######
+tickers.P5 <- c("INTC", "ORCL", "IBM", # technology
+                 "COF", "AIG") # financial
+
+## 1.2.3 Portfolio 3: d = 10 #######
+tickers.P10 <- c("INTC", "ORCL", "IBM", # technology
              "COF", "JPM", "AIG", # financial
              "MMM", "BA", "GE", "CAT") # industrial
 
-X <- X.[, tickers] # final risk factor changes we work with
-ntrn <- nrow(X)
-d <- ncol(X)
 
-## For financial examples
-S <- S.[, tickers]
-S.t <- t(tail(S, n = 1)) # last available values
-X.past.two <- X[paste0(c(2014-01-01, train.period[2]), collapse = "/"), ]
-sig <- apply(X.past.two, 2, sd) # estimate marginal volas based on past two years
+### 2 Computing all results ############################################
 
+## 2.1 Plots for portfolio of stocks identified in 1.2.1
+main(tickers.P3)
 
-### 1.2 Fitting and comparison of multivariate time series models ##############
+## 2.2 Plots for portfolio of stocks identified in 1.2.2
+main(tickers.P5)
 
-## Fitting
-series.strng <- paste0(tickers, collapse = "_")
-train.period.strng <- paste0(train.period, collapse = "_")
-fits <- all_multivariate_ts_fits(X, series.strng = series.strng, # fitting
-                                 train.period = train.period.strng)
-marginal.models <- fits$marginal ## fitted marginal models
-U.trn <- fits$pobs.train # pobs of the standardized residuals
-dep.models <- fits$dependence # fitted dependence models
-
-## Visual assessment of the pobs after removing the marginal time series
-if(doPDF) pdf(file = (file <- paste0("fig_scatter_dim_",d,"_",series.strng,".pdf")))
-pairs2(U.trn, pch = ".")
-if(doPDF) dev.off.crop(file)
-
-## Computing two-sample gof test statistics
-B <- 100
-gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng)
-
-## Visual assessment of the two-sample gof test statistics
-file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file), height = 9.5, width = 9.5)
-gof2stats_boxplot(gof.stats, ntrn = ntrn)
-if(doPDF) dev.off.crop(file)
-
-
-### 2 Assessing Variance reduction effects of GMMN QRS vs GMMN PRS #############
-
-### 2.1 Realizations of four objective functions based on GMMN PRS and GMMN QRS
-
-## Evaluation each objective function B times based on n samples
-B <- 200 # number of replications
-ngen. <- 1e5 # sample size
-res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
-                           B=B,n=ngen.,randomize = "Owen",S.t=S.t,sig=sig,
-                           series.strng = series.strng)
-
-
-### 2.2 Visual assessment of variance reduction effects ########################
-
-file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-VRF_boxplot(res[1,,], fn.name = dimnames(res)[[1]][1])
-if(doPDF) dev.off.crop(file)
-
-file <- paste0("fig_boxplot_allocationfirst","_dim_",d,"_ngen_",ngen.,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-VRF_boxplot(res[2,,], fn.name = dimnames(res)[[1]][2])
-if(doPDF) dev.off.crop(file)
-
-file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.,"_B_",B,"_",series.strng,".pdf")
-if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
-VRF_boxplot(res[3,,], fn.name = dimnames(res)[[1]][3])
-if(doPDF) dev.off.crop(file)
+## 2.3 Plots for portfolio of stocks identified in 1.2.3
+main(tickers.P10)
 
 
