@@ -436,12 +436,13 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
     if(doPDF) dev.off.crop(file)
 
     ## 3) Two-sample GoF test statistics
-    gof.stats <- gof2stats(U.trn, dep.models = dep.models, series.strng = series.strng, B = B.vec[1])
+    gof.stats <- gof2stats(B.vec[1], ngen = ngen.vec[1], pobs.train = U.trn,
+                           dep.models = dep.models, series.strng = series.strng)
 
     ## 4) Visual assessment of the two-sample gof test statistics
     file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen.vec[1],"_B_",B.vec[1],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 10, width = 10)
-    gof2stats_boxplot(gof.stats, ntrn = ntrn, d = d)
+    gof2stats_boxplot(gof.stats, ntrn = ntrn, B = B.vec[1], ngen = ngen.vec[1], d = d)
     if(doPDF) dev.off.crop(file)
 
     ## 5) Realizations of all objective functions using GMMN PRS and GMMN QRS
@@ -454,17 +455,17 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
     ##    for all objective functions
     file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], d = d, K = K)
+    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], d = d, K = K)
+    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
-    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], d = d, K = K)
+    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 }
 
