@@ -420,7 +420,7 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
     d <- ncol(X) # portfolio dimension
     sig <- apply(X[paste0(sig.period, collapse = "/"), ], 2, sd) # estimate marginal volas
     K <- round(1.005 * mean(S.t)) # strike for basket call
-    cat("Strike used for basket option objective function: K =",K,"\n")
+    ## cat("Strike used for basket option objective function: K =",K,"\n") # => we show that in VRF_boxplot()
     series.strng <- paste0(tickers, collapse = "_") # for output files
 
     ## 1) Fitting
@@ -457,17 +457,17 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
     ##    for all objective functions
     file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen[2], B = B.vec[2], d = d, K = K)
+    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen[2], B = B.vec[2], d = d, K = K)
+    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
-    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen[2], B = B.vec[2], d = d, K = K)
+    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 }
 
