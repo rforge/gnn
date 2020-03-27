@@ -4,8 +4,8 @@
 ## sampling for multivariate distributions via generative neural networks").
 ## Training times are obtained from running this script on an NVIDIA Tesla P100
 ## GPU (about 3h), run times of the various methods are obtained from running
-## this script locally (about 30min) as the GPU's run time measurements
-## weren't reliable.
+## this script locally on a 13" MacBook Pro (2018) in about 30min as the GPU's
+## run time measurements weren't reliable.
 
 
 ### Setup ######################################################################

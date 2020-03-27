@@ -2,7 +2,7 @@
 
 ## Data example for Hofert, Prasad, Zhu ("Quasi-random sampling for multivariate
 ## distributions via generative neural networks"). The NNs were trained on an
-## NVIDIA Tesla P100 GPU.
+## NVIDIA Tesla P100 GPU. Running this script without training took about 4.5h.
 
 
 ### Setup ######################################################################
