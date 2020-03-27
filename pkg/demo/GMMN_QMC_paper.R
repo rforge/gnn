@@ -2,9 +2,9 @@
 
 ## Reproducing R script for Hofert, Prasad, Zhu ("Quasi-random sampling for
 ## multivariate distributions via generative neural networks"). The NNs were
-## trained on an NVIDIA Tesla P100 GPU. Timings below are from a 13" MacBook
-## Pro (2018) without training. With pre-trained NNs, the code runs in about
-## 15h (via R CMD BATCH GMMN_QMC_paper.R, for example).
+## trained on an NVIDIA Tesla P100 GPU. Timings below are from running the script
+## locally on a 13" MacBook Pro (2018) without training. With pre-trained NNs,
+## the code runs in about 15h (via R CMD BATCH GMMN_QMC_paper.R, for example).
 
 
 ### Setup ######################################################################
