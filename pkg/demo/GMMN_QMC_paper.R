@@ -774,7 +774,7 @@ human_time(main(NG.d23, name = paste0("NG23_tau_",paste0(taus, collapse = "_")),
                 model = quote("(2,3)-nested Gumbel"), randomize = "Owen"))
 
 ## Copulas from Section 1.4 above
-human_time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.55h (largely due to Cramer--von Mises statistic evaluation)
+human_time(main(t.cop.d10.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 4.55h
                 model = quote(italic(t)[4]), randomize = "Owen"))
 human_time(main(C.cop.d10.tau2, name = paste0("C","_tau_",taus[2]), # ~= 20min
                 model = quote(Clayton), randomize = "Owen"))
