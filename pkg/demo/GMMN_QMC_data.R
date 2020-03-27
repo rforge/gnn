@@ -360,18 +360,19 @@ objective_functions <- function(gnn, marginal.fits, B, ngen, d, randomize, S.t, 
 }
 
 ##' @title Boxplots of Objective Function Realizations
-##' @param obj.vals return object of objective_functions()
+##' @param x return object of objective_functions() *without* first dimension
 ##' @param name name of objective function
 ##' @param ngen sample size
+##' @param B number of realizations
 ##' @param d dimension of data
 ##' @param K strike price of basket call option
 ##' @param level confidence level
 ##' @return invisible (boxplot by side-effect)
-VRF_boxplot <- function(obj.vals, name, ngen, d, K, level = 0.99)
+VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99)
 {
     ## Objective value realizations and their variances
-    varP <- var(GPRS <- obj.vals["GMMN PRS",])
-    varQ <- var(GQRS <- obj.vals["GMMN QRS",])
+    varP <- var(GPRS <- x["GMMN PRS",])
+    varQ <- var(GQRS <- x["GMMN QRS",])
 
     ## Compute the VRF and % improvements w.r.t. PRS
     VRF.Q <- formatC(varP / varQ, digits = 2, format = "f") # VRF for QRS
@@ -389,9 +390,9 @@ VRF_boxplot <- function(obj.vals, name, ngen, d, K, level = 0.99)
     ## Box plot
     opar <- par(pty = "s")
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
-            names = c("GMMN PRS", "GMMN QRS"), ylab = ylab)
+            names = c("GMMN PRS", "GMMN QRS"), ylab = as.expression(ylab))
     mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~ngen.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
-                     list(B. = B, d. = d, ngen. = ngen, VQ = VRF.Q,PQ= PIM.Q)),
+                     list(B. = B, d. = d, ngen. = ngen, VQ = VRF.Q, PQ = PIM.Q)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
 }
@@ -456,17 +457,17 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
     ##    for all objective functions
     file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen[2], d = d, K = K)
+    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
-    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen[2], d = d, K = K)
+    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
     if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
-    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen[2], d = d, K = K)
+    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 }
 
