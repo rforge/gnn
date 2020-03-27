@@ -18,7 +18,7 @@ if(grepl("gra", Sys.info()[["nodename"]])) {
 library(qrng) # for sobol()
 if(packageVersion("copula") < "0.999.19")
     stop('Consider updating via install.packages("copula", repos = "http://R-Forge.R-project.org")')
-library(copula) # for the considered copulas
+library(copula) # for the considered copulas and gofT2stat()
 library(gnn) # for the used GMMN models
 library(xts) # for na.fill()
 library(rugarch)
@@ -189,6 +189,7 @@ all_multivariate_ts_fits <- function(X, series.strng, trn.period)
                                  file = paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",
                                                dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
                                                "_nepo_",nepo,"_",series.strng,".rda"))
+    print("All fitting done")
 
     ## 6) Results
     dependence.models = list(model.cop.gumbel  = model.cop.gumbel,
@@ -197,7 +198,7 @@ all_multivariate_ts_fits <- function(X, series.strng, trn.period)
                              model.cop.norm.un = model.cop.norm.un,
                              model.cop.t.ex    = model.cop.t.ex,
                              model.cop.t.un    = model.cop.t.un,
-                             model.GMMN    = model.GMMN)
+                             model.GMMN        = model.GMMN)
     list(marginal = marginal.models, pobs.train = U, dependence = dependence.models) # return
 }
 
