@@ -453,16 +453,16 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     cat("=> Computing contour, Rosenblatt and scatter plots.\n")
     if(dim.in.out == 2 && !grepl("MO", x = name)) { # rosenblatt() not available for copulas involving MO (MO itself or mixtures)
         contourplot3(copula, uPRS = U.GMMN.PRS, uQRS = U.GMMN.QRS,
-                     file = paste0("GMMN_QMC_paper_fig_contours_",bname,".pdf"))
+                     file = paste0("fig_contours_",bname,".pdf"))
         rosenplot(copula, u = U.GMMN.QRS,
-                  file = paste0("GMMN_QMC_paper_fig_rosenblatt_",bname,".pdf"))
+                  file = paste0("fig_rosenblatt_",bname,".pdf"))
     }
     ## Scatter plots
     if(dim.in.out <= 3) { # for larger dimensions, one doesn't see much anyways
         lst <- list(PRS = U[seq_len(ngen),], GMMN.PRS = U.GMMN.PRS, GMMN.QRS = U.GMMN.QRS)
         nms <- c("copula_PRS", "GMMN_PRS", "GMMN_QRS")
         for(i in seq_along(lst))
-            scatterplot(lst[[i]], file = paste0("GMMN_QMC_paper_fig_scatter_",bname,"_",nms[i],".pdf"))
+            scatterplot(lst[[i]], file = paste0("fig_scatter_",bname,"_",nms[i],".pdf"))
     }
 
     ## 3 Cramer-von Mises (CvM) statistics and test functions ##################
@@ -485,11 +485,11 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         human_time(CvMstat <- CvM(B.CvM, n = ngen.CvM, # larger sample size here
                                   copula = copula, GMMN = GMMN,
                                   randomize = randomize,
-                                  file = paste0("GMMN_QMC_paper_res_CvMstat_",bname,".rds")))
+                                  file = paste0("res_CvMstat_",bname,".rds")))
 
         ## Boxplots
         CvM_boxplot(CvMstat, dim = dim.in.out, model = model.,
-                    file = paste0("GMMN_QMC_paper_fig_CvMboxplot_",bname,".pdf"))
+                    file = paste0("fig_CvMboxplot_",bname,".pdf"))
 
         ## 3.2 Test functions ##################################################
 
@@ -499,11 +499,11 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
         human_time(errTFs <- error_test_functions(B.conv, n = ns,
                                                   copula = copula, GMMN = GMMN,
                                                   randomize = randomize,
-                                                  file = paste0("GMMN_QMC_paper_res_testfun_",bname,".rds")))
+                                                  file = paste0("res_testfun_",bname,".rds")))
 
         ## Plot convergence behavior
         convergence_plot(errTFs, dim = dim.in.out, model = model.,
-                         filebname = paste0("GMMN_QMC_paper_fig_convergence_",bname), B = B.conv)
+                         filebname = paste0("fig_convergence_",bname), B = B.conv)
 
     }
 }
@@ -540,7 +540,7 @@ appendix <- function(copula, name, model, randomize)
 
     GMMNmod <- GMMN[["model"]]
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
-    file <- paste0("GMMN_QMC_paper_res_testfun_",bname,"_digital_shift.rds")
+    file <- paste0("res_testfun_",bname,"_digital_shift.rds")
     res <- if (file.exists(file)) {
         readRDS(file)
     } else {
@@ -613,7 +613,7 @@ appendix <- function(copula, name, model, randomize)
                } else as.character(tau(copula))
     model. <- substitute(m.*","~~tau==t., list(m. = model, t. = tau.str)) # model and taus
     convergence_plot(res, dim = dim.in.out, model = model.,
-                     filebname = paste0("GMMN_QMC_paper_fig_convergence_",bname,
+                     filebname = paste0("fig_convergence_",bname,
                                         "_digital_shift"), B = B.conv)
 }
 
