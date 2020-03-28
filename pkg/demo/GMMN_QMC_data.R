@@ -387,7 +387,7 @@ VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99, file)
             } else if (grepl("AC", name)) {
                 substitute(AC[list(1,l)], list(l = level))
             } else if (grepl("Basket call", name)) {
-                substitute("Basket call payoff, strike ="~K, list(K = K))
+                substitute("Basket call payoff ("*K==K.*")", list(K. = K))
             } else stop("No label match found.")
 
     ## Box plot
