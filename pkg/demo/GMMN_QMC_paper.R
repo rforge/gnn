@@ -369,9 +369,9 @@ convergence_plot <- function(err, dim, model, filebname, B)
 
         ## Compute convergence rates (the larger alpha, the faster the convergence;
         ## for MC, alpha ~= 1/2 for sd [~= 1 for variance])
-        a <- round(c(cop.PRS  = ccoef(err.["Copula PRS",]),
-                     GMMN.QRS = ccoef(err.["GMMN QRS",]),
-                     cop.QRS  = ccoef(err.["Copula QRS",])), digits = 2)
+        a <- c(cop.PRS  = ccoef(err.["Copula PRS",]),
+               GMMN.QRS = ccoef(err.["GMMN QRS",]),
+               cop.QRS  = ccoef(err.["Copula QRS",]))
         if(all(is.na(a))) next # no plot; happens for Sobol' g test function and copulas without available cCopula()
         ## Now it could still happen that a["cop.QRS"] is NA (omit this case from the plot then)
 
@@ -383,11 +383,12 @@ convergence_plot <- function(err, dim, model, filebname, B)
         }
         par(pty = "s")
         ylim <- range(err.[,], na.rm = TRUE)
+        alpha <- formatC(a, digits = 2, format = "f") # format for plot labels
         lgnd <- as.expression(
-            c(substitute("Copula PRS,"~alpha == a., list(a. = a["cop.PRS"])),
-              substitute("GMMN QRS,"~  alpha == a., list(a. = a["GMMN.QRS"])),
+            c(substitute("Copula PRS,"~alpha == a., list(a. = alpha["cop.PRS"])),
+              substitute("GMMN QRS,"~  alpha == a., list(a. = alpha["GMMN.QRS"])),
               if(!is.na(a["cop.QRS"]))
-                  substitute("Copula QRS,"~alpha == a., list(a. = a["cop.QRS"]))))
+                  substitute("Copula QRS,"~alpha == a., list(a. = alpha["cop.QRS"]))))
         plot(ns, err.["Copula PRS",], ylim = ylim, log = "xy", type = "l",
              xlab = expression(n[gen]), ylab = ylabels[ind])
         lines(ns, err.["GMMN QRS",], type = "l", lty = 2, lwd = 1.3)
@@ -718,8 +719,7 @@ human_time(main(t.cop.d2.tau1, name = paste0("t",nu,"_tau_",taus[1]), # ~= 7s
                 model = quote(italic(t)[4]), randomize = "Owen",
                 CvM.testfun = FALSE))
 human_time(main(t.cop.d2.tau2, name = paste0("t",nu,"_tau_",taus[2]), # ~= 23min
-                model = quote(italic(t)[4]), randomize = "Owen",
-                CvM.testfun = FALSE))
+                model = quote(italic(t)[4]), randomize = "Owen"))
 human_time(main(t.cop.d2.tau3, name = paste0("t",nu,"_tau_",taus[3]), # ~= 2s
                 model = quote(italic(t)[4]), randomize = "Owen",
                 CvM.testfun = FALSE))
@@ -727,8 +727,7 @@ human_time(main(C.cop.d2.tau1, name = paste0("C","_tau_",taus[1]), # ~= 2s
                 model = quote(Clayton), randomize = "Owen",
                 CvM.testfun = FALSE))
 human_time(main(C.cop.d2.tau2, name = paste0("C","_tau_",taus[2]), # ~= 14min
-                model = quote(Clayton), randomize = "Owen",
-                CvM.testfun = FALSE))
+                model = quote(Clayton), randomize = "Owen"))
 human_time(main(C.cop.d2.tau3, name = paste0("C","_tau_",taus[3]), # ~= 2s
                 model = quote(Clayton), randomize = "Owen",
                 CvM.testfun = FALSE))
@@ -736,8 +735,7 @@ human_time(main(G.cop.d2.tau1, name = paste0("G","_tau_",taus[1]), # ~= 2s
                 model = quote(Gumbel), randomize = "Owen",
                 CvM.testfun = FALSE))
 human_time(main(G.cop.d2.tau2, name = paste0("G","_tau_",taus[2]), # ~= 19min
-                model = quote(Gumbel), randomize = "Owen",
-                CvM.testfun = FALSE))
+                model = quote(Gumbel), randomize = "Owen"))
 human_time(main(G.cop.d2.tau3, name = paste0("G","_tau_",taus[3]), # ~= 2s
                 model = quote(Gumbel), randomize = "Owen",
                 CvM.testfun = FALSE))
