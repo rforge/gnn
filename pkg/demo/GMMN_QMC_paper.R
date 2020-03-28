@@ -115,7 +115,7 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
 ##' @param file character string (with ending .rds) specifying the file
 ##'        to save the results in
 ##' @return (<2 test functions>, <2 random sampling types>, <n>)-array
-##'         containing the errors (1x mad(), 1x sd()) based on B replications
+##'         containing the sample standard deviations computed based on B replications
 ##'         of the test functions (Sobol' g and 99% ES) evaluated for four types
 ##'         of RS (copula PRS, GMMN PRS, GMMN QRS, copula QRS) based
 ##'         on the sample sizes specified by 'n'.
@@ -213,8 +213,8 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
 
         ## Compute errors, save and return
         res <- array(, dim = c(2, 4, nlen), dimnames = dmnms[1:3]) # result object
-        res[1,,] <- apply(res.[1,,,], 1:2, mad) # apply mad() for fixed RNG, n combinations
-        res[2,,] <- apply(res.[2,,,], 1:2, sd)  # apply sd()  for fixed RNG, n combinations
+        res[1,,] <- apply(res.[1,,,], 1:2, sd) # apply sd() for fixed RNG, n combinations
+        res[2,,] <- apply(res.[2,,,], 1:2, sd)
         saveRDS(res, file = file)
         res
     }
