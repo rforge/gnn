@@ -263,7 +263,7 @@ gof2stats_boxplot <- function(gof.stats, ntrn, B, ngen, d)
     ## Boxplot
     boxplot(gof.stats, log = "y", names = nms,
             ylab = expression(S[list(n[trn],n[gen])]))
-    mtext(substitute(B.~"replications, d ="~d.~", "~n[trn]~"="~ntrn.~", "~n[gen]~"="~ngen.,
+    mtext(substitute(B==B.*","~~d==d.*","~~n[trn]==ntrn.*","~~n[gen]==ngen.,
                      list(B. = B, d. = d, ntrn. = ntrn, ngen. = ngen)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
@@ -374,7 +374,7 @@ VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99)
     varP <- var(GPRS <- x["GMMN PRS",])
     varQ <- var(GQRS <- x["GMMN QRS",])
 
-    ## Compute the VRF and % improvements w.r.t. PRS
+    ## Compute the VRF and % improvement w.r.t. PRS
     VRF.Q <- formatC(varP / varQ, digits = 2, format = "f") # VRF for QRS
     PIM.Q <- formatC((varP - varQ) / varP * 100, digits = 2, format = "f") # % improvement for QRS
 
@@ -391,7 +391,7 @@ VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99)
     opar <- par(pty = "s")
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
             names = c("GMMN PRS", "GMMN QRS"), ylab = as.expression(ylab))
-    mtext(substitute(B.~"replications, d ="~d.~", "~n[gen]~"="~ngen.~", VRF (% improvements)"~VQ~"("~PQ~"%)",
+    mtext(substitute(B==B.*","~~d==d.*","~~n[gen]==ngen.*","~~"VRF (% improvement)"~~VQ~"("*PQ*"%)",
                      list(B. = B, d. = d, ngen. = ngen, VQ = VRF.Q, PQ = PIM.Q)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
@@ -443,7 +443,7 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
 
     ## 4) Visual assessment of the two-sample gof test statistics
     file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen.vec[1],"_B_",B.vec[1],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file), height = 10, width = 10)
+    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
     gof2stats_boxplot(gof.stats, ntrn = ntrn, B = B.vec[1], ngen = ngen.vec[1], d = d)
     if(doPDF) dev.off.crop(file)
 
@@ -456,17 +456,17 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
     ## 6) Visual assessment of variance reduction effects of GMMN QRS vs GMMN PRS
     ##    for all objective functions
     file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
+    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
     VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file), height = 9, width = 9)
+    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
     VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 
     file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file),height = 9, width = 9)
+    if(doPDF) pdf(file = (file <- file),height = 7.4, width = 7.4)
     VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
     if(doPDF) dev.off.crop(file)
 }

@@ -258,8 +258,9 @@ contourplot3 <- function(copula, uPRS, uQRS, file,
     plt <- cpTRUE + cpPRS + cpQRS # overlaid plot
     doPDF <- hasArg(file) && is.character(file)
     if(doPDF) pdf(file = file, bg = "transparent")
-    par(pty = "s")
+    opar <- par(pty = "s")
     print(plt)
+    par(opar)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
 }
 
@@ -278,8 +279,9 @@ rosenplot <- function(copula, u, file,
     R <- cCopula(u, copula = copula) # Rosenblatt transform
     doPDF <- hasArg(file) && is.character(file)
     if(doPDF) pdf(file = file)
-    par(pty = "s")
+    opar <- par(pty = "s")
     plot(R, xlab = xlab, ylab = ylab)
+    par(opar)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
 }
 
@@ -293,10 +295,11 @@ scatterplot <- function(u, file)
 {
     doPDF <- hasArg(file) && is.character(file)
     if(doPDF) pdf(file = file)
-    par(pty = "s")
+    opar <- par(pty = "s")
     if(ncol(u) == 2) {
         plot(u, xlab = quote(U[1]), ylab = quote(U[2]))
     } else pairs2(u)
+    par(opar)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
 }
 
@@ -317,14 +320,15 @@ CvM_boxplot <- function(CvM, dim, model, file)
                 paste0("(",paste0(dim, collapse = ", "),")")
             }
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, width = 7.5, height = 7.5)
-    par(pty = "s")
+    if(doPDF) pdf(file = file, width = 7.4, height = 7.4)
+    opar <- par(pty = "s")
     boxplot(list(CvM[,"CvM.cop.PRS"], CvM[,"CvM.GMMN.PRS"], CvM[,"CvM.GMMN.QRS"]),
             names = c("Copula PRS", "GMMN PRS", "GMMN QRS"),
             ylab = expression(S[n[gen]]))
-    mtext(substitute(B~"replications,"~n[gen]==n.*", d ="~d*","~m,
-                     list(B = nrow(CvM), n. = ngen.CvM, d = dim., m = model)),
+    mtext(substitute(B==B.*","~~n[gen]==n.*","~~d==d*","~~m,
+                     list(B. = nrow(CvM), n. = ngen.CvM, d = dim., m = model)),
           side = 4, line = 0.5, adj = 0)
+    par(opar)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
 }
 
@@ -377,18 +381,16 @@ convergence_plot <- function(err, dim, model, filebname, B)
 
         ## Plot
         doPDF <- hasArg(filebname) && is.character(filebname)
-        if(doPDF) {
-            file <- paste0(filebname,"_testfun_",tfname[ind],".pdf")
-            pdf(file = file, width = 7.4, height = 7.4)
-        }
-        par(pty = "s")
+        if(doPDF)
+            pdf(file = (file <- paste0(filebname,"_testfun_",tfname[ind],".pdf")), width = 7.4, height = 7.4)
+        opar <- par(pty = "s")
         ylim <- range(err.[,], na.rm = TRUE)
         alpha <- formatC(a, digits = 2, format = "f") # format for plot labels
         lgnd <- as.expression(
-            c(substitute("Copula PRS,"~alpha == a., list(a. = alpha["cop.PRS"])),
-              substitute("GMMN QRS,"~  alpha == a., list(a. = alpha["GMMN.QRS"])),
+            c(substitute("Copula PRS,"~~alpha == a., list(a. = alpha["cop.PRS"])),
+              substitute("GMMN QRS,"~~alpha == a.,   list(a. = alpha["GMMN.QRS"])),
               if(!is.na(a["cop.QRS"]))
-                  substitute("Copula QRS,"~alpha == a., list(a. = alpha["cop.QRS"]))))
+                  substitute("Copula QRS,"~~alpha == a., list(a. = alpha["cop.QRS"]))))
         plot(ns, err.["Copula PRS",], ylim = ylim, log = "xy", type = "l",
              xlab = expression(n[gen]), ylab = ylabels[ind])
         lines(ns, err.["GMMN QRS",], type = "l", lty = 2, lwd = 1.3)
@@ -398,9 +400,10 @@ convergence_plot <- function(err, dim, model, filebname, B)
         } else {
             legend("bottomleft", bty = "n", lty = 1:2, lwd = c(1, 1.3), legend = lgnd)
         }
-        mtext(substitute(B.~"replications, d ="~d*","~m,
-                         list(B. = B, d = dim., m = model)),
+        mtext(substitute(B==B.*","~~d==d.*","~~m,
+                         list(B. = B, d. = dim., m = model)),
               side = 4, line = 0.5, adj = 0)
+        par(opar)
         if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file)
     }
 }
