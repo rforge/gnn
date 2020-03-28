@@ -247,8 +247,9 @@ gof2stats <- function(B, ngen, pobs.train, dep.models, series.strng)
 ##' @param B number of realization of the two-sample gof statistic
 ##' @param ngen sample size
 ##' @param d dimension of data
+##' @param file output file
 ##' @return invisible (boxplot by side-effect)
-gof2stats_boxplot <- function(gof.stats, ntrn, B, ngen, d)
+gof2stats_boxplot <- function(gof.stats, ntrn, B, ngen, d, file)
 {
     ## Create a vector of names with each names corresponding to a fitted dependence model
     nms <- rep(NA, ncol(gof.stats))
@@ -259,14 +260,15 @@ gof2stats_boxplot <- function(gof.stats, ntrn, B, ngen, d)
     nms[which(grepl("t.ex",    colnames(gof.stats)))] <- "t (ex)"
     nms[which(grepl("t.un",    colnames(gof.stats)))] <- "t (un)"
     nms[which(grepl("GMMN",    colnames(gof.stats)))] <- "GMMN"
+    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
     opar <- par(pty = 's')
-    ## Boxplot
     boxplot(gof.stats, log = "y", names = nms,
             ylab = expression(S[list(n[trn],n[gen])]))
     mtext(substitute(B==B.*","~~d==d.*","~~n[trn]==ntrn.*","~~n[gen]==ngen.,
                      list(B. = B, d. = d, ntrn. = ntrn, ngen. = ngen)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
+    if(doPDF) dev.off.crop(file)
 }
 
 
@@ -330,7 +332,7 @@ objective_functions <- function(gnn, marginal.fits, B, ngen, d, randomize, S.t, 
             level <- 0.99
             r.[1,] <- c(ES_np(Z.PRS, level = level), ES_np(Z.QRS, level = level))
 
-            ## 2) CA_alpha for first risk according to Euler principle
+            ## 2) AC_alpha for first risk according to Euler principle
             r.[2,] <- c(alloc_np(Z.PRS, level = level)$allocation[1],
                         alloc_np(Z.QRS, level = level)$allocation[1])
 
@@ -367,8 +369,9 @@ objective_functions <- function(gnn, marginal.fits, B, ngen, d, randomize, S.t, 
 ##' @param d dimension of data
 ##' @param K strike price of basket call option
 ##' @param level confidence level
+##' @param file output file
 ##' @return invisible (boxplot by side-effect)
-VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99)
+VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99, file)
 {
     ## Objective value realizations and their variances
     varP <- var(GPRS <- x["GMMN PRS",])
@@ -388,6 +391,7 @@ VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99)
             } else stop("No label match found.")
 
     ## Box plot
+    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
     opar <- par(pty = "s")
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
             names = c("GMMN PRS", "GMMN QRS"), ylab = as.expression(ylab))
@@ -395,6 +399,7 @@ VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99)
                      list(B. = B, d. = d, ngen. = ngen, VQ = VRF.Q, PQ = PIM.Q)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
+    if(doPDF) dev.off.crop(file)
 }
 
 
@@ -442,10 +447,8 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
                            dep.models = dep.models, series.strng = series.strng)
 
     ## 4) Visual assessment of the two-sample gof test statistics
-    file <- paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen.vec[1],"_B_",B.vec[1],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
-    gof2stats_boxplot(gof.stats, ntrn = ntrn, B = B.vec[1], ngen = ngen.vec[1], d = d)
-    if(doPDF) dev.off.crop(file)
+    gof2stats_boxplot(gof.stats, ntrn = ntrn, B = B.vec[1], ngen = ngen.vec[1], d = d,
+                      file = paste0("fig_boxplot_gof2stat","_dim_",d,"_ngen_",ngen.vec[1],"_B_",B.vec[1],"_",series.strng,".pdf"))
 
     ## 5) Realizations of all objective functions using GMMN PRS and GMMN QRS
     res <- objective_functions(dep.models$model.GMMN, marginal.fits = marginal.models$fit,
@@ -455,20 +458,12 @@ main <- function(tickers, B.vec, ngen.vec, S, trn.period, sig.period)
 
     ## 6) Visual assessment of variance reduction effects of GMMN QRS vs GMMN PRS
     ##    for all objective functions
-    file <- paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
-    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
-    if(doPDF) dev.off.crop(file)
-
-    file <- paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
-    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
-    if(doPDF) dev.off.crop(file)
-
-    file <- paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf")
-    if(doPDF) pdf(file = (file <- file),height = 7.4, width = 7.4)
-    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K)
-    if(doPDF) dev.off.crop(file)
+    VRF_boxplot(res[1,,], name = dimnames(res)[[1]][1], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K,
+                file = paste0("fig_boxplot_ES99","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf"))
+    VRF_boxplot(res[2,,], name = dimnames(res)[[1]][2], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K,
+                file = paste0("fig_boxplot_AC1","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf"))
+    VRF_boxplot(res[3,,], name = dimnames(res)[[1]][3], ngen = ngen.vec[2], B = B.vec[2], d = d, K = K,
+                file = paste0("fig_boxplot_basketcall","_dim_",d,"_ngen_",ngen.vec[2],"_B_",B.vec[2],"_",series.strng,".pdf"))
 }
 
 
