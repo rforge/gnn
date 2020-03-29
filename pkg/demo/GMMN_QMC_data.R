@@ -252,18 +252,22 @@ gof2stats <- function(B, ngen, pobs.train, dep.models, series.strng)
 gof2stats_boxplot <- function(gof.stats, ntrn, B, ngen, d, file)
 {
     ## Create a vector of names with each names corresponding to a fitted dependence model
-    nms <- rep(NA, ncol(gof.stats))
-    nms[which(grepl("gumbel",  colnames(gof.stats)))] <- "Gumbel"
-    nms[which(grepl("clayton", colnames(gof.stats)))] <- "Clayton"
-    nms[which(grepl("norm.ex", colnames(gof.stats)))] <- "Normal (ex)"
-    nms[which(grepl("norm.un", colnames(gof.stats)))] <- "Normal (un)"
-    nms[which(grepl("t.ex",    colnames(gof.stats)))] <- "t (ex)"
-    nms[which(grepl("t.un",    colnames(gof.stats)))] <- "t (un)"
-    nms[which(grepl("GMMN",    colnames(gof.stats)))] <- "GMMN"
-    if(doPDF) pdf(file = (file <- file), height = 7.4, width = 7.4)
-    opar <- par(pty = 's')
-    boxplot(gof.stats, log = "y", names = nms,
-            ylab = expression(S[list(n[trn],n[gen])]))
+    nmod <- ncol(gof.stats)
+    nms <- rep(NA, nmod)
+    clnms <- colnames(gof.stats)
+    nms[which(grepl("gumbel",  clnms))] <- "Gumbel"
+    nms[which(grepl("clayton", clnms))] <- "Clayton"
+    nms[which(grepl("norm.ex", clnms))] <- "Normal (ex)"
+    nms[which(grepl("norm.un", clnms))] <- "Normal (un)"
+    nms[which(grepl("t.ex",    clnms))] <- "t (ex)"
+    nms[which(grepl("t.un",    clnms))] <- "t (un)"
+    nms[which(grepl("GMMN",    clnms))] <- "GMMN"
+    if(doPDF) pdf(file = file, height = 7.4, width = 7.4)
+    opar <- par(pty = "s")
+    boxplot(gof.stats, log = "y", xaxt = "n", ylab = expression(S[list(n[trn],n[gen])]))
+    axis(1, at = 1:nmod, labels = FALSE)
+    par(usr = c(par("usr")[1:2], 0, 1))
+    text(1:nmod, y = 0.82, srt = 45, labels = nms, xpd = TRUE)
     mtext(substitute(B==B.*","~~d==d.*","~~n[trn]==ntrn.*","~~n[gen]==ngen.,
                      list(B. = B, d. = d, ntrn. = ntrn, ngen. = ngen)),
           side = 4, line = 0.5, adj = 0)
