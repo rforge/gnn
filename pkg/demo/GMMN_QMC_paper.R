@@ -325,8 +325,8 @@ CvM_boxplot <- function(CvM, dim, model, file)
     boxplot(list(CvM[,"CvM.cop.PRS"], CvM[,"CvM.GMMN.PRS"], CvM[,"CvM.GMMN.QRS"]),
             names = c("Copula PRS", "GMMN PRS", "GMMN QRS"),
             ylab = expression(S[n[gen]]))
-    mtext(substitute(B==B.*","~~n[gen]==n.*","~~d==d*","~~m,
-                     list(B. = nrow(CvM), n. = ngen.CvM, d = dim., m = model)),
+    mtext(substitute(B==B.*","~~n[gen]==n.*","~~d==d.*","~~m,
+                     list(B. = nrow(CvM), n. = ngen.CvM, d. = dim., m = model)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
     if(doPDF) if(require(crop)) dev.off.crop(file) else dev.off(file) # cropping if available
@@ -349,15 +349,12 @@ convergence_plot <- function(err, dim, model, filebname, B)
         res <- tryCatch(lm(log(error) ~ log(ns)), error = function(e) e)
         if(is(res, "simpleError")) NA else -coef(res)[["log(ns)"]]
     }
+    ylab <- expression("Standard deviation estimate,"~O(n[gen]^{-alpha}))
     ## Note: error(n) = O(n^{-alpha}) => error(n) = c*n^{-alpha} => ccoef(error) = alpha
-    ld <- length(dim(err))
-    if(ld == 3) { # for all test functions
-        ylabels <- c(expression("Median absolute deviation estimate,"~O(n[gen]^{-alpha})),
-                     expression("Standard deviation estimate,"~O(n[gen]^{-alpha})))
+    if(length(dim(err)) == 3) { # for all test functions
         tfname <- c("sobolg", "ES99") # test function names for PDF files
         tfnum <- 2 # number of test functions
-    } else if(ld == 2) { # for the ES test function
-        ylabels <- expression("Standard deviation estimate,"~O(n[gen]^{-alpha}))
+    } else { # length(dim(err)) == 2; for the ES test function
         tfname <- "ES99"
         tfnum <- 1
     }
@@ -392,7 +389,7 @@ convergence_plot <- function(err, dim, model, filebname, B)
               if(!is.na(a["cop.QRS"]))
                   substitute("Copula QRS,"~~alpha == a., list(a. = alpha["cop.QRS"]))))
         plot(ns, err.["Copula PRS",], ylim = ylim, log = "xy", type = "l",
-             xlab = expression(n[gen]), ylab = ylabels[ind])
+             xlab = expression(n[gen]), ylab = ylab)
         lines(ns, err.["GMMN QRS",], type = "l", lty = 2, lwd = 1.3)
         if(!is.na(a["cop.QRS"])) {
             lines(ns, err.["Copula QRS",], type = "l", lty = 3, lwd = 1.6)
