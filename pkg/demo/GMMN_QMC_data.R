@@ -377,13 +377,13 @@ objective_functions <- function(gnn, marginal.fits, B, ngen, d, randomize, S.t, 
 ##' @return invisible (boxplot by side-effect)
 VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99, file)
 {
-    ## Objective value realizations and their variances
+    ## Objective function values and their variances
     varP <- var(GPRS <- x["GMMN PRS",])
     varQ <- var(GQRS <- x["GMMN QRS",])
 
     ## Compute the VRF and % improvement w.r.t. PRS
-    VRF.Q <- formatC(varP / varQ, digits = 2, format = "f") # VRF for QRS
-    PIM.Q <- formatC((varP - varQ) / varP * 100, digits = 2, format = "f") # % improvement for QRS
+    VRF <- formatC(varP / varQ, digits = 2, format = "f") # VRF
+    PI  <- formatC((varP - varQ) / varP * 100, digits = 2, format = "f") # % improvement
 
     ## Create labels for y-axis depending on the objective function
     ylab <- if(grepl("ES", name)) {
@@ -399,8 +399,8 @@ VRF_boxplot <- function(x, name, ngen, B, d, K, level = 0.99, file)
     opar <- par(pty = "s")
     boxplot(list(GPRS = GPRS, GQRS = GQRS),
             names = c("GMMN PRS", "GMMN QRS"), ylab = as.expression(ylab))
-    mtext(substitute(B==B.*","~~d==d.*","~~n[gen]==ngen.*","~~"VRF (% improvement)"~~VQ~"("*PQ*"%)",
-                     list(B. = B, d. = d, ngen. = ngen, VQ = VRF.Q, PQ = PIM.Q)),
+    mtext(substitute(B==B.*","~~d==d.*","~~n[gen]==ngen.*","~~"VRF:"~~VRF.*","~~"improvement:"~~PI.*"%",
+                     list(B. = B, d. = d, ngen. = ngen, VRF. = VRF, PI. = PI)),
           side = 4, line = 0.5, adj = 0)
     par(opar)
     if(doPDF) dev.off.crop(file)
