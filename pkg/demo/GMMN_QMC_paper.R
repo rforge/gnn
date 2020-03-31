@@ -81,9 +81,9 @@ CvM <- function(B, n, copula, GMMN, randomize, file)
         aux <- function(b) { # the following is independent of 'b'
             ## Draw PRS and QRS
             U.cop.PRS <- pobs(rCopula(n, copula = copula)) # copula PRS
-            N.PRS <- matrix(rnorm(n * d), ncol = d) # prior PRS
+            N.PRS <- matrix(rnorm(n * d), ncol = d) # input PRS
             U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
-            N.QRS <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # prior QRS
+            N.QRS <- qnorm(sobol(n, d = d, randomize = randomize, seed = b)) # input QRS
             U.GMMN.QRS <- pobs(predict(GMMNmod, x = N.QRS)) # GMMN QRS
             ## Compute the Cramer-von Mises statistic for each of the samples
             c(gofTstat(U.cop.PRS,  copula = copula), # CvM statistic for copula PRS
@@ -145,10 +145,10 @@ error_test_functions <- function(B, n, copula, GMMN, randomize, file)
                 ## Random number generation
                 n. <- n[nind]
                 U.cop.PRS  <- rCopula(n., copula = copula) # copula PRS
-                N.PRS <- matrix(rnorm(n. * d), ncol = d) # PRS from the prior
+                N.PRS <- matrix(rnorm(n. * d), ncol = d) # PRS from the input distribution
                 U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
-                N.QRS <- qnorm(sob) # prior QRS
+                N.QRS <- qnorm(sob) # input QRS
                 U.GMMN.QRS <- pobs(predict(GMMNmod, x = N.QRS)) # GMMN QRS
                 ## If available in analytical form, draw real QRS
                 ## Note: cCopula() now exists for moCopula() but wasn't included here
@@ -429,7 +429,7 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     set.seed(271) # for reproducibility
     U <- rCopula(ntrn, copula = copula) # generate training dataset (PRS)
     ## Train
-    dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
+    dim.in.out <- dim(copula) # = dimension of the input distribution fed into the GMMN
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
@@ -445,10 +445,10 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     bname <- paste0("dim_",dim.in.out,"_",name) # suffix
     seed <- 314
     set.seed(seed) # for reproducibility
-    N01.prior.PRS <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # prior PRS
-    N01.prior.QRS <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # prior QRS
-    U.GMMN.PRS <- pobs(predict(GMMNmod, x = N01.prior.PRS)) # GMMN PRS
-    U.GMMN.QRS <- pobs(predict(GMMNmod, x = N01.prior.QRS)) # GMMN QRS
+    N01.input.PRS <- matrix(rnorm(ngen * dim.in.out), ncol = dim.in.out) # input PRS
+    N01.input.QRS <- qnorm(sobol(ngen, d = dim.in.out, randomize = randomize, seed = seed)) # input QRS
+    U.GMMN.PRS <- pobs(predict(GMMNmod, x = N01.input.PRS)) # GMMN PRS
+    U.GMMN.QRS <- pobs(predict(GMMNmod, x = N01.input.QRS)) # GMMN QRS
 
     ## Contour, Rosenblatt and scatter plots
     cat("=> Computing contour, Rosenblatt and scatter plots.\n")
@@ -528,7 +528,7 @@ appendix <- function(copula, name, model, randomize)
     set.seed(271) # for reproducibility
     U <- rCopula(ntrn, copula = copula) # generate training dataset (PRS)
     ## Train
-    dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
+    dim.in.out <- dim(copula) # = dimension of the input distribution fed into the GMMN
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
     GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
@@ -563,10 +563,10 @@ appendix <- function(copula, name, model, randomize)
                 ## 0) Random number generation
                 n. <- n[nind]
                 U.cop.PRS  <- rCopula(n., copula = copula) # copula PRS
-                N.PRS <- matrix(rnorm(n. * d), ncol = d) # prior PRS
+                N.PRS <- matrix(rnorm(n. * d), ncol = d) # input PRS
                 U.GMMN.PRS <- pobs(predict(GMMNmod, x = N.PRS)) # GMMN PRS
                 sob <- sobol(n., d = d, randomize = randomize, seed = b) # randomized Sobol' sequence; note: same seed for each 'n' (good!)
-                N.QRS <- qnorm(sob) # prior QRS
+                N.QRS <- qnorm(sob) # input QRS
                 U.GMMN.QRS <- pobs(predict(GMMNmod, x = N.QRS)) # GMMN QRS
                 ## If available in analytical form, draw real QRS
                 ## Note: cCopula() now exists for moCopula() but wasn't included here

@@ -49,7 +49,7 @@ ngen <- c(1e5, 1e3) # or 1e6 (about 30min), 1e7 (about 3h)
 training_time <- function(copula, cstrng)
 {
     U <- rCopula(ntrn, copula = copula) # pseudo-random training data
-    dim.in.out <- dim(copula) # = dimension of the prior distribution fed into the GMMN
+    dim.in.out <- dim(copula) # = dimension of the input distribution fed into the GMMN
     file <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                    "_nbat_",nbat,"_nepo_",nepo,"_",cstrng,".rda")
     name <- rm_ext(basename(file))
@@ -359,16 +359,18 @@ stopifnot(all.equal(U.TF, U.R, tolerance = 1e-7))
 ## Compute run times as a function of n
 ngen. <- 10^seq(1, 6, by = 0.5) # sample sizes considered
 d <- c(2, 5, 10) # dimensions considered
-set.seed(271); U. <- matrix(rnorm(max(ngen.) * max(d)), ncol = max(d)) # generate for the max. sample size and dimension
+set.seed(271)
 res <- matrix(, nrow = length(ngen.), ncol = length(d)) # (length(n), length(d))-matrix
 pb <- txtProgressBar(max = length(d) * length(ngen.), style = 3)
 for(j in seq_along(d)) {
     mod <- get_model_param_dim(GMMNs[j])
     for(i in seq_along(ngen.)) {
-        U.. <- U.[1:ngen.[i], 1:d[j], drop = FALSE]
-        res[i, j] <-
-            mean(replicate(10, expr = system.time(pobs(predictR(U.., param = mod$param)))[["elapsed"]] /
-                                   system.time(pobs(predict(mod$model, x = U..)))[["elapsed"]]))
+        f <- function() {
+            N <- matrix(rnorm(ngen.[i] *  d[j]), ncol = d[j]) # generate input
+            system.time(pobs(predictR(N, param = mod$param)))[["elapsed"]] /
+                system.time(pobs(predict(mod$model, x = N)))[["elapsed"]]
+        }
+        res[i,j] <- mean(replicate(10, expr = f()))
         setTxtProgressBar(pb, length(ngen.) * (j-1) + i)
     }
 }

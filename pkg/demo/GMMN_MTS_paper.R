@@ -491,8 +491,8 @@ distribution_forecast_ts <- function(n.samples, n.test, margin.model, dep.model,
         ## Generating samples from the various dependence models
         U.sim <- switch(type,
                "GMMN" = {
-                   N01.prior.gen <- matrix(rnorm(n.samples * dim.dep * h), ncol = dim.dep)
-                   pobs(predict(dep.model, x = N01.prior.gen))
+                   N01.input.gen <- matrix(rnorm(n.samples * dim.dep * h), ncol = dim.dep)
+                   pobs(predict(dep.model, x = N01.input.gen))
                },
                "copula" = {
                    rCopula(n.samples * h, copula = dep.model)

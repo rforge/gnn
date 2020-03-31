@@ -60,8 +60,8 @@ system.time(VAE <- train_once(GNN, data = x.frey, # train once
 
 ## Generate Frey-like images from the fitted generator
 set.seed(271) # for reproducibility
-N01.prior <- matrix(rnorm(n * dim.lat), ncol = dim.lat) # sample from the prior
-x.frey. <- predict(VAE$generator, x = N01.prior) # # sample via the generator
+N01.input <- matrix(rnorm(n * dim.lat), ncol = dim.lat) # sample from the input
+x.frey. <- predict(VAE$generator, x = N01.input) # # sample via the generator
 
 ## Plot
 opar <- par(mar = rep(0.2, 4))
@@ -109,8 +109,8 @@ system.time(VAE <- train_once(GNN, data = x.fmnist, # train once
 
 ## Generate fashion-MNIST-like images from the fitted generator
 set.seed(271) # for reproducibility
-N01.prior <- matrix(rnorm(n * dim.lat), ncol = dim.lat) # sample from the prior
-x.fmnist. <- predict(VAE$generator, x = N01.prior) # sample via the generator
+N01.input <- matrix(rnorm(n * dim.lat), ncol = dim.lat) # sample from the input
+x.fmnist. <- predict(VAE$generator, x = N01.input) # sample via the generator
 
 ## Plot
 opar <- par(mar = rep(0.2, 4))
