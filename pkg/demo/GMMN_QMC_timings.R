@@ -367,8 +367,8 @@ for(j in seq_along(d)) {
     for(i in seq_along(ngen.)) {
         U.. <- U.[1:ngen.[i], 1:d[j], drop = FALSE]
         res[i, j] <-
-            mean(replicate(10, expr = system.time(predictR(U.., param = mod$param))[["elapsed"]] /
-                                   system.time(predict(mod$model, x = U..))[["elapsed"]]))
+            mean(replicate(10, expr = system.time(pobs(predictR(U.., param = mod$param)))[["elapsed"]] /
+                                   system.time(pobs(predict(mod$model, x = U..)))[["elapsed"]]))
         setTxtProgressBar(pb, length(ngen.) * (j-1) + i)
     }
 }
