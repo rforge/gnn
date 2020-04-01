@@ -366,9 +366,10 @@ for(j in seq_along(d)) {
     mod <- get_model_param_dim(GMMNs[j])
     for(i in seq_along(ngen.)) {
         f <- function() {
-            N <- matrix(rnorm(ngen.[i] *  d[j]), ncol = d[j]) # generate input
-            system.time(pobs(predictR(N, param = mod$param)))[["elapsed"]] /
-                system.time(pobs(predict(mod$model, x = N)))[["elapsed"]]
+            system.time(pobs(predictR(matrix(rnorm(ngen.[i] *  d[j]), ncol = d[j]),
+                                      param = mod$param)))[["elapsed"]] /
+                system.time(pobs(predict(mod$model, x = matrix(rnorm(ngen.[i] *  d[j]),
+                                                               ncol = d[j]))))[["elapsed"]]
         }
         res[i,j] <- mean(replicate(10, expr = f()))
         setTxtProgressBar(pb, length(ngen.) * (j-1) + i)
