@@ -411,7 +411,6 @@ labels <- sapply(1:length(ngen), function(i) if(i %% 2 == 1) as.expression(bquot
 axis(1, at = ngen, labels = labels)
 for(j in 1:len.d)
     lines(ngen, ave.ratio[j,], lty = j)
-if(max(ave.ratio) >= 1) abline(h = 1, lty = 4)
 legend("bottomright", bty = "n", col = 1, lty = 1:3, legend = paste("d =", d))
 mtext(substitute(B==B.~~"replications", list(B. = B)), side = 4, line = 0.5, adj = 0)
 par(opar)
