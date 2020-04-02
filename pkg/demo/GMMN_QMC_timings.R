@@ -3,7 +3,7 @@
 ## Measuring run time for certain examples in Hofert, Prasad, Zhu ("Quasi-random
 ## sampling for multivariate distributions via generative neural networks").
 ## Training times are obtained from running this script on an NVIDIA Tesla P100
-## GPU (about 3h), run times of the various methods are obtained from running
+## GPU (about 2.5h), run times of the various methods are obtained from running
 ## this script locally on a 13" MacBook Pro (2018) in about 30min as the GPU's
 ## run time measurements weren't reliable.
 
@@ -396,20 +396,22 @@ if(file.exists(file)) {
 ## Compute fractions 'R implementation / TensorFlow implementation'
 ratio <- res["R",,,] / res["TF",,,] # (<d>, <n>, <replication>)-array
 summary(ratio)
+ave.ratio <- apply(ratio, 1:2, mean) # (<d>, <n>)-matrix
 
 ## Plot
+## Note: The break-even point was around n = 10^4 (largest d) to 10^5 (smallest d)
+##       when run locally and R was always faster on Graham.
 file <- "fig_elapsed_time_R_over_TensorFlow.pdf"
 pdf(file, bg = "transparent", width = 7, height = 7)
 opar <- par(pty = "s")
-plot(NA, NA, type = "l", log = "x", xlim = range(ngen), ylim = range(ratio),
+plot(NA, NA, type = "l", log = "x", xlim = range(ngen), ylim = range(ave.ratio),
      xaxt = "n", xlab = expression(n[gen]),
      ylab = "Elapsed time of R implementation / TensorFlow implementation")
 labels <- sapply(1:length(ngen), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
 axis(1, at = ngen, labels = labels)
 for(j in 1:len.d)
-    ## for(b in 1:B)
-        lines(ngen, apply(ratio[j,,], 1, mean), lty = j)
-abline(h = 1, lty = 4)
+    lines(ngen, ave.ratio[j,], lty = j)
+if(max(ave.ratio) >= 1) abline(h = 1, lty = 4)
 legend("bottomright", bty = "n", col = 1, lty = 1:3, legend = paste("d =", d))
 mtext(substitute(B==B.~~"replications", list(B. = B)), side = 4, line = 0.5, adj = 0)
 par(opar)
