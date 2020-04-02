@@ -139,18 +139,20 @@ timings <- function(copula, cstrng, file)
     res
 }
 
-##' @title Load and Extract the Model, Parameters and Dimensions
+##' @title Load and Extract the Model and its Parameters
 ##' @param x string specifying the GMMN
-##' @return 3-list containing the model, parameters and dimensions of all layers
+##' @return list containing the model and its parameters (weight matrix and bias vector
+##'         for each hidden or output layer)
 ##' @author Marius Hofert
-get_model_param_dim <- function(x)
+##' @note if 'x' is a pre-trained and saved (.rda) GMMN, do:
+##' load(paste0(x,".rda"))
+##' x <- to_callable(get(x))[["model"]] # get trained model
+get_model_param <- function(x)
 {
-    load(paste0(x,".rda"))
-    gnn <- get(x)
-    model <- to_callable(gnn)[["model"]] # get trained model
-    param <- get_weights(model)
-    names(param) <- paste0(c("W", "b"), rep(seq_len(length(gnn[["dim"]]) -1), each = 2))
-    list(model = model, param = param, dim = gnn[["dim"]])
+    param.lst <- get_weights(x) # 2*(num.layer-1)-list containing (W, b) for the hidden and output layers
+    num.layer.m1 <- length(param.lst) / 2 # number of layers minus input layer
+    names(param.lst) <- paste0(rep(c("W", "b"), num.layer.m1), rep(1:num.layer.m1, each = 2))
+    param.lst
 }
 
 ##' @title Compute a Linear Transformation
@@ -334,64 +336,81 @@ res.sampling <- matrix(noquote(sprintf("%.4f", c(
 toLatex(ftable(res.sampling))
 
 
-### 4 Run time comparison of R implementation in comparison to TensorFlow ######
+### 4 Run time comparison of R implementation of predict() vs TensorFlow #######
 
-## GMMNs considered
-GMMNs <- c("GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5",
-           "GMMN_dim_5_300_5_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5",
-           "GMMN_dim_10_300_10_ntrn_60000_nbat_5000_nepo_300_t4_tau_0.5")
+### 4.1 Check predictR() #######################################################
 
-
-### 4.1 Do we match the output of TensorFlow ###################################
-
-mod <- get_model_param_dim(GMMNs[1])
-d <- mod$dim[1]
 n <- 1e5
-set.seed(271)
-U. <- matrix(rnorm(n * d), ncol = d)
-system.time(U.TF <- predict(mod$model, x = U.))
-system.time(U.R  <- predictR(U., param = mod$param))
-stopifnot(all.equal(U.TF, U.R, tolerance = 1e-7))
+d <- 2
+rGMMN.model <- GMMN_model(dim = c(d, dim.hid, d))[["model"]] # every call produces random weights and biases of 0; set.seed() is *not* respected
+rGMMN.param <- get_model_param(rGMMN.model)
+set.seed(271) # for input matrix N
+N <- matrix(rnorm(n * d), ncol = d)
+system.time(ff.TF <- predict(rGMMN.model, x = N))
+system.time(ff.R  <- predictR(N, param = rGMMN.param))
+stopifnot(all.equal(ff.TF, ff.R, tolerance = 1e-7))
+## Note: The last stopifnot() may or may not hold as seed is not respected by
+##       TensorFlow but the given tolerance worked in most cases tried.
 
 
-### 4.2 Run time as a function of n for several GMMNs ##########################
+### 4.2 Run time of predictR() vs predict() ####################################
 
 ## Compute run times as a function of n
-ngen. <- 10^seq(1, 6, by = 0.5) # sample sizes considered
-d <- c(2, 5, 10) # dimensions considered
-set.seed(271)
-res <- matrix(, nrow = length(ngen.), ncol = length(d)) # (length(n), length(d))-matrix
-pb <- txtProgressBar(max = length(d) * length(ngen.), style = 3)
-for(j in seq_along(d)) {
-    mod <- get_model_param_dim(GMMNs[j])
-    for(i in seq_along(ngen.)) {
-        f <- function() {
-            system.time(pobs(predictR(matrix(rnorm(ngen.[i] *  d[j]), ncol = d[j]),
-                                      param = mod$param)))[["elapsed"]] /
-                system.time(pobs(predict(mod$model, x = matrix(rnorm(ngen.[i] *  d[j]),
-                                                               ncol = d[j]))))[["elapsed"]]
+len.ngen <- length(ngen <- round(10^seq(1, 6, by = 0.5))) # sample sizes considered
+len.d <- length(d <- c(2, 5, 10)) # dimensions considered
+B <- 10 # number of replications
+res <- array(, dim = c(2, len.d, len.ngen, B), # (<function>, <d>, <n>, <replication>)-array
+             dimnames = list("Function" = c("TF", "R"), "d" = d,
+                             "ngen" = ngen, "B" = 1:B))
+## Iteration
+file <- "res_elapsed_time_R_over_TensorFlow.rds"
+if(file.exists(file)) {
+    res <- readRDS(file)
+} else {
+    pb <- txtProgressBar(max = len.d * len.ngen, style = 3)
+    for(j in 1:len.d) { # iterate over the dimensions considered
+        ## Generate B different random GMMNs (with biases)
+        ## Note: This part takes some time which is why the progress bar seems to 'hang'
+        mod <- replicate(B, expr = GMMN_model(c(d[j], dim.hid, d[j]))[["model"]]) # B random GMMNs
+        mod.param <- lapply(mod, function(m) get_model_param(m)) # their parameters
+        ## Iterate over ngen
+        for(i in 1:len.ngen) {
+            cntr <- len.ngen * (j-1) + i # counter for seed and progress bar
+            set.seed(cntr)
+            res["TF",j,i,] <- sapply(1:B, function(b) {
+                N <- matrix(rnorm(ngen[i] *  d[j]), ncol = d[j]) # new sample from input distribution
+                system.time(predict(mod[[b]], x = N))[["elapsed"]] # feed-forward
+            })
+            set.seed(cntr)
+            res["R",j,i,] <- sapply(1:B, function(b) {
+                N <- matrix(rnorm(ngen[i] *  d[j]), ncol = d[j]) # new sample from input distribution
+                system.time(predictR(N, param = mod.param[[b]]))[["elapsed"]] # feed-forward
+            })
+            setTxtProgressBar(pb, cntr)
         }
-        res[i,j] <- mean(replicate(10, expr = f()))
-        setTxtProgressBar(pb, length(ngen.) * (j-1) + i)
     }
+    close(pb)
+    saveRDS(res, file = file)
 }
-close(pb)
+
+## Compute fractions 'R implementation / TensorFlow implementation'
+ratio <- res["R",,,] / res["TF",,,] # (<d>, <n>, <replication>)-array
+summary(ratio)
 
 ## Plot
 file <- "fig_elapsed_time_R_over_TensorFlow.pdf"
 pdf(file, bg = "transparent", width = 7, height = 7)
 opar <- par(pty = "s")
-plot(ngen., res[,1], type = "l", log = "x", ylim = range(res), xaxt = "n",
-     xlab = expression(n[gen]),
+plot(NA, NA, type = "l", log = "x", xlim = range(ngen), ylim = range(ratio),
+     xaxt = "n", xlab = expression(n[gen]),
      ylab = "Elapsed time of R implementation / TensorFlow implementation")
-labels <- sapply(1:length(ngen.), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
-axis(1, at = ngen., labels = labels)
-lines(ngen., res[,2], lty = 2)
-lines(ngen., res[,3], lty = 3)
+labels <- sapply(1:length(ngen), function(i) if(i %% 2 == 1) as.expression(bquote(10^.((i+1)/2))) else NA)
+axis(1, at = ngen, labels = labels)
+for(j in 1:len.d)
+    ## for(b in 1:B)
+        lines(ngen, apply(ratio[j,,], 1, mean), lty = j)
 abline(h = 1, lty = 4)
 legend("bottomright", bty = "n", col = 1, lty = 1:3, legend = paste("d =", d))
-mtext(substitute(italic(t)[nu.]~"copula with Kendall's tau"~tau==tau.,
-                 list(nu. = nu, tau. = taus[2])),
-      side = 4, line = 0.5, adj = 0)
+mtext(substitute(B==B.~~"replications", list(B. = B)), side = 4, line = 0.5, adj = 0)
 par(opar)
 if(require(crop)) dev.off.crop(file) else dev.off(file)

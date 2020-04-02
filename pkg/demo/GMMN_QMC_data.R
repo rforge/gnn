@@ -164,32 +164,44 @@ all_multivariate_ts_fits <- function(X, series.strng, trn.period)
     nbat <- ntrn # batch optimization
 
     ## 4) Fitting the copula models
-    print("Fitting a Gumbel copula")
-    model.cop.gumbel  <- dependence_fit(U,
-                                        file = paste0("copula_","gumbel", "_dim_",dim.in.out,"_",series.strng,".rda"))
-    print("Fitting a Clayton copula")
-    model.cop.clayton <- dependence_fit(U,
-                                        file = paste0("copula_","clayton","_dim_",dim.in.out,"_",series.strng,".rda"))
-    print("Fitting an exchangeable normal copula")
-    model.cop.norm.ex <- dependence_fit(U,
-                                        file = paste0("copula_","norm_ex","_dim_",dim.in.out,"_",series.strng,".rda"))
-    print("Fitting an unstructured normal copula")
-    model.cop.norm.un <- dependence_fit(U,
-                                        file = paste0("copula_","norm_un","_dim_",dim.in.out,"_",series.strng,".rda"))
-    print("Fitting an exchangeable t copula")
-    model.cop.t.ex    <- dependence_fit(U,
-                                        file = paste0("copula_","t_ex","_dim_",dim.in.out,"_",series.strng,".rda"))
-    print("Fitting an unstructured t copula")
-    model.cop.t.un    <- dependence_fit(U,
-                                        file = paste0("copula_","t_un","_dim_",dim.in.out,"_",series.strng,".rda"))
-
+    ##    Gumbel
+    cat("Fitting a Gumbel copula: ")
+    tm <- system.time(model.cop.gumbel <- dependence_fit(U, file = paste0("copula_","gumbel", "_dim_",dim.in.out,
+                                                                          "_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
+    ##    Clayton
+    cat("Fitting a Clayton copula: ")
+    tm <- system.time(model.cop.clayton <- dependence_fit(U, file = paste0("copula_","clayton","_dim_",dim.in.out,
+                                                                           "_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
+    ##    Normal (exchangeable)
+    cat("Fitting an exchangeable normal copula: ")
+    tm <- system.time(model.cop.norm.ex <- dependence_fit(U, file = paste0("copula_","norm_ex","_dim_",dim.in.out,
+                                                                           "_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
+    ##    Normal (unstructured)
+    cat("Fitting an unstructured normal copula: ")
+    tm <- system.time(model.cop.norm.un <- dependence_fit(U, file = paste0("copula_","norm_un","_dim_",dim.in.out,
+                                                                           "_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
+    ##    t (exchangeable)
+    cat("Fitting an exchangeable t copula: ")
+    tm <- system.time(model.cop.t.ex <- dependence_fit(U, file = paste0("copula_","t_ex","_dim_",dim.in.out,
+                                                                        "_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
+    ##    t (unstructured)
+    cat("Fitting an unstructured t copula: ")
+    tm <- system.time(model.cop.t.un <- dependence_fit(U, file = paste0("copula_","t_un","_dim_",dim.in.out,
+                                                                        "_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
     ## 5) Fitting the GMMN model
-    print("Training a GMMN")
-    model.GMMN <- dependence_fit(U, GMMN.dim = c(dim.in.out, dim.hid, dim.in.out),
-                                 file = paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",
-                                               dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
-                                               "_nepo_",nepo,"_",series.strng,".rda"))
-    print("All fitting done")
+    cat("Training a GMMN: ")
+    tm <- system.time(model.GMMN <- dependence_fit(U, GMMN.dim = c(dim.in.out, dim.hid, dim.in.out),
+                                                   file = paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",
+                                                                 dim.in.out,"_ntrn_",ntrn,"_nbat_",nbat,
+                                                                 "_nepo_",nepo,"_",series.strng,".rda")))[["elapsed"]]
+    cat("Done in ",tm,"s\n", sep = "")
+    cat("All fitting done\n")
 
     ## 6) Results
     dependence.models = list(model.cop.gumbel  = model.cop.gumbel,
