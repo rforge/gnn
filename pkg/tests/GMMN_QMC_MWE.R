@@ -2,21 +2,21 @@
 
 ## Basic tests of QMC based on GMMNs
 
+## Note: If TensorFlow was installed in a virtual environment as described on
+##       https://www.tensorflow.org/install/pip#system-install, then this needs
+##       to be activated ('source .../bin/activate/') before this script can be run.
+
+
 library(gnn)
 
-## Check (too restrictive as the OS-level TensorFlow installation will not catch
-## TensorFlow installations done differently; see the stackoverflow link)
-checkCMD <- tryCatch(checkTF <- system("pip list | grep tensorflow",
-                                       intern = TRUE, ignore.stderr = TRUE),
-                     error = function(e) e) # see https://stackoverflow.com/questions/38549253/how-to-find-which-version-of-tensorflow-is-installed-in-my-system
-TFisInstalled <- !is(checkCMD, "simpleError") && length(checkTF) > 0 &&
-    grepl("tensorflow", checkTF[[1]])
-doTest <- TFisInstalled && # OS-level TensorFlow
-    require(tensorflow) && # tensorflow package
-    require(qrng) && packageVersion("qrng") >= "0.0-7"
-
+## Check (restrictive, as the OS-level TensorFlow installation will not catch
+## TensorFlow installations done differently)
+TF <- catch(system("pip list | grep tensorflow", ignore.stdout = TRUE) == 0) # see https://stackoverflow.com/questions/38549253/how-to-find-which-version-of-tensorflow-is-installed-in-my-system
+TFisFound <- is.null(TF$error) && is.null(TF$warning) && TF$value
+doTest <- TFisFound && # OS-level TensorFlow
+    require(tensorflow) && # tensorflow package is available
+    require(qrng) && packageVersion("qrng") >= "0.0-7" # qrng is available and not too outdated
 if(!doTest) q()
-
 
 ## Training data
 d <- 2 # bivariate case

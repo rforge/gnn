@@ -257,7 +257,7 @@ contourplot3 <- function(copula, uPRS, uQRS, file,
     ## Build plot object
     plt <- cpTRUE + cpPRS + cpQRS # overlaid plot
     doPDF <- hasArg(file) && is.character(file)
-    if(doPDF) pdf(file = file, bg = "transparent")
+    if(doPDF) pdf(file = file)
     opar <- par(pty = "s")
     print(plt)
     par(opar)
