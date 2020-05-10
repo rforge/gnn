@@ -15,7 +15,7 @@ importFrom("tensorflow",
 importFrom("utils",
            "data", "packageName")
 importFrom("methods",
-           "hasArg")
+           "hasArg", "is")
 importFrom("stats",
            "rnorm", "plogis", "qlogis", "prcomp")
 importFrom("tools",

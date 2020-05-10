@@ -4,19 +4,21 @@
 
 ## Note: If TensorFlow was installed in a virtual environment as described on
 ##       https://www.tensorflow.org/install/pip#system-install, then this needs
-##       to be activated ('source .../bin/activate/') before this script can be run.
+##       to be activated ('source .../bin/activate/') before this script can be run;
+##       the path to the virtual environment can be found via echo $VIRTUAL_ENV
 
 
-library(gnn)
+## Check whether TensorFlow can be found (restrictive, as the OS-level TensorFlow
+## installation will not catch TensorFlow installations done differently)
+TFres <- gnn::catch(system("pip list | grep tensorflow") == 0) # see https://stackoverflow.com/questions/38549253/how-to-find-which-version-of-tensorflow-is-installed-in-my-system
+TFisFound <- is.null(TFres$error) && is.null(TFres$warning) && TFres$value
+if(!TFisFound) q() # as training below would fail
 
-## Check (restrictive, as the OS-level TensorFlow installation will not catch
-## TensorFlow installations done differently)
-TF <- catch(system("pip list | grep tensorflow", ignore.stdout = TRUE) == 0) # see https://stackoverflow.com/questions/38549253/how-to-find-which-version-of-tensorflow-is-installed-in-my-system
-TFisFound <- is.null(TF$error) && is.null(TF$warning) && TF$value
-doTest <- TFisFound && # OS-level TensorFlow
-    require(tensorflow) && # tensorflow package is available
-    require(qrng) && packageVersion("qrng") >= "0.0-7" # qrng is available and not too outdated
-if(!doTest) q()
+## Packages
+library(tensorflow) # R package 'tensorflow'; load *before* gnn
+library(gnn) # load *after* tensorflow; otherwise the wrong 'train' is used (which produces an error)
+library(qrng)
+stopifnot(packageVersion("qrng") >= "0.0-7")
 
 ## Training data
 d <- 2 # bivariate case
