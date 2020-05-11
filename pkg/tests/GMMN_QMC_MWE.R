@@ -8,16 +8,13 @@
 ##       the path to the virtual environment can be found via echo $VIRTUAL_ENV
 
 
-## Check whether TensorFlow can be found (restrictive, as the OS-level TensorFlow
-## installation will not catch TensorFlow installations done differently)
-TFres <- gnn::catch(system("pip list | grep tensorflow") == 0) # see https://stackoverflow.com/questions/38549253/how-to-find-which-version-of-tensorflow-is-installed-in-my-system
-TFisFound <- is.null(TFres$error) && is.null(TFres$warning) && TFres$value
-if(!TFisFound) q() # as training below would fail
-
 ## Packages
 library(tensorflow) # R package 'tensorflow'; load *before* gnn
 library(gnn) # load *after* tensorflow; otherwise the wrong 'train' is used (which produces an error)
 library(qrng)
+
+## Checks
+if(!TensorFlow_available()) q() # as training and evaluation below would fail
 stopifnot(packageVersion("qrng") >= "0.0-7")
 
 ## Training data

@@ -24,6 +24,22 @@ catch <- function(expr)
 }
 
 
+### Simple and (re)strict(ive) test of whether TensorFlow is available #########
+
+##' @title Test whether TensorFlow is Available
+##' @return boolean indicating whether TensorFlow is found
+##' @author Marius Hofert
+##' @note See https://stackoverflow.com/questions/38549253/how-to-find-which-version-of-tensorflow-is-installed-in-my-system
+TensorFlow_available <- function() {
+    if(Sys.info()[["sysname"]] == "Windows") {
+        warning("'TensorFlow_available()' does not work on Windows. Will return FALSE.")
+        return(FALSE)
+    }
+    TFfound <- catch(system("pip list | grep tensorflow") == 0)
+    is.null(TFfound$error) && is.null(TFfound$warning) && TFfound$value
+}
+
+
 ### Remove extension of a file path ############################################
 
 ##' @title Fixed Version of tools::file_path_sans_ext()
