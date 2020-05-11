@@ -7,8 +7,6 @@
 \usage{
 TensorFlow_available()
 }
-\arguments{
-}
 \value{
   \code{\link{logical}} indicating whether TensorFlow was found.
 }
