@@ -76,4 +76,43 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
   See the underlying functions \code{\link{load}()},
   \code{\link{data}()} and \code{\link{save}()} (among others).
 }
+\examples{
+\donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
+## Create dummy objects and save them in a temporary file
+myobj1 <- 1:10
+myobj2 <- 10:1
+file1. <- tempfile("foo1", fileext = ".rda") # tempfile() for CRAN checks
+file1 <- rm_ext(file1.)
+save(myobj1, myobj2, file = file1.)
+rm(myobj1, myobj2)
+
+## Testing exists_rda()
+## Check the existence of file 'file' with file ending '.rda'
+stopifnot(exists_rda(file1.))
+## Check the existence of file 'file' without file ending '.rda'
+stopifnot(exists_rda(file1))
+## Check the existence of 'myobj1' inside 'file' with file ending '.rda'
+stopifnot(exists_rda(file1., names = "myobj1"))
+## Check the existence of 'myobj1' inside 'file' without file ending '.rda'
+stopifnot(exists_rda(file1,  names = "myobj1"))
+## Check the existence of a file named 'SP500_const' in 'qrmdata'
+stopifnot(exists_rda("SP500_const", package = "qrmdata"))
+## Check the existence of 'SP500_const_info' inside 'SP500_const' in 'qrmdata'
+stopifnot(exists_rda("SP500_const", names = "SP500_const_info", package = "qrmdata"))
+
+## Testing read_rda()
+stopifnot(names(read_rda(c("myobj1", "myobj2"), file = file1.)) == c("myobj1", "myobj2"))
+foo <- read_rda("SP500_const", names = "SP500_const_info", package = "qrmdata")
+stopifnot(is.data.frame(foo))
+
+## Testing save_rda()
+file2. <- tempfile("foo2", fileext = ".rda") # for CRAN
+save_rda(foo, file = file2., names = "SP500info2")
+bar <- read_rda(file2., names = "SP500info2")
+stopifnot(identical(bar, foo))
+
+## Clean-up
+stopifnot(file.remove(file1., file2.))
+}
+}
 \keyword{manip}

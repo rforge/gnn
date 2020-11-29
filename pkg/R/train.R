@@ -1,7 +1,7 @@
 ### Training GNNs ##############################################################
 
 ##' @title Training GNNs
-##' @param gnn GNN object as returned by GMMN_model() or VAE_model()
+##' @param gnn GNN object as returned by GMMN_model()
 ##' @param data (n,d)-matrix containing n d-dimensional observations forming the
 ##'        training data
 ##' @param batch.size number of samples per stochastic gradient step
@@ -23,16 +23,16 @@ train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
     if(!("dim" %in% nms && "type" %in% nms))
         stop("'gnn' must have components 'dim' and 'type'.")
     type <- gnn$type
-    if(type != "GMMN" && type != "VAE")
-        stop("The only GNN types currently supported are 'GMMN' and 'VAE'.")
+    if(type != "GMMN") # && type != "VAE")
+        stop("The only GNN type currently supported is 'GMMN'.")
     dim <- gnn$dim
     dim.out <- switch(type, # dimension of the output layer
                       "GMMN" = {
                           dim[length(dim)]
                       },
-                      "VAE" = {
-                          dim[1] # for VAEs, the dimension of input and output layers are equal
-                      },
+                      ## "VAE" = {
+                      ##     dim[1] # for VAEs, the dimension of input and output layers are equal
+                      ## },
                       stop("Wrong 'type'"))
     if(dim.train[2] != dim.out)
         stop("The dimension of the training data does not match the dimension of the output layer of the GNN")
@@ -44,10 +44,10 @@ train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
                gnn$model %>% fit(x = prior, y = data, # x = data (here: prior, could also be user input) passed through NN as input; y = target/training data (e.g., copula data)
                                  batch_size = batch.size, epochs = nepoch, verbose = verbose, ...) # training
            },
-           "VAE" = {
-               gnn$model %>% fit(x = data, y = data, # both input and output to the NN are the target/training data
-                                 batch_size = batch.size, epochs = nepoch, verbose = verbose, ...)
-           },
+           ## "VAE" = {
+           ##     gnn$model %>% fit(x = data, y = data, # both input and output to the NN are the target/training data
+           ##                       batch_size = batch.size, epochs = nepoch, verbose = verbose, ...)
+           ## },
            stop("Wrong 'type'"))
 
     ## Update information

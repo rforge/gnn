@@ -14,7 +14,7 @@ Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.5.0)
 Imports: keras, tensorflow, qrng, methods, tools
-Suggests: copula, qrmtools, qrmdata, latticeExtra, RnavGraphImageData
+Suggests: copula, qrmtools, qrmdata, latticeExtra, RnavGraphImageData, mvtnorm
 Enhances:
 License: GPL (>= 3)
 SystemRequirements: TensorFlow (https://www.tensorflow.org/)

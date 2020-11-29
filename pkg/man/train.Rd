@@ -11,8 +11,7 @@ train_once(gnn, data, batch.size, nepoch,
            file, name = rm_ext(basename(file)), package = NULL, ...)
 }
 \arguments{
-  \item{gnn}{GNN object as created by \code{\link{GMMN_model}()} or
-    \code{\link{VAE_model}()}.}
+  \item{gnn}{GNN object as created by \code{\link{GMMN_model}()}.}
   \item{data}{\eqn{(n,d)}-matrix containing the \eqn{n}
     \eqn{d}-dimensional observations of the training data.}
   \item{batch.size}{number of samples used per stochastic gradient step.}
@@ -46,8 +45,8 @@ train_once(gnn, data, batch.size, nepoch,
 }
 \author{Marius Hofert}
 \seealso{
-  \code{\link{GMMN_model}()}, \code{\link{VAE_model}()},
-  \code{\link{to_savable}()}, \code{\link{to_callable}()}.
+  \code{\link{GMMN_model}()}, \code{\link{to_savable}()},
+  \code{\link{to_callable}()}.
 }
 \examples{
 \donttest{

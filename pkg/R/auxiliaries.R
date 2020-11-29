@@ -35,8 +35,8 @@ TensorFlow_available <- function() {
         warning("'TensorFlow_available()' does not work on Windows. Will return FALSE.")
         return(FALSE)
     }
-    TFfound <- catch(system("pip list | grep tensorflow") == 0)
-    is.null(TFfound$error) && is.null(TFfound$warning) && TFfound$value
+    TFfound <- catch(system("pip list | grep tensorflow", ignore.stdout = TRUE))
+    is.null(TFfound$error) && is.null(TFfound$warning) && (TFfound$value == 0)
 }
 
 

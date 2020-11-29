@@ -26,12 +26,12 @@ to_callable(gnn)
   For GMMNs, \code{to_savable()} calls \code{\link{serialize_model}()}
   and \code{to_callable()} calls \code{\link{unserialize_model}()}.
 
-  For VAEs, \code{to_savable()} is (indirectly) based on
-  \code{\link{save_model_weights_hdf5}()} and \code{to_callable()}
-  on \code{\link{load_model_weights_hdf5}()}; one cannot work
-  with \code{\link{serialize_model}()} or
-  \code{\link{unserialize_model}()} in this case because of the
-  involved \code{\link{layer_lambda}()}.
+  %% For VAEs, \code{to_savable()} is (indirectly) based on
+  %% \code{\link{save_model_weights_hdf5}()} and \code{to_callable()}
+  %% on \code{\link{load_model_weights_hdf5}()}; one cannot work
+  %% with \code{\link{serialize_model}()} or
+  %% \code{\link{unserialize_model}()} in this case because of the
+  %% involved \code{\link{layer_lambda}()}.
 
   See the source code for more details.
 }

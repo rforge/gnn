@@ -64,13 +64,53 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   optimization. \emph{AUAI Press}, 258--267.
   See http://www.auai.org/uai2015/proceedings/papers/230.pdf (2019-08-24)
 }
-\seealso{
-  \code{\link{VAE_model}()}
-}
 \examples{
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
-## Example model with a 5d input, 300d hidden and 4d output layer
-str(GMMN_model(c(5, 300, 4)))
+## Training data
+d <- 2 # bivariate case
+P <- matrix(0.9, nrow = d, ncol = d); diag(P) <- 1 # correlation matrix
+ntrn <- 60000 # training data sample size
+set.seed(271)
+library(mvtnorm)
+X <- rmvnorm(ntrn, sigma = P) # N(0,P) samples
+X. <- abs(X) # |X|
+
+## Plot a subsample
+m <- 2000 # subsample size for plots
+opar <- par(pty = "s")
+plot(X.[1:m,], xlab = expression(X[1]), ylab = expression(X[2])) # plot |X|
+U <- apply(X., 2, rank) / (ntrn + 1) # pseudo-observations of |X|
+plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
+
+## Define the model and 'train' it
+dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
+GMMN.mod <- GMMN_model(dim) # define the GMMN model
+nbat <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
+nepo <- 10 # number of epochs = number of times training data is shuffled
+GMMN <- train(GMMN.mod, data = U, batch.size = nbat, nepoch = nepo)
+## Note:
+## - Obviously, in a real-world application, batch.size and nepoch
+##   should be (much) larger (e.g., batch.size = 5000, nepoch = 300).
+## - The above training is not reproducible (due to keras).
+
+## Evaluate GMMN based on prior sample (already roughly picks up the shape)
+set.seed(271)
+N.prior <- matrix(rnorm(m * d), ncol = d) # sample from the prior distribution
+V <- predict(GMMN[["model"]], x = N.prior) # feedforward through GMMN
+
+## Joint plot of training subsample with GMMN PRNs
+layout(t(1:2))
+plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
+plot(V,       xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+
+## Joint plot of training subsample with GMMN QRNs
+library(qrng) # for sobol()
+V. <- predict(GMMN[["model"]], x = qnorm(sobol(m, d = d, randomize = "Owen",
+                                               seed = 271)))
+plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
+plot(V.,      xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+layout(1)
+par(opar)
 }
 }
 \keyword{datagen}
