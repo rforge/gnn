@@ -3,7 +3,7 @@
 \title{Generative Moment Matching Network}
 \description{
   Constructor for a generative moment matching network (GMMN) model,
-  an object of S3 class "gnn_GMMN".
+  an object of \code{\link{S3}} class gnn_GMMN.
 }
 \usage{
 GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
@@ -33,7 +33,8 @@ GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   \item{\dots}{additional arguments passed to \code{\link{loss}()}.}
 }
 \value{
-  \code{GMMN()} returns an object of S3 class "gnn_GMMN" with components
+  \code{GMMN()} returns an object of \code{\link{S3}} class gnn_GMMN
+  with components
   \describe{
     \item{\code{model}:}{GMMN model (a \pkg{keras} object inheriting from
       the R6 classes \code{"keras.engine.training.Model"},
@@ -53,8 +54,9 @@ GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   }
 }
 \details{
-  The S3 class "gnn_GMMN" is a subclass of the S3 class "gnn_GNN" which
-  in turn is a subclass of "gnn_Model".
+  The \code{\link{S3}} class gnn_GMMN is a subclass of the
+  \code{\link{S3}} class "gnn_GNN" which in turn is a subclass of
+  "gnn_Model".
 }
 \author{Marius Hofert and Avinash Prasad}
 \references{
