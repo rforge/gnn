@@ -117,8 +117,8 @@ dependence_fit <- function(U, GMMN.dim, file)
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "GMMN" = {
-                       train_once(GMMN_model(GMMN.dim), data = U,
-                                  batch.size = n, nepoch = nepo, file = file)
+                       train_once(GMMN(GMMN.dim), data = U,
+                                  batch.size = n, n.epoch = nepo, file = file)
                    },
                    stop("Wrong 'method'"))
         ## Since train_once() already saves GMMN models we only need to save the copula models

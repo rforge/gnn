@@ -2,7 +2,7 @@
 \alias{exists_rda}
 \alias{read_rda}
 \alias{save_rda}
-\alias{rename_rda}
+\alias{modify_rda}
 \title{Check Existence, Read, Save and Rename .rda Files and their Objects}
 \description{
   Check Existence, Read, Save and Rename \code{.rda} Files and their Objects.
@@ -11,7 +11,7 @@
 exists_rda(file, names, package = NULL)
 read_rda(file, names, package = NULL)
 save_rda(..., file, names = NULL)
-rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
+modify_rda(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
            newname, newfile = paste0(newname, collapse = "_", ".rda"),
 	   package = NULL)
 }
@@ -44,7 +44,7 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
     \describe{
       \item{exists_rda()}{package name in which to check or \code{\link{NULL}}
 	(the default) in which case the current working directory is checked.}
-      \item{read_rda(), rename_rda()}{package name from which to load
+      \item{read_rda(), modify_rda()}{package name from which to load
 	the objects or \code{\link{NULL}} (the default) in which case
 	the current working directory is searched.}
     }
@@ -54,6 +54,8 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
     be read.}
   \item{oldfile}{file name (with or without ending \code{.rda})
     specifying from which the object named \code{oldname} is read.}
+  \item{FUN}{if provided, a \code{\link{function}} applied to the
+    read object before it is saved.}
   \item{newname}{\code{\link{character}} string specifying the new name
     under which the object is to be saved.}
   \item{newfile}{file name (with ending \code{.rda}) specifying
@@ -68,7 +70,7 @@ rename_rda(oldname, oldfile = paste0(oldname, collapse = "_"),
       exist inside \code{file} (if \code{names} is provided).}
     \item{read_rda()}{the object read from the \code{.rda}.}
     \item{save_rda()}{nothing (generated an \code{.rda} by side-effect).}
-    \item{rename_rda()}{nothing (generated an \code{.rda} by side-effect).}
+    \item{modify_rda()}{nothing (generated an \code{.rda} by side-effect).}
   }
 }
 \author{Marius Hofert}

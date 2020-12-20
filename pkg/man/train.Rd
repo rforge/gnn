@@ -6,16 +6,16 @@
   Functions for training generative neural networks.
 }
 \usage{
-train(gnn, data, batch.size, nepoch, verbose = 3, ...)
-train_once(gnn, data, batch.size, nepoch,
+train(gnn, data, batch.size, n.epoch, verbose = 3, ...)
+train_once(gnn, data, batch.size, n.epoch,
            file, name = rm_ext(basename(file)), package = NULL, ...)
 }
 \arguments{
-  \item{gnn}{GNN object as created by \code{\link{GMMN_model}()}.}
+  \item{gnn}{GNN object as created by \code{\link{GMMN}()}.}
   \item{data}{\eqn{(n,d)}-matrix containing the \eqn{n}
     \eqn{d}-dimensional observations of the training data.}
   \item{batch.size}{number of samples used per stochastic gradient step.}
-  \item{nepoch}{number of epochs (one epoch equals one pass through
+  \item{n.epoch}{number of epochs (one epoch equals one pass through
     the complete training dataset while updating the GNN's parameters
     through stochastic gradient steps).}
   \item{verbose}{see \code{\link{fit.keras.engine.training.Model}()}.}
@@ -45,7 +45,7 @@ train_once(gnn, data, batch.size, nepoch,
 }
 \author{Marius Hofert}
 \seealso{
-  \code{\link{GMMN_model}()}, \code{\link{to_savable}()},
+  \code{\link{GMMN}()}, \code{\link{to_savable}()},
   \code{\link{to_callable}()}.
 }
 \examples{
@@ -64,13 +64,13 @@ plot(U[1:2000,], xlab = expression(U[1]), ylab = expression(U[2]))
 
 ## Define the model and 'train' it
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN.mod <- GMMN_model(dim)
-GMMN.trained <- train(GMMN.mod, data = U, batch.size = 500, nepoch = 2)
-## Note: Obviously, in a real-world application, batch.size and nepoch
-##       should be (much) larger (e.g., batch.size = 5000, nepoch = 300).
+GMMN.mod <- GMMN(dim)
+GMMN.trained <- train(GMMN.mod, data = U, batch.size = 500, n.epoch = 2)
+## Note: Obviously, in a real-world application, batch.size and n.epoch
+##       should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
 
 ## Evaluate (roughly picks up the shape even with our bad choices of
-## batch.size and nepoch)
+## batch.size and n.epoch)
 set.seed(271)
 N.prior <- matrix(rnorm(2000 * d), ncol = d)
 V <- predict(GMMN.trained[["model"]], x = N.prior)

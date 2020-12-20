@@ -432,10 +432,10 @@ main <- function(copula, name, model, randomize, CvM.testfun = TRUE)
     dim.in.out <- dim(copula) # = dimension of the input distribution fed into the GMMN
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
-    GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
+    GNN <- GMMN(c(dim.in.out, dim.hid, dim.in.out)) # model setup
     cat("=> Starting training (unless pre-trained).\n")
     human_time(GMMN <- train_once(GNN, data = U,
-                                  batch.size = nbat, nepoch = nepo,
+                                  batch.size = nbat, n.epoch = nepo,
                                   file = NNname, package = package)) # training and saving
 
     ## 2 Contour/Rosenblatt plots or scatter plots #############################
@@ -531,10 +531,10 @@ appendix <- function(copula, name, model, randomize)
     dim.in.out <- dim(copula) # = dimension of the input distribution fed into the GMMN
     NNname <- paste0("GMMN_dim_",dim.in.out,"_",dim.hid,"_",dim.in.out,"_ntrn_",ntrn,
                      "_nbat_",nbat,"_nepo_",nepo,"_",name,".rda")
-    GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # model setup
+    GNN <- GMMN(c(dim.in.out, dim.hid, dim.in.out)) # model setup
     cat("=> Starting training (unless pre-trained).\n")
     human_time(GMMN <- train_once(GNN, data = U,
-                                  batch.size = nbat, nepoch = nepo,
+                                  batch.size = nbat, n.epoch = nepo,
                                   file = NNname, package = package)) # training and saving
 
     ## 2 Expected shortfall test function ######################################

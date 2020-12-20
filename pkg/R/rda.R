@@ -121,6 +121,7 @@ save_rda <- function(..., file, names = NULL)
 ##' @param oldname character string specifying the object to be read
 ##' @param oldfile file name (with or without extension .rda) specifying from which
 ##'        the object named 'oldname' is read
+##' @param FUN if provided, a function applied to the read object before it is saved.
 ##' @param newname character string (without extension .rda) specifying the new name
 ##'        under which the object is to be saved
 ##' @param newfile file name (with extension .rda) specifying where the object named
@@ -129,10 +130,15 @@ save_rda <- function(..., file, names = NULL)
 ##' @return nothing (generates an .rda by side-effect)
 ##' @author Marius Hofert
 ##' @note An .rds can simply be renamed (as no object name is stored)
-rename_rda <- function(oldname, oldfile = paste0(oldname, collapse = "_"),
+modify_rda <- function(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
                        newname, newfile = paste0(newname, collapse = "_", ".rda"),
                        package = NULL)
 {
     dat <- read_rda(oldname, file = oldfile, package = package)
-    save_rda(dat, file = newfile, names = newname) # does not save 'dat' as 'dat' but under the right name 'newname'
+    if(!missing(FUN)) {
+        save_rda(FUN(dat), file = newfile, names = newname)
+    } else {
+        save_rda(dat, file = newfile, names = newname)
+    }
 }
+

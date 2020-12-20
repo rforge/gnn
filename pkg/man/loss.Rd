@@ -31,6 +31,6 @@ loss(x, y, type = c("MSE", "binary.cross", "MMD"), ...)
   See https://keras.rstudio.com/articles/examples/variational_autoencoder.html
 }
 \seealso{
-  \code{\link{GMMN_model}()} where \code{loss()} is used.
+  \code{\link{GMMN}()} where \code{loss()} is used.
 }
 \keyword{univar}

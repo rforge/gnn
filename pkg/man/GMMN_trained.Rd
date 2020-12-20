@@ -401,7 +401,7 @@ data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
 %% \emph{myjournal} \bold{myversion}(mynumber), --.
 }
 \seealso{
-  \code{\link{GMMN_model}()}, \code{\link{to_callable}()}
+  \code{\link{GMMN}()}, \code{\link{to_callable}()}
 }
 \examples{
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"

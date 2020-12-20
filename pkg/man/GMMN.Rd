@@ -1,12 +1,13 @@
-\name{GMMN_model}
-\alias{GMMN_model}
+\name{GMMN}
+\alias{GMMN}
 \title{Generative Moment Matching Network}
 \description{
-  Setup of a generative moment matching network (GMMN) model.
+  Constructor for a generative moment matching network (GMMN) model,
+  an object of S3 class "gnn_GMMN".
 }
 \usage{
-GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
-           batch.norm = FALSE, dropout.rate = 0, nGPU = 0, ...)
+GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
+     batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
 }
 \arguments{
   \item{dim}{\code{\link{numeric}} vector of length at least two, giving
@@ -22,7 +23,7 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     the fraction of input to be dropped; see the rate parameter of
     \code{\link{layer_dropout}()}. Note that only if positive, dropout
     layers are added after each hidden layer.}
-  \item{nGPU}{non-negative \code{\link{integer}} specifying the number of GPUs
+  \item{n.GPU}{non-negative \code{\link{integer}} specifying the number of GPUs
     available if the GPU version of TensorFlow is installed.
     If positive, a (special) multiple GPU model for data
     parallelism is instantiated. Note that for multi-layer perceptrons
@@ -32,10 +33,10 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   \item{\dots}{additional arguments passed to \code{\link{loss}()}.}
 }
 \value{
-  \code{GMMN_model()} returns a list with components
+  \code{GMMN()} returns an object of S3 class "gnn_GMMN" with components
   \describe{
     \item{\code{model}:}{GMMN model (a \pkg{keras} object inheriting from
-      the classes \code{"keras.engine.training.Model"},
+      the R6 classes \code{"keras.engine.training.Model"},
       \code{"keras.engine.network.Network"},
       \code{"keras.engine.base_layer.Layer"}
       and \code{"python.builtin.object"}).}
@@ -45,11 +46,15 @@ GMMN_model(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     \item{\code{activation}:}{see above.}
     \item{\code{batch.norm}:}{see above.}
     \item{\code{dropout.rate}:}{see above.}
-    \item{\code{dim.train}:}{dimension of the training data (\code{NA}
+    \item{\code{n.train}:}{number of training samples (\code{NA}
       unless trained).}
     \item{\code{batch.size}:}{batch size (\code{NA} unless trained).}
-    \item{\code{nepoch}:}{number of epochs (\code{NA} unless trained).}
+    \item{\code{n.epoch}:}{number of epochs (\code{NA} unless trained).}
   }
+}
+\details{
+  The S3 class "gnn_GMMN" is a subclass of the S3 class "gnn_GNN" which
+  in turn is a subclass of "gnn_Model".
 }
 \author{Marius Hofert and Avinash Prasad}
 \references{
@@ -84,13 +89,13 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
 ## Define the model and 'train' it
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN.mod <- GMMN_model(dim) # define the GMMN model
+GMMN.mod <- GMMN(dim) # define the GMMN model
 nbat <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
 nepo <- 10 # number of epochs = number of times training data is shuffled
-GMMN <- train(GMMN.mod, data = U, batch.size = nbat, nepoch = nepo)
+GMMN <- train(GMMN.mod, data = U, batch.size = nbat, n.epoch = nepo)
 ## Note:
-## - Obviously, in a real-world application, batch.size and nepoch
-##   should be (much) larger (e.g., batch.size = 5000, nepoch = 300).
+## - Obviously, in a real-world application, batch.size and n.epoch
+##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
 ## - The above training is not reproducible (due to keras).
 
 ## Evaluate GMMN based on prior sample (already roughly picks up the shape)

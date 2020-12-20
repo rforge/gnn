@@ -1,27 +1,27 @@
 ### Training GNNs ##############################################################
 
 ##' @title Training GNNs
-##' @param gnn GNN object as returned by GMMN_model()
+##' @param gnn GNN object as returned by constructors
 ##' @param data (n,d)-matrix containing n d-dimensional observations forming the
 ##'        training data
 ##' @param batch.size number of samples per stochastic gradient step
-##' @param nepoch number of epochs (one epoch equals one pass through the complete
+##' @param n.epoch number of epochs (one epoch equals one pass through the complete
 ##'        training dataset while updating the GNN's parameters)
 ##' @param verbose see ?keras:::fit.keras.engine.training.Model
 ##' @param ... additional arguments passed to the underlying fit()
 ##'        see ?keras:::fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
-train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
+train <- function(gnn, data, batch.size, n.epoch, verbose = 3, ...)
 {
     ## Define variables and do checks
     if(!is.matrix(data))
         stop("'data' needs to be an (n, d)-matrix containing n d-dimensional training observations.")
     dim.train <- dim(data) # training data dimensions
-    stopifnot(1 <= batch.size, batch.size <= dim.train[1], nepoch >= 1)
+    stopifnot(1 <= batch.size, batch.size <= dim.train[1], n.epoch >= 1)
     nms <- names(gnn)
-    if(!("dim" %in% nms && "type" %in% nms))
-        stop("'gnn' must have components 'dim' and 'type'.")
+    if(!("type" %in% nms && "dim" %in% nms))
+        stop("'gnn' must have components 'type' and 'dim'.")
     type <- gnn$type
     if(type != "GMMN") # && type != "VAE")
         stop("The only GNN type currently supported is 'GMMN'.")
@@ -42,18 +42,18 @@ train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
            "GMMN" = {
                prior <- matrix(rnorm(dim.train[1] * dim[1]), nrow = dim.train[1]) # N(0,1) prior (same dimension as input layer)
                gnn$model %>% fit(x = prior, y = data, # x = data (here: prior, could also be user input) passed through NN as input; y = target/training data (e.g., copula data)
-                                 batch_size = batch.size, epochs = nepoch, verbose = verbose, ...) # training
+                                 batch_size = batch.size, epochs = n.epoch, verbose = verbose, ...) # training
            },
            ## "VAE" = {
            ##     gnn$model %>% fit(x = data, y = data, # both input and output to the NN are the target/training data
-           ##                       batch_size = batch.size, epochs = nepoch, verbose = verbose, ...)
+           ##                       batch_size = batch.size, epochs = n.epoch, verbose = verbose, ...)
            ## },
            stop("Wrong 'type'"))
 
     ## Update information
-    gnn[["dim.train"]] <- dim.train
+    gnn[["n.train"]] <- dim.train[1]
     gnn[["batch.size"]] <- batch.size
-    gnn[["nepoch"]] <- nepoch
+    gnn[["n.epoch"]] <- n.epoch
 
     ## Return
     gnn # GNN object with trained model and additional information
@@ -63,7 +63,7 @@ train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
 ##' @param gnn see ?train
 ##' @param data see ?train
 ##' @param batch.size see ?train
-##' @param nepoch see ?train
+##' @param n.epoch see ?train
 ##' @param file character string (with or without ending .rda) specifying the file
 ##'        to save the trained GNN object to (with component 'model' serialized)
 ##' @param name name under which the trained GNN object is saved in 'file'
@@ -72,7 +72,7 @@ train <- function(gnn, data, batch.size, nepoch, verbose = 3, ...)
 ##' @param ... additional arguments passed to the underlying train()
 ##' @return trained or loaded GNN object
 ##' @author Marius Hofert
-train_once <- function(gnn, data, batch.size, nepoch,
+train_once <- function(gnn, data, batch.size, n.epoch,
                        file, name = rm_ext(basename(file)), package = NULL, ...)
 {
     if(exists_rda(file, names = name, package = package)) { # check existence of 'name' in 'file'
@@ -82,7 +82,7 @@ train_once <- function(gnn, data, batch.size, nepoch,
         to_callable(read.gnn) # return whole GNN object (with unserialized model (components))
     } else { # if 'file' does not exist or 'name' does not exist in 'file'
         ## Train and update training slots
-        trained.gnn <- train(gnn, data = data, batch.size = batch.size, nepoch = nepoch, ...) # trained GNN
+        trained.gnn <- train(gnn, data = data, batch.size = batch.size, n.epoch = n.epoch, ...) # trained GNN
         ## Convert necessary slots to storable objects
         trained.gnn. <- to_savable(trained.gnn)
         ## Save and return

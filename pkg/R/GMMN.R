@@ -1,18 +1,19 @@
 ### Generative moment matching network #########################################
 
-##' @title Generative Moment Matching Network (GMMN)
-##' @param dim numeric vector of length at least two giving the dimensions of
-##'        the input layer, the hidden layer(s) (if any) and the output layer
-##' @param activation character vector of length length(dim) - 1 specifying the
-##'        activation functions for all hidden layers and the output layer
+##' @title Generative Moment Matching Network (GMMN) Constructor
+##' @param dim numeric vector of length at least two giving the dimensions
+##'        of the input layer, the hidden layer(s) (if any) and the output layer
+##' @param activation character vector of length length(dim) - 1 specifying
+##'        the activation functions for all hidden layers and the output layer
 ##'        (in this order); note that the input layer does not have an
 ##'        activation function.
+##' @param "sigmoid")
 ##' @param batch.norm logical indicating whether batch normalization
 ##'        layers are to be added after each hidden layer.
 ##' @param dropout.rate numeric value in [0,1] specifying the fraction of input
 ##'        to be dropped; see the rate parameter of layer_dropout().
 ##'        Only if positive, dropout layers are added after each hidden layer.
-##' @param nGPU non-negative integer specifying the number of GPUs available
+##' @param n.GPU non-negative integer specifying the number of GPUs available
 ##'        if the GPU version of TensorFlow is installed. If positive, a
 ##'        (special) multiple GPU model for data parallelism is instantiated.
 ##'        Note that for multi-layer perceptrons on a few GPUs, this model does
@@ -21,14 +22,16 @@
 ##' @param ... additional arguments passed to the underlying loss function;
 ##'        at the moment, this can be the bandwith parameter 'bandwidth'
 ##'        which is passed on by loss() to Gaussian_mixture_kernel().
-##' @return List with Keras model of the GMMN and additional information
+##' @return An object of class "gnn_GMMN" (inheriting from "gnn_GNN" and
+##'         "gnn_Model") being a list with the Keras model of the GMMN
+##'         and additional information
 ##' @note - Could at some point have an argument 'kernel.type' which specifies
 ##'         a different kernel.
 ##'       - The respective parameters are then passed via '...' (as we do for
 ##'         loss() at the moment).
 ##'       - Make sure that the resulting NN is always a GMMN.
-GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
-                       batch.norm = FALSE, dropout.rate = 0, nGPU = 0, ...)
+GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
+                 batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
 {
     ## Basic input checks and definitions
     num.lay <- length(dim) # number of layers (including input and output layer)
@@ -36,7 +39,7 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
     stopifnot(num.lay >= 2, is.numeric(dim), dim >= 1,
               len.activ == num.lay - 1, is.character(activation),
               is.logical(batch.norm), 0 <= dropout.rate, dropout.rate <= 1,
-              nGPU >= 0)
+              n.GPU >= 0)
     num.hidden <- num.lay - 2 # number of hidden layers (= number of layers - input - output); can be 0
     ind.hid.lay <- seq_len(num.hidden) # note: num.hidden can be 0
 
@@ -58,13 +61,13 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
                            activation = activation[num.hidden + 1])
 
     ## 2) Define the GMMN
-    model <- if(nGPU > 0) {
+    model <- if(n.GPU > 0) {
                  ## To ensure memory is hosted on the CPU and not on the GPU
                  ## see https://keras.rstudio.com/reference/multi_gpu_model.html
                  with(tf$device("/cpu:0"), {
                      model. <- keras_model(in.lay, out.lay)
                  })
-                 multi_gpu_model(model., gpus = nGPU) # replicated model on different GPUs
+                 multi_gpu_model(model., gpus = n.GPU) # replicated model on different GPUs
              } else keras_model(in.lay, out.lay)
 
     ## 3) Loss function
@@ -78,7 +81,14 @@ GMMN_model <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoi
     model %>% compile(optimizer = "adam", loss = loss_fn)
 
     ## Return
-    list(model = model, type = "GMMN", dim = dim, activation = activation,
-         batch.norm = batch.norm, dropout.rate = dropout.rate,
-         dim.train = NA, batch.size = NA, nepoch = NA)
+    structure(list(model = model, # object of class keras.engine.training.Model (R6)
+                   type = "GMMN", # character string
+                   dim = dim, # integer vector of dimensions for input, hidden, output layers
+                   activation = activation, # character vector of activation functions for hidden and output layers
+                   batch.norm = batch.norm, # logical(1) indicating whether batch normalization layers are added after each hidden layer
+                   dropout.rate = dropout.rate, # numeric(1) specifying the fraction of input to be dropped
+                   n.train = NA, # numeric(1) specifying the sample size for training (or NA if not trained)
+                   batch.size = NA, # numeric(1) specifying the batch size used for training (or NA if not trained)
+                   n.epoch = NA), # numeric(1) specifying the number of epochs used for training (or NA if not trained)
+              class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
 }

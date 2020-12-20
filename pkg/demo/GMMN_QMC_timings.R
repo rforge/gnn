@@ -58,9 +58,9 @@ training_time <- function(copula, cstrng)
         GMMN <- to_callable(read.gnn)
         train.time <- NA
     } else {
-        GNN <- GMMN_model(c(dim.in.out, dim.hid, dim.in.out)) # GMMN model
+        GNN <- GMMN(c(dim.in.out, dim.hid, dim.in.out)) # GMMN model
         train.time <- system.time(GMMN <- train(GNN, data = U, # train and measure elapsed time
-                                                batch.size = nbat, nepoch = nepo))["elapsed"] / 60 # in min
+                                                batch.size = nbat, n.epoch = nepo))["elapsed"] / 60 # in min
         save_rda(to_savable(GMMN), file = file, names = name) # save
         ## Note: We use train() instead of train_once() to capture only training time.
         ##       Also, if a saved GMMN exists in the current working directory
@@ -342,7 +342,7 @@ toLatex(ftable(res.sampling))
 
 n <- 1e5
 d <- 2
-rGMMN.model <- GMMN_model(dim = c(d, dim.hid, d))[["model"]] # every call produces random weights and biases of 0; set.seed() is *not* respected
+rGMMN.model <- GMMN(dim = c(d, dim.hid, d))[["model"]] # every call produces random weights and biases of 0; set.seed() is *not* respected
 rGMMN.param <- get_model_param(rGMMN.model)
 set.seed(271) # for input matrix N
 N <- matrix(rnorm(n * d), ncol = d)
@@ -371,7 +371,7 @@ if(file.exists(file)) {
     for(j in 1:len.d) { # iterate over the dimensions considered
         ## Generate B different random GMMNs (with biases)
         ## Note: This part takes some time which is why the progress bar seems to 'hang'
-        mod <- replicate(B, expr = GMMN_model(c(d[j], dim.hid, d[j]))[["model"]]) # B random GMMNs
+        mod <- replicate(B, expr = GMMN(c(d[j], dim.hid, d[j]))[["model"]]) # B random GMMNs
         mod.param <- lapply(mod, function(m) get_model_param(m)) # their parameters
         ## Iterate over ngen
         for(i in 1:len.ngen) {

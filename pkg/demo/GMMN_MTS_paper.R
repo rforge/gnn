@@ -162,8 +162,8 @@ dependence_fit <- function(U,GMMN.dim, file)
                                  data = U, method = "mpl", estimate.variance = FALSE)
                    },
                    "GMMN" = {
-                       train_once(GMMN_model(GMMN.dim), data = U,
-                                  batch.size = n, nepoch = nepo, file = file,
+                       train_once(GMMN(GMMN.dim), data = U,
+                                  batch.size = n, n.epoch = nepo, file = file,
                                   package = package)
                    },
                    stop("Wrong 'method'"))

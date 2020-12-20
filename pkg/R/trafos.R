@@ -88,11 +88,12 @@ logis_trafo <- function(x, mean = 0, sd = 1, slope = 1, intercept = 0,
 ##' @title Principal Component Transformtion
 ##' @param x (n, d)-matrix of data (typically before training or after sampling).
 ##'        If inverse, then an (n, k)-matrix with 1 <= k <= d.
-##' @param mu d-vector for the transformation Y = Gamma^T (X - mu)
+##' @param mu d-vector for the transformation Y = Gamma^T (X - mu); only used if
+##'        'inverse'.
 ##' @param Gamma (d, k)-matrix with k >= ncol(x) whose columns contain k orthonormal
 ##'        eigenvectors of a covariance matrix sorted in decreasing order of their
 ##'        eigenvalues. If a matrix with k > ncol(x) is provided, only the first
-##'        k-many are considered.
+##'        k-many are considered. Only used if 'inverse'.
 ##' @param inverse logical indicating whether the inverse transformation is applied
 ##'        based on provided 'mu' and 'Gamma'.
 ##' @param ... additional arguments passed to the underlying prcomp() if inverse.
