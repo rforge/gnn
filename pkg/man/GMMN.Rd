@@ -3,14 +3,14 @@
 \title{Generative Moment Matching Network}
 \description{
   Constructor for a generative moment matching network (GMMN) model,
-  an object of \code{\link{S3}} class gnn_GMMN.
+  an object of \code{\link{S3}} class \code{"gnn_GMMN"}.
 }
 \usage{
 GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
      batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
 }
 \arguments{
-  \item{dim}{\code{\link{numeric}} vector of length at least two, giving
+  \item{dim}{\code{\link{integer}} vector of length at least two, giving
     the dimensions of the input layer, the hidden layer(s) (if any) and
     the output layer (in this order).}
   \item{activation}{\code{\link{character}} vector of length
@@ -33,30 +33,32 @@ GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   \item{\dots}{additional arguments passed to \code{\link{loss}()}.}
 }
 \value{
-  \code{GMMN()} returns an object of \code{\link{S3}} class gnn_GMMN
+  \code{GMMN()} returns an object of \code{\link{S3}} class \code{"gnn_GMMN"}
   with components
   \describe{
-    \item{\code{model}:}{GMMN model (a \pkg{keras} object inheriting from
+    \item{\code{model}}{GMMN model (a \pkg{keras} object inheriting from
       the R6 classes \code{"keras.engine.training.Model"},
       \code{"keras.engine.network.Network"},
       \code{"keras.engine.base_layer.Layer"}
       and \code{"python.builtin.object"}).}
-    \item{\code{type}:}{\code{\link{character}} string indicating
+    \item{\code{type}}{\code{\link{character}} string indicating
       the type of model (\code{"GMMN"}).}
-    \item{\code{dim}:}{see above.}
-    \item{\code{activation}:}{see above.}
-    \item{\code{batch.norm}:}{see above.}
-    \item{\code{dropout.rate}:}{see above.}
-    \item{\code{n.train}:}{number of training samples (\code{NA}
+    \item{\code{dim}}{see above.}
+    \item{\code{activation}}{see above.}
+    \item{\code{batch.norm}}{see above.}
+    \item{\code{dropout.rate}}{see above.}
+    \item{\code{n.param}}{number of trainable, non-trainable and total
+      number of parameters.}
+    \item{\code{n.train}}{number of training samples (\code{NA_integer_}
       unless trained).}
-    \item{\code{batch.size}:}{batch size (\code{NA} unless trained).}
-    \item{\code{n.epoch}:}{number of epochs (\code{NA} unless trained).}
+    \item{\code{batch.size}}{batch size (\code{NA_integer_} unless trained).}
+    \item{\code{n.epoch}}{number of epochs (\code{NA_integer_} unless trained).}
   }
 }
 \details{
-  The \code{\link{S3}} class gnn_GMMN is a subclass of the
-  \code{\link{S3}} class "gnn_GNN" which in turn is a subclass of
-  "gnn_Model".
+  The \code{\link{S3}} class \code{"gnn_GMMN"} is a subclass of the
+  \code{\link{S3}} class \code{"gnn_GNN"} which in turn is a subclass of
+  \code{"gnn_Model"}.
 }
 \author{Marius Hofert and Avinash Prasad}
 \references{
@@ -70,6 +72,19 @@ GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   Training generative neural networks via maximum mean discrepancy
   optimization. \emph{AUAI Press}, 258--267.
   See http://www.auai.org/uai2015/proceedings/papers/230.pdf (2019-08-24)
+
+  Hofert, M., Prasad, A. and Zhu, M. (2020).
+  Quasi-random sampling for multivariate distributions via generative
+  neural networks. \emph{Journal of Computational and Graphical
+  Statistics}, \doi{10.1080/10618600.2020.1868302}.
+
+  Hofert, M., Prasad, A. and Zhu, M. (2020).
+  Multivariate time-series modeling with generative neural networks.
+  See \url{https://arxiv.org/abs/2002.10645}.
+
+  Hofert, M. Prasad, A. and Zhu, M. (2020).
+  Applications of multivariate quasi-random sampling with neural
+  networks. See \url{https://arxiv.org/abs/2012.08036}.
 }
 \examples{
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
@@ -92,9 +107,9 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 ## Define the model and 'train' it
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
 GMMN.mod <- GMMN(dim) # define the GMMN model
-nbat <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
-nepo <- 10 # number of epochs = number of times training data is shuffled
-GMMN <- train(GMMN.mod, data = U, batch.size = nbat, n.epoch = nepo)
+batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
+n.epo <- 10 # number of epochs = number of times training data is shuffled
+GMMN <- train(GMMN.mod, data = U, batch.size = batch, n.epoch = n.epo)
 ## Note:
 ## - Obviously, in a real-world application, batch.size and n.epoch
 ##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).

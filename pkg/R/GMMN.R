@@ -1,7 +1,29 @@
-### Generative moment matching network #########################################
+### GMMN constructor ###########################################################
+
+##' @title Determine the Number of Parameters
+##' @param x object of class "keras.engine.training.Model"
+##' @return 3-vector with the number of trainable, non-trainable and the total
+##'         number of parameters
+##' @author Marius Hofert
+##' @note See https://stackoverflow.com/questions/47312219/what-is-the-definition-of-a-non-trainable-parameter
+##'       for the meaning of 'trainable' vs 'non-trainable'
+nparam_GMMN <- function(x)
+{
+    num.tot.params <- count_params(x) # total number of parameters
+    ## For the trainable parameters, there's no function, so we extract the information
+    x.as.char <- as.character(x)
+    char.vec <- strsplit(x.as.char, split = "\n")[[1]]
+    pos <- which(sapply(char.vec, function(x) grepl("Trainable params:", x)))
+    rm.str <- sub("Trainable params: ", "", char.vec[pos])
+    num.trainable.params <- as.integer(gsub(",", "", rm.str))
+    ## Result
+    c("trainable" = num.trainable.params,
+      "non-trainable" = num.tot.params - num.trainable.params,
+      "total" = num.tot.params)
+}
 
 ##' @title Generative Moment Matching Network (GMMN) Constructor
-##' @param dim numeric vector of length at least two giving the dimensions
+##' @param dim integer vector of length at least two giving the dimensions
 ##'        of the input layer, the hidden layer(s) (if any) and the output layer
 ##' @param activation character vector of length length(dim) - 1 specifying
 ##'        the activation functions for all hidden layers and the output layer
@@ -30,6 +52,7 @@
 ##'       - The respective parameters are then passed via '...' (as we do for
 ##'         loss() at the moment).
 ##'       - Make sure that the resulting NN is always a GMMN.
+##'       - names(<GMMN>$model) provides slots of "keras.engine.training.Model" object
 GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
                  batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
 {
@@ -40,6 +63,7 @@ GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
               len.activ == num.lay - 1, is.character(activation),
               is.logical(batch.norm), 0 <= dropout.rate, dropout.rate <= 1,
               n.GPU >= 0)
+    storage.mode(dim) <- "integer" # see ?as.integer
     num.hidden <- num.lay - 2 # number of hidden layers (= number of layers - input - output); can be 0
     ind.hid.lay <- seq_len(num.hidden) # note: num.hidden can be 0
 
@@ -81,14 +105,15 @@ GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     model %>% compile(optimizer = "adam", loss = loss_fn)
 
     ## Return
-    structure(list(model = model, # object of class keras.engine.training.Model (R6)
+    structure(list(model = model, # object of R6 class keras.engine.training.Model (directed acyclic graph of layers)
                    type = "GMMN", # character string
                    dim = dim, # integer vector of dimensions for input, hidden, output layers
                    activation = activation, # character vector of activation functions for hidden and output layers
                    batch.norm = batch.norm, # logical(1) indicating whether batch normalization layers are added after each hidden layer
                    dropout.rate = dropout.rate, # numeric(1) specifying the fraction of input to be dropped
-                   n.train = NA, # numeric(1) specifying the sample size for training (or NA if not trained)
-                   batch.size = NA, # numeric(1) specifying the batch size used for training (or NA if not trained)
-                   n.epoch = NA), # numeric(1) specifying the number of epochs used for training (or NA if not trained)
+                   n.param = nparam_GMMN(model), # integer(3) giving the number of trainable, non-trainable and the total number of parameters
+                   n.train = NA_integer_, # numeric(1) specifying the sample size for training (or NA if not trained)
+                   batch.size = NA_integer_, # numeric(1) specifying the batch size used for training (or NA if not trained)
+                   n.epoch = NA_integer_), # numeric(1) specifying the number of epochs used for training (or NA if not trained)
               class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
 }

@@ -1,3 +1,9 @@
+### Special functions ##########################################################
+
+## ## If package contains compiled code
+## useDynLib(gnn, .registration = TRUE)
+
+
 ### Imports ####################################################################
 
 importFrom("qrng",
@@ -10,13 +16,14 @@ importFrom("keras",
            "compile", "k_mean", "k_square", "k_exp",
            "loss_mean_squared_error", "loss_binary_crossentropy",
            "save_model_weights_hdf5", "load_model_weights_hdf5",
-           "fit", "serialize_model", "unserialize_model")
+           "fit", "serialize_model", "unserialize_model",
+           "count_params")
 
 importFrom("tensorflow",
            "tf")
 
 importFrom("utils",
-           "data", "packageName")
+           "data", "packageName", "str")
 
 importFrom("methods",
            "hasArg", "is")
@@ -30,9 +37,6 @@ importFrom("tools",
 
 ### Exports ####################################################################
 
-## Constructors
-export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
-
 ## Functions
 export("loss")
 export("train", "train_once")
@@ -41,3 +45,11 @@ export("exists_rda", "read_rda", "save_rda", "modify_rda")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
        "rm_ext", "human_time")
 export("to_savable", "to_callable")
+
+## Constructors
+export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
+
+## Methods
+S3method("print",   "gnn_GMMN")
+S3method("str",     "gnn_GMMN")
+S3method("summary", "gnn_GMMN")
