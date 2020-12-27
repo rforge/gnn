@@ -1,4 +1,5 @@
 \name{rGNN}
+\alias{rGNN}
 \alias{rGNN.gnn_GNN}
 \title{Sampling from a Generative Neural Network}
 \description{

@@ -1,6 +1,6 @@
 ### GNN sampling generic #######################################################
 
-rGNN <- function(GNN, ...) UseMethod("rGNN")
+rGNN <- function(GNN, ...)  UseMethod("rGNN")
 
 
 ### GNN sampling method ########################################################
@@ -44,9 +44,9 @@ rGNN.gnn_GNN <- function(GNN, size, prior = NULL, copula = indepCopula(dim(GNN)[
                         rCopula(size, copula)
                     },
                     "sobol" = {
-                        if(missing(randomize))
+                        if(!hasArg(randomize))
                             randomize <- "digital.shift"
-                        if(missing(seed))
+                        if(!hasArg(seed))
                             seed <- 271
                         U. <- sobol(size, d = d, randomize = randomize, seed = seed, ...)
                         if(!inherits(copula, "indepCopula") && # those having an inverse Rosenblatt transform
