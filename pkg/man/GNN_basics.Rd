@@ -34,11 +34,11 @@
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
 d <- 2
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN.mod <- GMMN(dim) # define the GMMN model
-GMMN.mod # print() method
-str(GMMN.mod) # str() method
-summary(GMMN.mod) # summary() method
-stopifnot(dim(GMMN.mod) == c(d, 300, d)) # dim() method
+GMMN <- GMMN(dim) # define the GMMN model
+GMMN # print() method
+str(GMMN) # str() method
+summary(GMMN) # summary() method
+stopifnot(dim(GMMN) == c(d, 300, d)) # dim() method
 }
 }
 \keyword{methods}

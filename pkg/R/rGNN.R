@@ -78,5 +78,5 @@ rGNN.gnn_GNN <- function(GNN, size, prior = NULL, copula = indepCopula(dim(GNN)[
     }
 
     ## Feedforward
-    feedforward(GNN, data = prior)
+    ffGNN(GNN, data = prior)
 }

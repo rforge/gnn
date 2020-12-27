@@ -64,8 +64,8 @@ plot(U[1:2000,], xlab = expression(U[1]), ylab = expression(U[2]))
 
 ## Define the model and 'train' it
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN.mod <- GMMN(dim)
-GMMN.trained <- train(GMMN.mod, data = U, batch.size = 500, n.epoch = 2)
+GMMN <- GMMN(dim)
+GMMN <- train(GMMN, data = U, batch.size = 500, n.epoch = 2)
 ## Note: Obviously, in a real-world application, batch.size and n.epoch
 ##       should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
 
@@ -73,12 +73,12 @@ GMMN.trained <- train(GMMN.mod, data = U, batch.size = 500, n.epoch = 2)
 ## batch.size and n.epoch)
 set.seed(271)
 N.prior <- matrix(rnorm(2000 * d), ncol = d)
-V <- predict(GMMN.trained[["model"]], x = N.prior)
+V <- predict(GMMN[["model"]], x = N.prior)
 plot(V, xlab = expression(V[1]), ylab = expression(V[2]))
 
 ## Convert the trained neural network to one that can be saved
 ## and save it (here: to some temporary file)
-GMMN.savable <- to_savable(GMMN.trained)
+GMMN.savable <- to_savable(GMMN)
 file <- tempfile("trained_GMMN", fileext = ".rda")
 save_rda(GMMN.savable, file = file, names = "GMMN")
 }

@@ -54,6 +54,7 @@ export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn
 
 ## Generics
 export("rGNN")
+export("ffGNN")
 
 ## Basic methods
 S3method("print",   "gnn_GNN")
@@ -61,3 +62,4 @@ S3method("str",     "gnn_GNN")
 S3method("summary", "gnn_GNN")
 S3method("dim",     "gnn_GNN")
 S3method("rGNN",    "gnn_GNN")
+S3method("ffGNN",   "gnn_GNN")

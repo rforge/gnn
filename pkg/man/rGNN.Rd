@@ -42,14 +42,14 @@
 ## Define dummy model
 d <- 2 # bivariate case
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN.mod <- GMMN(dim) # define a GMMN model (with random weights)
+GMMN <- GMMN(dim) # define a GMMN model (with random weights)
 
 ## Sampling
 n <- 3
-(X1 <- rGNN(GMMN.mod, size = n))
-(X2 <- rGNN(GMMN.mod, size = n, method = "sobol"))
-(X3 <- rGNN(GMMN.mod, prior = matrix(runif(n * d), ncol = d)))
-(X4 <- rGNN(GMMN.mod, size = n,
+(X1 <- rGNN(GMMN, size = n))
+(X2 <- rGNN(GMMN, size = n, method = "sobol"))
+(X3 <- rGNN(GMMN, prior = matrix(runif(n * d), ncol = d)))
+(X4 <- rGNN(GMMN, size = n,
             prior = function(n.) matrix(runif(n. * d), ncol = d)))
 stopifnot(dim(X1) == c(n, d), dim(X2) == c(n, d),
           dim(X3) == c(n, d), dim(X4) == c(n, d))
