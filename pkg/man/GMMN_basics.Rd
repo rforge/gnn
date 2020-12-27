@@ -2,6 +2,7 @@
 \alias{print.gnn_GMMN}
 \alias{str.gnn_GMMN}
 \alias{summary.gnn_GMMN}
+\alias{dim.gnn_GMMN}
 \title{Basic Methods}
 \description{
   Basic methods for objects of \code{\link{S3}} class \code{"gnn_GMMN"}.
@@ -10,6 +11,7 @@
 \method{print}{gnn_GMMN}(x, \dots)
 \method{str}{gnn_GMMN}(object, \dots)
 \method{summary}{gnn_GMMN}(object, \dots)
+\method{dim}{gnn_GMMN}(x)
 }
 \arguments{
   \item{x, object}{object of \code{\link{S3}} class \code{"gnn_GMMN"}.}
@@ -18,11 +20,13 @@
 \value{
   \describe{
     \item{\code{print()}}{return value of the \code{\link{print}()}
-       method for objects of class \code{"\link{list}"}.}
-     \item{\code{str()}}{nothing, as \code{\link{str}()} returns
-       nothing when applied to objects of class \code{"\link{list}"}.}
+      method for objects of class \code{"\link{list}"}.}
+    \item{\code{str()}}{nothing, as \code{\link{str}()} returns
+      nothing when applied to objects of class \code{"\link{list}"}.}
     \item{\code{summary()}}{return value of the \code{\link{summary}()}
-       method for objects of class \code{"\link{list}"}.}
+      method for objects of class \code{"\link{list}"}.}
+    \item{\code{dim()}}{slot \code{dim} of \code{x}, so a vector of
+      dimensions of input, hidden and output layers.}
   }
 }
 \author{Marius Hofert and Avinash Prasad}
@@ -34,6 +38,7 @@ GMMN.mod <- GMMN(dim) # define the GMMN model
 GMMN.mod # print() method
 str(GMMN.mod) # str() method
 summary(GMMN.mod) # summary() method
+stopifnot(dim(GMMN.mod) == c(d, 300, d)) # dim() method
 }
 }
 \keyword{datagen}

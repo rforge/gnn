@@ -1,7 +1,8 @@
-### GMMN generics ##############################################################
+### GMMN basic generics ########################################################
 
 ## Note: - print(), str(), summary() are already generics, so don't need to be
-##         defined as such.
+##         defined as such. Also note that dim() is already a generic (even if
+##         not directly visible on 'dim').
 ##       - But note that the corresponding methods need to have the same
 ##         or at least compatible arguments with the (already defined) generics;
 ##         otherwise "checking S3 generic/method consistency ... WARNING" appears.
@@ -9,7 +10,7 @@
 ##         see https://gist.github.com/datalove/88f5a24758b2d8356e32
 
 
-### GMMN methods ###############################################################
+### GMMN basic methods #########################################################
 
 ##' @title Print Method for Objects of Class "gnn_GMMN"
 ##' @param x object of class "gnn_GMMN"
@@ -51,3 +52,9 @@ summary.gnn_GMMN <- function(object, ...)
     summ[,"Class"] <- c(summ["model", "Class"], sapply(object[names(object) != "model"], class)) # fix classes
     summ
 }
+
+##' @title Dim Method for Objects of Class "gnn_GMMN"
+##' @param x object of class "gnn_GMMN"
+##' @return dimension slot, a vector
+##' @author Marius Hofert
+dim.gnn_GMMN <- function(x) x$dim

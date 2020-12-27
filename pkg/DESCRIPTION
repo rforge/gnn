@@ -11,8 +11,8 @@ Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
                     email = "a2prasad@uwaterloo.ca"))
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.5.0)
-Imports: keras, tensorflow, methods, qrng, tools
-Suggests: copula, qrmtools, qrmdata, latticeExtra, RnavGraphImageData, mvtnorm
+Imports: keras, tensorflow, methods, qrng, tools, copula
+Suggests: qrmtools, qrmdata, latticeExtra, RnavGraphImageData, mvtnorm
 Enhances:
 License: GPL (>= 3)
 SystemRequirements: TensorFlow (https://www.tensorflow.org/)

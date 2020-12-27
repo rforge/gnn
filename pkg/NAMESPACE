@@ -29,10 +29,13 @@ importFrom("methods",
            "hasArg", "is")
 
 importFrom("stats",
-           "rnorm", "plogis", "qlogis", "prcomp")
+           "predict", "rnorm", "qnorm", "plogis", "qlogis", "prcomp")
 
 importFrom("tools",
            "file_path_sans_ext")
+
+importFrom("copula",
+           "rCopula", "cCopula", "indepCopula")
 
 
 ### Exports ####################################################################
@@ -53,3 +56,4 @@ export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn
 S3method("print",   "gnn_GMMN")
 S3method("str",     "gnn_GMMN")
 S3method("summary", "gnn_GMMN")
+S3method("dim",     "gnn_GMMN")
