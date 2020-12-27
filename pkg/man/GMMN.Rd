@@ -106,7 +106,7 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
 ## Define the model and 'train' it
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN.mod <- GMMN(dim) # define the GMMN model
+GMMN.mod <- GMMN(dim) # define a GMMN model
 batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
 n.epo <- 10 # number of epochs = number of times training data is shuffled
 GMMN <- train(GMMN.mod, data = U, batch.size = batch, n.epoch = n.epo)
@@ -135,4 +135,4 @@ layout(1)
 par(opar)
 }
 }
-\keyword{datagen}
+\keyword{models}

@@ -1,20 +1,20 @@
-\name{GMMN_basics}
-\alias{print.gnn_GMMN}
-\alias{str.gnn_GMMN}
-\alias{summary.gnn_GMMN}
-\alias{dim.gnn_GMMN}
+\name{GNN_basics}
+\alias{print.gnn_GNN}
+\alias{str.gnn_GNN}
+\alias{summary.gnn_GNN}
+\alias{dim.gnn_GNN}
 \title{Basic Methods}
 \description{
-  Basic methods for objects of \code{\link{S3}} class \code{"gnn_GMMN"}.
+  Basic methods for objects of \code{\link{S3}} class \code{"gnn_GNN"}.
 }
 \usage{
-\method{print}{gnn_GMMN}(x, \dots)
-\method{str}{gnn_GMMN}(object, \dots)
-\method{summary}{gnn_GMMN}(object, \dots)
-\method{dim}{gnn_GMMN}(x)
+\method{print}{gnn_GNN}(x, \dots)
+\method{str}{gnn_GNN}(object, \dots)
+\method{summary}{gnn_GNN}(object, \dots)
+\method{dim}{gnn_GNN}(x)
 }
 \arguments{
-  \item{x, object}{object of \code{\link{S3}} class \code{"gnn_GMMN"}.}
+  \item{x, object}{object of \code{\link{S3}} class \code{"gnn_GNN"}.}
   \item{\dots}{currently not used.}
 }
 \value{
@@ -29,7 +29,7 @@
       dimensions of input, hidden and output layers.}
   }
 }
-\author{Marius Hofert and Avinash Prasad}
+\author{Marius Hofert}
 \examples{
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
 d <- 2
@@ -41,4 +41,4 @@ summary(GMMN.mod) # summary() method
 stopifnot(dim(GMMN.mod) == c(d, 300, d)) # dim() method
 }
 }
-\keyword{datagen}
+\keyword{methods}
