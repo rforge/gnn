@@ -63,8 +63,7 @@ U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 plot(U[1:2000,], xlab = expression(U[1]), ylab = expression(U[2]))
 
 ## Define the model and 'train' it
-dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN <- GMMN(dim)
+GMMN <- GMMN(c(d, 300, d))
 GMMN <- train(GMMN, data = U, batch.size = 500, n.epoch = 2)
 ## Note: Obviously, in a real-world application, batch.size and n.epoch
 ##       should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
@@ -72,8 +71,7 @@ GMMN <- train(GMMN, data = U, batch.size = 500, n.epoch = 2)
 ## Evaluate (roughly picks up the shape even with our bad choices of
 ## batch.size and n.epoch)
 set.seed(271)
-N.prior <- matrix(rnorm(2000 * d), ncol = d)
-V <- predict(GMMN[["model"]], x = N.prior)
+V <- rGNN(GMMN, size = 2000) # sample
 plot(V, xlab = expression(V[1]), ylab = expression(V[2]))
 
 ## Convert the trained neural network to one that can be saved

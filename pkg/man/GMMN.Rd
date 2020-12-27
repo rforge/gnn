@@ -105,8 +105,7 @@ U <- apply(X., 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
 ## Define the model and 'train' it
-dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN <- GMMN(dim) # define a GMMN model
+GMMN <- GMMN(c(d, 300, d)) # define a GMMN model
 batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
 n.epo <- 10 # number of epochs = number of times training data is shuffled
 GMMN <- train(GMMN, data = U, batch.size = batch, n.epoch = n.epo)
@@ -117,8 +116,7 @@ GMMN <- train(GMMN, data = U, batch.size = batch, n.epoch = n.epo)
 
 ## Evaluate GMMN based on prior sample (already roughly picks up the shape)
 set.seed(271)
-N.prior <- matrix(rnorm(m * d), ncol = d) # sample from the prior distribution
-V <- predict(GMMN[["model"]], x = N.prior) # feedforward through GMMN
+V <- rGNN(GMMN, size = m) # sample
 
 ## Joint plot of training subsample with GMMN PRNs
 layout(t(1:2))
@@ -127,8 +125,7 @@ plot(V,       xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 
 ## Joint plot of training subsample with GMMN QRNs
 library(qrng) # for sobol()
-V. <- predict(GMMN[["model"]], x = qnorm(sobol(m, d = d, randomize = "Owen",
-                                               seed = 271)))
+V. <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
 plot(V.,      xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 layout(1)

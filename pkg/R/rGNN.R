@@ -1,12 +1,12 @@
 ### GNN sampling generic #######################################################
 
-rGNN <- function(GNN, ...)  UseMethod("rGNN")
+rGNN <- function(gnn, ...)  UseMethod("rGNN")
 
 
 ### GNN sampling method ########################################################
 
 ##' @title Sampling Method for Objects of Class "gnn_GNN"
-##' @param GNN object of S3 class "gnn_GNN" to be sampled from (input layer is
+##' @param gnn object of S3 class "gnn_GNN" to be sampled from (input layer is
 ##'        d-dimensional)
 ##' @param size sample size; chosen as nrow(prior) if prior is a vector or matrix
 ##' @param prior NULL, (n, d)-matrix (or d-vector) of samples or a function of
@@ -17,18 +17,18 @@ rGNN <- function(GNN, ...)  UseMethod("rGNN")
 ##'        then repeated d times.
 ##' @param method character string indicating the method to be used for sampling
 ##' @param ... additional arguments passed to 'method'
-##' @return Sample from the GNN (feedforwarded input sample)
+##' @return Sample from the GNN gnn (feedforwarded input sample)
 ##' @author Marius Hofert
-##' @note rGNN.numeric <- function(n, GNN, prior, ...) would have been another
+##' @note rGNN.numeric <- function(n, gnn, prior, ...) would have been another
 ##'       option but then 'n' is required even if prior is a sample, which is
 ##'       weird. And omitting 'n' then leads to error 'no applicable method for 'rGNN'
 ##'       applied to an object of class "name"'. The current version acts more
 ##'       like sample()
-rGNN.gnn_GNN <- function(GNN, size, prior = NULL, copula = indepCopula(dim(GNN)[1]),
+rGNN.gnn_GNN <- function(gnn, size, prior = NULL, copula = indepCopula(dim(gnn)[1]),
                          qmargin = qnorm, method = c("pseudo", "sobol"), ...)
 {
-    stopifnot(inherits(GNN, "gnn_GNN"))
-    d <- dim(GNN)[1]
+    stopifnot(inherits(gnn, "gnn_GNN"))
+    d <- dim(gnn)[1]
     if(is.null(prior)) { # prior = NULL
 
         if(!inherits(copula, "Copula"))
@@ -36,7 +36,7 @@ rGNN.gnn_GNN <- function(GNN, size, prior = NULL, copula = indepCopula(dim(GNN)[
         if(is.function(qmargin))
             qmargin <- rep(list(qmargin), d)
         if(!all(sapply(qmargin, is.function)))
-            stop("'qmargin' must be a quantile function or vector of dimension dim(GNN)[1] of such.")
+            stop("'qmargin' must be a quantile function or vector of dimension dim(gnn)[1] of such.")
         ## Generate copula sample
         method <- match.arg(method)
         U <- switch(method,
@@ -44,11 +44,12 @@ rGNN.gnn_GNN <- function(GNN, size, prior = NULL, copula = indepCopula(dim(GNN)[
                         rCopula(size, copula)
                     },
                     "sobol" = {
-                        if(!hasArg(randomize))
-                            randomize <- "digital.shift"
-                        if(!hasArg(seed))
-                            seed <- 271
-                        U. <- sobol(size, d = d, randomize = randomize, seed = seed, ...)
+                        args <- list(...)
+                        if(!hasArg("randomize"))
+                            args <- c(args, randomize = "digital.shift")
+                        if(!hasArg("seed"))
+                            args <- c(args, seed = 271)
+                        U. <- do.call(sobol, args = c(n = size, d = d, args))
                         if(!inherits(copula, "indepCopula") && # those having an inverse Rosenblatt transform
                            !inherits(copula, "claytonCopula") &&
                            !inherits(copula, "normalCopula") &&
@@ -73,10 +74,10 @@ rGNN.gnn_GNN <- function(GNN, size, prior = NULL, copula = indepCopula(dim(GNN)[
         if(!is.matrix(prior))
             prior <- rbind(prior, deparse.level = 0L)
         if(ncol(prior) != d)
-            stop("Number of columns of 'prior' matrix does not match dim(GNN)[1]")
+            stop("Number of columns of 'prior' matrix does not match dim(gnn)[1]")
 
     }
 
     ## Feedforward
-    ffGNN(GNN, data = prior)
+    ffGNN(gnn, data = prior)
 }

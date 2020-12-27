@@ -429,8 +429,7 @@ stopifnot(identical(GMMN1[names(GMMN1) != "model"],
 
 ## Evaluate
 set.seed(271)
-N.prior <- matrix(rnorm(2000 * 2), ncol = 2)
-X <- predict(GMMN1[["model"]], x = N.prior)
+X <- rGNN(GMMN1, size = 2000)
 plot(X, xlab = expression(X[1]), ylab = expression(X[2]))
 }
 }
