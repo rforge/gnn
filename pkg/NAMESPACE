@@ -52,8 +52,12 @@ export("to_savable", "to_callable")
 ## Constructors
 export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
 
-## Methods
-S3method("print",   "gnn_GMMN")
-S3method("str",     "gnn_GMMN")
-S3method("summary", "gnn_GMMN")
-S3method("dim",     "gnn_GMMN")
+## Generics
+export("rGNN")
+
+## Basic methods
+S3method("print",   "gnn_GNN")
+S3method("str",     "gnn_GNN")
+S3method("summary", "gnn_GNN")
+S3method("dim",     "gnn_GNN")
+S3method("rGNN",    "gnn_GNN")
