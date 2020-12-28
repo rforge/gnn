@@ -1,7 +1,7 @@
 ### Training GNNs ##############################################################
 
 ##' @title Training GNNs
-##' @param gnn GNN object as returned by constructors
+##' @param x GNN object as returned by constructors
 ##' @param data (n,d)-matrix containing n d-dimensional observations forming the
 ##'        training data
 ##' @param batch.size number of samples per stochastic gradient step
@@ -12,20 +12,20 @@
 ##'        see ?keras:::fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
-train <- function(gnn, data, batch.size, n.epoch, verbose = 3, ...)
+train <- function(x, data, batch.size, n.epoch, verbose = 3, ...)
 {
     ## Define variables and do checks
     if(!is.matrix(data))
         stop("'data' needs to be an (n, d)-matrix containing n d-dimensional training observations.")
     dim.train <- dim(data) # training data dimensions
     stopifnot(1 <= batch.size, batch.size <= dim.train[1], n.epoch >= 1)
-    nms <- names(gnn)
+    nms <- names(x)
     if(!("type" %in% nms && "dim" %in% nms))
-        stop("'gnn' must have components 'type' and 'dim'.")
-    type <- gnn$type
+        stop("'x' must have components 'type' and 'dim'.")
+    type <- x$type
     if(type != "GMMN") # && type != "VAE")
         stop("The only GNN type currently supported is 'GMMN'.")
-    dim <- gnn$dim
+    dim <- x$dim
     dim.out <- switch(type, # dimension of the output layer
                       "GMMN" = {
                           dim[length(dim)]
@@ -41,26 +41,26 @@ train <- function(gnn, data, batch.size, n.epoch, verbose = 3, ...)
     switch(type,
            "GMMN" = {
                prior <- matrix(rnorm(dim.train[1] * dim[1]), nrow = dim.train[1]) # N(0,1) prior (same dimension as input layer)
-               gnn$model %>% fit(x = prior, y = data, # x = data (here: prior, could also be user input) passed through NN as input; y = target/training data (e.g., copula data)
+               x$model %>% fit(x = prior, y = data, # x = data (here: prior, could also be user input) passed through NN as input; y = target/training data (e.g., copula data)
                                  batch_size = batch.size, epochs = n.epoch, verbose = verbose, ...) # training
            },
            ## "VAE" = {
-           ##     gnn$model %>% fit(x = data, y = data, # both input and output to the NN are the target/training data
+           ##     x$model %>% fit(x = data, y = data, # both input and output to the NN are the target/training data
            ##                       batch_size = batch.size, epochs = n.epoch, verbose = verbose, ...)
            ## },
            stop("Wrong 'type'"))
 
     ## Update information
-    gnn[["n.train"]] <- dim.train[1]
-    gnn[["batch.size"]] <- batch.size
-    gnn[["n.epoch"]] <- n.epoch
+    x[["n.train"]] <- dim.train[1]
+    x[["batch.size"]] <- batch.size
+    x[["n.epoch"]] <- n.epoch
 
     ## Return
-    gnn # GNN object with trained model and additional information
+    x # GNN object with trained model and additional information
 }
 
 ##' @title Training or Loading a Trained GNN
-##' @param gnn see ?train
+##' @param x see ?train
 ##' @param data see ?train
 ##' @param batch.size see ?train
 ##' @param n.epoch see ?train
@@ -72,21 +72,21 @@ train <- function(gnn, data, batch.size, n.epoch, verbose = 3, ...)
 ##' @param ... additional arguments passed to the underlying train()
 ##' @return trained or loaded GNN object
 ##' @author Marius Hofert
-train_once <- function(gnn, data, batch.size, n.epoch,
+train_once <- function(x, data, batch.size, n.epoch,
                        file, name = rm_ext(basename(file)), package = NULL, ...)
 {
     if(exists_rda(file, names = name, package = package)) { # check existence of 'name' in 'file'
-        read.gnn <- read_rda(file, names = name, package = package) # GNN object with serialized component 'model'
-        if(read.gnn[["type"]] != gnn[["type"]])
-            stop("The 'type' of the read GNN and that of 'gnn' do not coincide")
-        as.keras(read.gnn) # return whole GNN object (with unserialized model (components))
+        read.x <- read_rda(file, names = name, package = package) # GNN object with serialized component 'model'
+        if(read.x[["type"]] != x[["type"]])
+            stop("The 'type' of the read GNN and that of 'x' do not coincide")
+        as.keras(read.x) # return whole GNN object (with unserialized model (components))
     } else { # if 'file' does not exist or 'name' does not exist in 'file'
         ## Train and update training slots
-        trained.gnn <- train(gnn, data = data, batch.size = batch.size, n.epoch = n.epoch, ...) # trained GNN
+        trained.x <- train(x, data = data, batch.size = batch.size, n.epoch = n.epoch, ...) # trained GNN
         ## Convert necessary slots to storable objects
-        trained.gnn. <- as.raw(trained.gnn)
+        trained.x. <- as.raw(trained.x)
         ## Save and return
-        save_rda(trained.gnn., file = file, names = name) # save the trained model (with savable GNNs)
-        trained.gnn # return trained GNN object (with original GNNs)
+        save_rda(trained.x., file = file, names = name) # save the trained model (with savable GNNs)
+        trained.x # return trained GNN object (with original GNNs)
     }
 }

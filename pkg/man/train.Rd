@@ -6,12 +6,12 @@
   Functions for training generative neural networks.
 }
 \usage{
-train(gnn, data, batch.size, n.epoch, verbose = 3, ...)
-train_once(gnn, data, batch.size, n.epoch,
+train(x, data, batch.size, n.epoch, verbose = 3, ...)
+train_once(x, data, batch.size, n.epoch,
            file, name = rm_ext(basename(file)), package = NULL, ...)
 }
 \arguments{
-  \item{gnn}{GNN object as created by \code{\link{GMMN}()}.}
+  \item{x}{GNN object as created by \code{\link{GMMN}()}.}
   \item{data}{\eqn{(n,d)}-matrix containing the \eqn{n}
     \eqn{d}-dimensional observations of the training data.}
   \item{batch.size}{number of samples used per stochastic gradient step.}

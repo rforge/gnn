@@ -55,7 +55,7 @@ as.raw.gnn_GNN <- function(x) # needs 'x' because of generic being already defin
 }
 
 ##' @title Convert raw Model to keras
-##' @param gnn object of S3 class "gnn_GNN" to be converted
+##' @param x object of S3 class "gnn_GNN" to be converted
 ##' @return object of S3 class "gnn_GNN" with 'model' component converted to keras
 ##'         object
 ##' @author Marius Hofert
