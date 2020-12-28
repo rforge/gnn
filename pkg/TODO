@@ -1,12 +1,12 @@
 ## Short-term
-- rename all 'gnn' args to 'x'
-- plot method: what to use as 'low' and 'up' values to evaluate NN at (low,...,low,up,low,...,low)?
+- minimize Suggests: qrmtools, qrmdata, latticeExtra, RnavGraphImageData, mvtnorm
 - fitGNN (call train but do progress bar and time measurement per epochs as output)
-  and use them
-- 'save' and 'load' methods that execute as.raw and as.keras and use save and load
-- Use all new methods in all demos
+  and merge the two train functions => essentially redo train.R
+  + fix .Rd
+- 'save' and 'read' methods that execute as.raw and as.keras and use save and load
+- remove all demos and saved NNs and store them locally (with those version of the package)
+- Use all new methods in all demos => update ./pro/time and ./pro/qmc_time
 - re-run all ./demo files and check
-- perhaps remove all demos and saved NNs and store them locally
 
 - implement and export constructor for class gnn_Model (slots model and type)
 - implement and export methods rModel, fitModel
@@ -15,6 +15,7 @@
 - re-run and check demos
 
 ## Long-term
+- plot method: what to use as 'low' and 'up' values to evaluate NN at (low,...,low,up,low,...,low)?
 - Fix: Paper citations (2019 on arXiv or the real publication if published)
 - KL(): If an analytical (differentiable) form exits for K-L divergence
         between copulas, we could propose an interesting extension.

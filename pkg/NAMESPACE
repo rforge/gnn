@@ -58,9 +58,10 @@ S3method("ffGNN",    "gnn_GNN")
 S3method("as.raw",   "gnn_GNN")
 S3method("as.keras", "gnn_GNN")
 
+export("train", "train_once")
+
 ## Functions
 export("loss")
-export("train", "train_once")
 export("range_trafo", "logis_trafo", "PCA_trafo")
 export("exists_rda", "read_rda", "save_rda", "modify_rda")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
