@@ -36,17 +36,17 @@ train_once(gnn, data, batch.size, n.epoch,
     \item{\code{train_once()}:}{If object \code{name} exists in
       \code{file}, \code{train_once()} reads it,
       converts it to a callable GNN object via
-      \code{\link{to_callable}()} and returns it.
+      \code{\link{as.keras}()} and returns it.
       Otherwise, \code{train_once()} calls \code{train()}
       to train the GNN, converts it to a savable
-      GNN object via \code{\link{to_savable}()}, saves it
+      GNN object via \code{\link{as.raw}()}, saves it
       and returns the trained GNN.}
   }
 }
 \author{Marius Hofert}
 \seealso{
-  \code{\link{GMMN}()}, \code{\link{to_savable}()},
-  \code{\link{to_callable}()}.
+  \code{\link{GMMN}()}, \code{\link{as.raw}()},
+  \code{\link{as.keras}()}.
 }
 \examples{
 \donttest{
@@ -76,9 +76,9 @@ plot(V, xlab = expression(V[1]), ylab = expression(V[2]))
 
 ## Convert the trained neural network to one that can be saved
 ## and save it (here: to some temporary file)
-GMMN.savable <- to_savable(GMMN)
+GMMN.save <- as.raw(GMMN)
 file <- tempfile("trained_GMMN", fileext = ".rda")
-save_rda(GMMN.savable, file = file, names = "GMMN")
+save_rda(GMMN.save, file = file, names = "GMMN")
 }
 }
 \keyword{optimize}

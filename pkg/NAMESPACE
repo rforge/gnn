@@ -40,6 +40,24 @@ importFrom("copula",
 
 ### Exports ####################################################################
 
+## Constructors
+export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
+
+## Generics
+export("rGNN")
+export("ffGNN")
+export("as.keras")
+
+## Basic methods
+S3method("print",    "gnn_GNN")
+S3method("str",      "gnn_GNN")
+S3method("summary",  "gnn_GNN")
+S3method("dim",      "gnn_GNN")
+S3method("rGNN",     "gnn_GNN")
+S3method("ffGNN",    "gnn_GNN")
+S3method("as.raw",   "gnn_GNN")
+S3method("as.keras", "gnn_GNN")
+
 ## Functions
 export("loss")
 export("train", "train_once")
@@ -47,19 +65,3 @@ export("range_trafo", "logis_trafo", "PCA_trafo")
 export("exists_rda", "read_rda", "save_rda", "modify_rda")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
        "rm_ext", "human_time")
-export("to_savable", "to_callable")
-
-## Constructors
-export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
-
-## Generics
-export("rGNN")
-export("ffGNN")
-
-## Basic methods
-S3method("print",   "gnn_GNN")
-S3method("str",     "gnn_GNN")
-S3method("summary", "gnn_GNN")
-S3method("dim",     "gnn_GNN")
-S3method("rGNN",    "gnn_GNN")
-S3method("ffGNN",   "gnn_GNN")

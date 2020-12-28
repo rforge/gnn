@@ -79,12 +79,12 @@ train_once <- function(gnn, data, batch.size, n.epoch,
         read.gnn <- read_rda(file, names = name, package = package) # GNN object with serialized component 'model'
         if(read.gnn[["type"]] != gnn[["type"]])
             stop("The 'type' of the read GNN and that of 'gnn' do not coincide")
-        to_callable(read.gnn) # return whole GNN object (with unserialized model (components))
+        as.keras(read.gnn) # return whole GNN object (with unserialized model (components))
     } else { # if 'file' does not exist or 'name' does not exist in 'file'
         ## Train and update training slots
         trained.gnn <- train(gnn, data = data, batch.size = batch.size, n.epoch = n.epoch, ...) # trained GNN
         ## Convert necessary slots to storable objects
-        trained.gnn. <- to_savable(trained.gnn)
+        trained.gnn. <- as.raw(trained.gnn)
         ## Save and return
         save_rda(trained.gnn., file = file, names = name) # save the trained model (with savable GNNs)
         trained.gnn # return trained GNN object (with original GNNs)

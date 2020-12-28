@@ -40,7 +40,8 @@ GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
       the R6 classes \code{"keras.engine.training.Model"},
       \code{"keras.engine.network.Network"},
       \code{"keras.engine.base_layer.Layer"}
-      and \code{"python.builtin.object"}).}
+      and \code{"python.builtin.object"}, or a \code{\link{raw}}
+      object).}
     \item{\code{type}}{\code{\link{character}} string indicating
       the type of model (\code{"GMMN"}).}
     \item{\code{dim}}{see above.}

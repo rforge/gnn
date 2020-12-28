@@ -408,19 +408,19 @@ data("GMMN_dim_6_600_6_ntrn_5478_nbat_5478_nepo_1000_FX_GBP")
 %% \emph{myjournal} \bold{myversion}(mynumber), --.
 }
 \seealso{
-  \code{\link{GMMN}()}, \code{\link{to_callable}()}
+  \code{\link{GMMN}()}, \code{\link{as.keras}()}, \code{\link{as.raw}()}
 }
 \examples{
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
 ## Load a trained GMMN (see train_once())
 NNname <- "GMMN_dim_2_300_2_ntrn_60000_nbat_5000_nepo_300_eqmix_C_tau_0.5_rot90_t4_tau_0.5"
 NN <- read_rda(NNname, package = "gnn")
-GMMN1 <- to_callable(NN)
+GMMN1 <- as.keras(NN)
 str(GMMN1)
 
 ## Alternative
 NNnm <- data(list = NNname)
-GMMN2 <- to_callable(get(NNnm))
+GMMN2 <- as.keras(get(NNnm))
 str(GMMN2)
 
 ## Check (the check-able components)
