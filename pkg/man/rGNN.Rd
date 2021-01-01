@@ -6,7 +6,7 @@
   Sampling method for objects of \code{\link{S3}} class \code{"gnn_GNN"}.
 }
 \usage{
-\method{rGNN}{gnn_GNN}(x, size, prior = NULL)
+\method{rGNN}{gnn_GNN}(x, size, prior = NULL, ...)
 }
 \arguments{
   \item{x}{object of \code{\link{S3}} class \code{"gnn_GNN"}.}
@@ -36,7 +36,7 @@ GMMN <- GMMN(c(d, 300, d)) # define a GMMN model (with random weights)
 n <- 3
 (X1 <- rGNN(GMMN, size = n)) # default (independent N(0,1) samples as prior)
 (X2 <- rGNN(GMMN, size = n, # passing additional arguments to rPrior()
-            qmargins = "qexp", method = "sobol", seed = 271))
+            qmargins = qexp, method = "sobol", seed = 271))
 (X3 <- rGNN(GMMN, prior = matrix(rexp(n * d), ncol = d))) # providing 'prior'
 stopifnot(dim(X1) == c(n, d), dim(X2) == c(n, d), dim(X3) == c(n, d))
 }

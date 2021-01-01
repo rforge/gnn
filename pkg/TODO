@@ -1,25 +1,10 @@
 ## Short-term
-- GMMN(c(2,2)) fails; perhaps make that the default!
-- export and test:
-  + rPrior() (use the pasted part below)
-  + method is.trained()
-  + method is.GNN()
-  + saveGNN()
-  + loadGNN()
-  + fitGNN() (remove/adapt train(), trainonce .Rd)
-- fitGNN
-  + check verbose argument (and perhaps do your own version)
-  + can we save the loss function values after every epoch?
-
-  \item{copula}{object of \code{\link{S4}} class \code{"Copula"} for
-    which the method \code{\link{rCopula}()} is available; see the \R
-    package \pkg{copula}.}
-  \item{qmargins}{marginal quantile function or a \code{\link{list}}
-    of length \code{dim(x)[1]} of such.}
-  \item{method}{\code{\link{character}} string indicating the sampling
-    method. If \code{"sobol"}, then randomization \code{"digital.shift"}
-    is used with seed 271; see the \R package \pkg{qrng}.}
-  \item{\dots}{additional arguments passed to \code{method}.}
+- document
+  ‘is.GNN’ ‘is.trained’ ‘loadGNN’ ‘saveGNN’ ‘trained’ ‘trained<-’
+  - method is.GNN()
+- check verbose argument of fitGNN() (and perhaps do your own version)
+- can we save the loss function values after every epoch?
+- check GMMN()
 
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 

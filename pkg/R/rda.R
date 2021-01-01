@@ -156,7 +156,7 @@ saveGNN <- function(..., file)
     stopifnot(length(args) >= 1, inherits(args[[1]], "gnn_GNN"), !missing(file))
     ## Convert model components of all GNNs to 'raw' for saving
     args <- lapply(args, function(x) {
-        if(inherits(x, "gnn_GNN")) to.raw(x) else x
+        if(inherits(x, "gnn_GNN")) as.raw(x) else x
     })
     ## Save
     do.call(save_rda, args = c(args, file = file))
@@ -173,7 +173,7 @@ loadGNN <- function(file)
     stopifnot(length(res) >= 1)
     ## Convert model components of all GNNs to 'raw' for saving
     res <- lapply(res, function(x) {
-        if(inherits(x, "gnn_GNN")) to.keras(x) else x
+        if(inherits(x, "gnn_GNN")) as.keras(x) else x
     })
     ## Return
     res

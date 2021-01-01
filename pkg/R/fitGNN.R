@@ -144,7 +144,7 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 ##'        provided file. If called again and the file exists, no training is done
 ##'        but the trained object loaded from the file.
 ##' @param ... see fitGNN.gnn_GNN()
-##' @return see fitGNN.gnn_GNN()
+##' @return see (list of) trained GNNs
 ##' @author Marius Hofert
 fitGNNonce.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL,
                                verbose = 1, file = NULL, ...)

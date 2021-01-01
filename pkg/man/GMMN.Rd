@@ -109,7 +109,7 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 GMMN <- GMMN(c(d, 300, d)) # define a GMMN model
 batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
 n.epo <- 10 # number of epochs = number of times training data is shuffled
-GMMN <- train(GMMN, data = U, batch.size = batch, n.epoch = n.epo)
+GMMN <- fitGNN(GMMN, data = U, batch.size = batch, n.epoch = n.epo)
 ## Note:
 ## - Obviously, in a real-world application, batch.size and n.epoch
 ##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).

@@ -23,7 +23,7 @@ importFrom("tensorflow",
            "tf")
 
 importFrom("utils",
-           "data", "packageName", "str")
+           "data", "packageName", "str", "tail")
 
 importFrom("methods",
            "hasArg", "is")
@@ -40,29 +40,35 @@ importFrom("copula",
 
 ### Exports ####################################################################
 
+## Functions
+export("loss")
+export("range_trafo", "logis_trafo", "PCA_trafo")
+export("save_rda", "exists_rda", "load_rda", "modify_rda", "saveGNN", "loadGNN")
+export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
+       "rm_ext", "human_time")
+export("is.GNN", "is.trained")
+export("trained", "trained<-")
+export("rPrior")
+
 ## Constructors
 export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
 
 ## Generics
-export("rGNN")
 export("ffGNN")
+export("fitGNN", "fitGNNonce")
+export("rGNN")
 export("as.keras")
 
 ## Basic methods
-S3method("print",    "gnn_GNN")
-S3method("str",      "gnn_GNN")
-S3method("summary",  "gnn_GNN")
-S3method("dim",      "gnn_GNN")
-S3method("rGNN",     "gnn_GNN")
-S3method("ffGNN",    "gnn_GNN")
-S3method("as.raw",   "gnn_GNN")
-S3method("as.keras", "gnn_GNN")
+S3method("print",      "gnn_GNN")
+S3method("str",        "gnn_GNN")
+S3method("summary",    "gnn_GNN")
+S3method("dim",        "gnn_GNN")
+S3method("ffGNN",      "gnn_GNN")
+S3method("fitGNN",     "gnn_GNN")
+S3method("fitGNNonce", "gnn_GNN")
+S3method("rGNN",       "gnn_GNN")
+S3method("as.raw",     "gnn_GNN")
+S3method("as.keras",   "gnn_GNN")
 
-export("train", "train_once")
 
-## Functions
-export("loss")
-export("range_trafo", "logis_trafo", "PCA_trafo")
-export("exists_rda", "read_rda", "save_rda", "modify_rda")
-export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
-       "rm_ext", "human_time")

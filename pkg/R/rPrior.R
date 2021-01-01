@@ -8,6 +8,7 @@
 ##'        then repeated d times.
 ##' @param method character string indicating the method to be used for sampling
 ##' @param ... additional arguments passed to 'method'
+##' @return (n, d)-matrix
 ##' @author Marius Hofert
 rPrior <- function(n, copula, qmargins = qnorm, method = c("pseudo", "sobol"), ...)
 {
@@ -16,12 +17,14 @@ rPrior <- function(n, copula, qmargins = qnorm, method = c("pseudo", "sobol"), .
     if(!inherits(copula, "Copula"))
         stop("'copula' must be of class 'Copula'")
     d <- dim(copula)
-    if(is.function(qmargin))
-        qmargin <- rep(list(qmargin), d)
+    if(is.character(qmargins))
+        stop("'qmargins' must be a quantile function (not string) or vector of such")
+    if(is.function(qmargins))
+        qmargins <- rep(list(qmargins), d)
     if(length(qmargins) != d)
         stop("length(qmargins) != dim(copula)")
-    if(!all(sapply(qmargin, is.function)))
-        stop("'qmargin' must be a quantile function or vector of dimension dim(x)[1] of such.")
+    if(!all(sapply(qmargins, is.function)))
+        stop("'qmargins' must be a quantile function or vector of dimension dim(x)[1] of such.")
 
     ## Generate copula sample
     method <- match.arg(method)
@@ -44,8 +47,9 @@ rPrior <- function(n, copula, qmargins = qnorm, method = c("pseudo", "sobol"), .
                 stop("Wrong 'method'."))
 
     ## Map U to the given margins
-    prior <- sapply(1:d, function(j) qmargin[[j]](U[,j]))
+    prior <- sapply(1:d, function(j) qmargins[[j]](U[,j]))
     if(!is.matrix(prior)) # for n = 1
         prior <- rbind(prior, deparse.level = 0L)
     prior
 }
+

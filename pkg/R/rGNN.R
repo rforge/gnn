@@ -12,7 +12,7 @@ rGNN <- function(x, ...)  UseMethod("rGNN")
 ##' @param prior NULL (in which case N(0,1)^d is pseudo-sampled via rPrior())
 ##'        or a (size, d)-matrix of prior samples.
 ##' @param ... additional arguments passed to rPrior() if prior = NULL
-##' @return Sample from the GNN 'x' (feedforwarded input sample)
+##' @return Sample from the GNN 'x' (feedforwarded prior sample)
 ##' @author Marius Hofert
 ##' @note rGNN.numeric <- function(n, x, prior, ...) would have been another
 ##'       option but then 'n' is required even if prior is a sample, which is
@@ -21,7 +21,7 @@ rGNN <- function(x, ...)  UseMethod("rGNN")
 ##'       more like sample()
 rGNN.gnn_GNN <- function(x, size, prior = NULL, ...)
 {
-    stopifnot(inherits(x, "gnn_GNN"), size >= 1)
+    stopifnot(inherits(x, "gnn_GNN"))
     if(is.null(prior))
         prior <- rPrior(size, copula = indepCopula(dim(x)[1]), ...) # independent N(0,1)
     ffGNN(x, data = prior)
