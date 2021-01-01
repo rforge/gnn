@@ -1,18 +1,22 @@
 ## Short-term
-- minimize Suggests: qrmtools, qrmdata, latticeExtra, RnavGraphImageData, mvtnorm
-- fitGNN (call train but do progress bar and time measurement per epochs as output)
-  and merge the two train functions => essentially redo train.R
-  + fix .Rd
-- 'save' and 'read' methods that execute as.raw and as.keras and use save and load
+- fix 'svn st'
+- allow "trained(x) <- FALSE"
+- export and test:
+  + rPrior() (use the pasted part below)
+  + method is.trained()
+  + method is.GNN()
+  + saveGNN()
+  + loadGNN()
+  + fitGNN() (remove/adapt train(), trainonce .Rd)
+- fitGNN
+  + check verbose argument (and perhaps do your own version)
+  + can we save the loss function values after every epoch?
 - remove all demos and saved NNs and store them locally (with those version of the package)
 - Use all new methods in all demos => update ./pro/time and ./pro/qmc_time
-- re-run all ./demo files and check
 
 - implement and export constructor for class gnn_Model (slots model and type)
-- implement and export methods rModel, fitModel
+- implement and export methods rModel, fitModel, save/load
 - incorporate S4 methods of 'copula' as S3 methods in gnn (objects, rCopula, fitCopula)
-- use them all in demos
-- re-run and check demos
 
 ## Long-term
 - plot method: what to use as 'low' and 'up' values to evaluate NN at (low,...,low,up,low,...,low)?
@@ -22,3 +26,18 @@
         (Simpler) extensions to consider first: encoder maps to non-diagonal
         covariance matrix, Kendall matrix (which we then transform to covariance
         matrix for use in KL()).
+
+
+  \item{copula}{object of \code{\link{S4}} class \code{"Copula"} for
+    which the method \code{\link{rCopula}()} is available; see the \R
+    package \pkg{copula}.}
+  \item{qmargins}{marginal quantile function or a \code{\link{list}}
+    of length \code{dim(x)[1]} of such.}
+  \item{method}{\code{\link{character}} string indicating the sampling
+    method. If \code{"sobol"}, then randomization \code{"digital.shift"}
+    is used with seed 271; see the \R package \pkg{qrng}.}
+  \item{\dots}{additional arguments passed to \code{method}.}
+
+library(gnn)
+x <- GMMN(c(2, 30, 2))
+y <- list(x, x),

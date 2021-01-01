@@ -11,7 +11,9 @@ ffGNN <- function(x, data) UseMethod("ffGNN")
 ##' @param data (n, d)-matrix of data to be fed forward through 'x'
 ##' @return the output (matrix) of the GNN 'x'
 ##' @author Marius Hofert
-ffGNN.gnn_GNN <- function(x, data) {
+ffGNN.gnn_GNN <- function(x, data)
+{
+    stopifnot(inherits(x, "gnn_GNN"))
     if(!is.matrix(data))
         data <- rbind(data)
     if(ncol(data) != dim(x)[1])

@@ -1,5 +1,30 @@
 ### Auxiliary functions for checking existence, loading and saving data ########
 
+##' @title Saving Objects under a given Name in a Given .rda File
+##' @param ... objects to be saved in 'file' under names specified by 'names'
+##' @param file character string (with or without extension '.rda') specifying
+##'        the file to save to
+##' @param names character vector of names under which the objects are saved
+##'        in 'file' (default: those of the arguments provided by '...')
+##' @return nothing (generates an .rda by side-effect)
+##' @author Marius Hofert
+##' @note inspired by save() (also overwrites files)
+save_rda <- function(..., file, names = NULL)
+{
+    stopifnot(is.character(file), length(file) == 1)
+    args <- list(...)
+    len <- length(args)
+    if(is.null(names)) {
+        nms <- deparse(substitute(list(...))) # get names of provided arguments
+        nms <- substring(nms, first = 6, last = nchar(nms) - 1) # strip away "list(" and ")"
+        names <- unlist(strsplit(nms, split = ", "))
+    }
+    stopifnot(length(names) == len)
+    for(i in seq_len(len))
+        assign(names[i], value = args[[i]]) # name the objects in 'args' as specified by 'names'
+    save(list = names, file = file) # save R objects in 'file' under the provided 'names'
+}
+
 ##' @title Checking whether Datasets(s) Exist
 ##' @param file character string (with or without extension .rda) specifying the
 ##'        name of the file considered
@@ -8,10 +33,9 @@
 ##'        the current working directory is used.
 ##' @return logical
 ##' @author Marius Hofert
-##' @note - For .rds: file.exists(file)
-##'       - File extensions can largely mess this up:
-##'         + file.exists() needs the file extension .rda to find the file
-##'         + data() must have no extension
+##' @note File extensions can largely mess this up:
+##'       - file.exists() needs the file extension .rda to find the file
+##'       - data() must have no extension
 exists_rda <- function(file, names, package = NULL)
 {
     stopifnot(is.character(file), length(file) == 1)
@@ -48,13 +72,14 @@ exists_rda <- function(file, names, package = NULL)
 ##'        Current Working Directory
 ##' @param file character string (with or without extension .rda) specifying
 ##'        the file to read from
-##' @param names character vector of names of objects to be read
+##' @param names character vector of names of objects to be read; defaults to
+##'        file.
 ##' @param package name of the package from which to load the objects; if NULL
 ##'        (the default) the current working directory is searched.
 ##' @return the read object(s)
 ##' @author Marius Hofert
-##' @note For .rds: readRDS()
-read_rda <- function(file, names, package = NULL)
+##' @note as readRDS(), behaves more functional in that it returns an object
+load_rda <- function(file, names, package = NULL)
 {
     stopifnot(is.character(file))
     file  <- rm_ext(file) # remove file extension
@@ -92,31 +117,6 @@ read_rda <- function(file, names, package = NULL)
     res # return
 }
 
-##' @title Saving Objects under a given Name in a Given .rda File
-##' @param ... objects to be saved in 'file' under names specified by 'names'
-##' @param file character string (with or without extension '.rda') specifying
-##'        the file to save to
-##' @param names character vector of names under which the objects are saved
-##'        in 'file'
-##' @return nothing (generates an .rda by side-effect)
-##' @author Marius Hofert
-##' @note For .rds: saveRDS()
-save_rda <- function(..., file, names = NULL)
-{
-    stopifnot(is.character(file), length(file) == 1)
-    args <- list(...)
-    len <- length(args)
-    if(is.null(names)) {
-        nms <- deparse(substitute(list(...))) # get names of provided arguments
-        nms <- substring(nms, first = 6, last = nchar(nms) - 1) # strip away "list(" and ")"
-        names <- unlist(strsplit(nms, split = ", "))
-    }
-    stopifnot(length(names) == len)
-    for(i in seq_len(len))
-        assign(names[i], value = args[[i]]) # name the objects in 'args' as specified by 'names'
-    save(list = names, file = file) # save R objects in 'file' under the provided 'names'
-}
-
 ##' @title Reading, Renaming and Saving an .rda Object
 ##' @param oldname character string specifying the object to be read
 ##' @param oldfile file name (with or without extension .rda) specifying from which
@@ -126,15 +126,14 @@ save_rda <- function(..., file, names = NULL)
 ##'        under which the object is to be saved
 ##' @param newfile file name (with extension .rda) specifying where the object named
 ##'        'oldname' is saved under the name 'newname'
-##' @param package see ?read_rda
+##' @param package see ?load_rda
 ##' @return nothing (generates an .rda by side-effect)
 ##' @author Marius Hofert
-##' @note An .rds can simply be renamed (as no object name is stored)
 modify_rda <- function(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
                        newname, newfile = paste0(newname, collapse = "_", ".rda"),
                        package = NULL)
 {
-    dat <- read_rda(oldname, file = oldfile, package = package)
+    dat <- load_rda(oldname, file = oldfile, package = package)
     if(!missing(FUN)) {
         save_rda(FUN(dat), file = newfile, names = newname)
     } else {
@@ -142,3 +141,40 @@ modify_rda <- function(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
     }
 }
 
+
+### Saving and loading of objects possibly of class gnn_GNN and conversion #####
+
+##' @title Saving of Objects with Conversion to Raw if Necessary
+##' @param ... objects to be saved in 'file'; those of class "gnn_GNN" are
+##'        converted to 'raw'
+##' @param file name of file to save '...' in
+##' @return nothing (generates an .rda by side-effect)
+##' @author Marius Hofert
+saveGNN <- function(..., file)
+{
+    args <- list(...)
+    stopifnot(length(args) >= 1, inherits(args[[1]], "gnn_GNN"), !missing(file))
+    ## Convert model components of all GNNs to 'raw' for saving
+    args <- lapply(args, function(x) {
+        if(inherits(x, "gnn_GNN")) to.raw(x) else x
+    })
+    ## Save
+    do.call(save_rda, args = c(args, file = file))
+}
+
+##' @title Loading of Objects with Conversion to Keras if Necessary
+##' @param file name of file from which to load all objects
+##' @return the read objects (converted to keras objects) as a list
+##' @author Marius Hofert
+##' @note as readRDS(), behaves more functional in that it returns an object
+loadGNN <- function(file)
+{
+    res <- load_rda(file)
+    stopifnot(length(res) >= 1)
+    ## Convert model components of all GNNs to 'raw' for saving
+    res <- lapply(res, function(x) {
+        if(inherits(x, "gnn_GNN")) to.keras(x) else x
+    })
+    ## Return
+    res
+}

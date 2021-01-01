@@ -105,15 +105,21 @@ GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     model %>% compile(optimizer = "adam", loss = loss_fn)
 
     ## Return
-    structure(list(model = model, # object of R6 class keras.engine.training.Model (directed acyclic graph of layers)
-                   type = "GMMN", # character string
-                   dim = dim, # integer vector of dimensions for input, hidden, output layers
-                   activation = activation, # character vector of activation functions for hidden and output layers
-                   batch.norm = batch.norm, # logical(1) indicating whether batch normalization layers are added after each hidden layer
-                   dropout.rate = dropout.rate, # numeric(1) specifying the fraction of input to be dropped
-                   n.param = nparam_GMMN(model), # integer(3) giving the number of trainable, non-trainable and the total number of parameters
-                   n.train = NA_integer_, # numeric(1) specifying the sample size for training (or NA if not trained)
-                   batch.size = NA_integer_, # numeric(1) specifying the batch size used for training (or NA if not trained)
-                   n.epoch = NA_integer_), # numeric(1) specifying the number of epochs used for training (or NA if not trained)
-              class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
+    structure(list(
+        ## Main object
+        model = model, # object of R6 class keras.engine.training.Model (directed acyclic graph of layers)
+        ## Model string
+        type = "GMMN", # character string
+        ## Specification
+        dim = dim, # integer vector of dimensions for input, hidden, output layers
+        activation = activation, # character vector of activation functions for hidden and output layers
+        batch.norm = batch.norm, # logical(1) indicating whether batch normalization layers are added after each hidden layer
+        dropout.rate = dropout.rate, # numeric(1) specifying the fraction of input to be dropped
+        n.param = nparam_GMMN(model), # integer(3) giving the number of trainable, non-trainable and the total number of parameters
+        ## Training
+        n.train = NA_integer_, # integer(1) specifying the sample size for training (or NA if not trained)
+        batch.size = NA_integer_, # integer(1) specifying the batch size used for training (or NA if not trained)
+        n.epoch = NA_integer_), # integer(1) specifying the number of epochs used for training (or NA if not trained)
+        ## Class (part of structure())
+        class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
 }

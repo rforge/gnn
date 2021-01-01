@@ -9,6 +9,8 @@
 ##       - For defining a generic without overwriting already defined generics,
 ##         see https://gist.github.com/datalove/88f5a24758b2d8356e32
 
+is.GNN <- function(x) UseMethod("is.GNN")
+
 
 ### GNN basic methods ##########################################################
 
@@ -19,6 +21,7 @@
 ##' @note Just replace component 'model' by our own (to avoid keras print method)
 print.gnn_GNN <- function(x, ...)
 {
+    stopifnot(inherits(x, "gnn_GNN"))
     cls <- class(x[["model"]])[1]
     print(c("model" = noquote(paste0("object of class \"",cls,"\"")), # new 'model' component
             x[names(x) != "model"]))
@@ -32,6 +35,7 @@ print.gnn_GNN <- function(x, ...)
 ##'       modify the output.
 str.gnn_GNN <- function(object, ...)
 {
+    stopifnot(inherits(object, "gnn_GNN"))
     nms <- names(object)
     cls <- class(object[["model"]])[1]
     ## Model part; see calls utils:::str.default()
@@ -48,6 +52,7 @@ str.gnn_GNN <- function(object, ...)
 ##' @author Marius Hofert
 summary.gnn_GNN <- function(object, ...)
 {
+    stopifnot(inherits(object, "gnn_GNN"))
     summ <- summary(unclass(object)) # calls summary.default() on the list unclass(object)
     summ[,"Class"] <- c(summ["model", "Class"], sapply(object[names(object) != "model"], class)) # fix classes
     summ
@@ -57,4 +62,26 @@ summary.gnn_GNN <- function(object, ...)
 ##' @param x object of class "gnn_GNN"
 ##' @return dimension slot, a vector
 ##' @author Marius Hofert
-dim.gnn_GNN <- function(x) x$dim
+dim.gnn_GNN <- function(x)
+{
+    stopifnot(inherits(x, "gnn_GNN"))
+    x[["dim"]]
+}
+
+##' @title Check for Class "gnn_GNN"
+##' @param x single object or list of objects
+##' @return logical (possibly a vector)
+##' @author Marius Hofert
+##' @note a bit smarter than 'just' inherits(x, "gnn_GNN") which is
+##'       still useful for exact checks
+is.GNN.gnn_GNN <- function(x)
+{
+    is.gnn <- inherits(x, "gnn_GNN")
+    if(is.gnn) {
+        TRUE
+    } else if(is.list(x)) { # could still be a list of such
+        sapply(x, function(x.) inherits(x., "gnn_GNN"))
+    } else { # not even a list
+        FALSE
+    }
+}
