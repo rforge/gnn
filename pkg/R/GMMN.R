@@ -56,7 +56,7 @@ nparam_GMMN <- function(x)
 ##'         loss() at the moment).
 ##'       - Make sure that the resulting NN is always a GMMN.
 ##'       - names(<GMMN>$model) provides slots of "keras.engine.training.Model" object
-GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
+GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
                  batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
 {
     ## Basic input checks and definitions
@@ -68,14 +68,13 @@ GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
               n.GPU >= 0)
     storage.mode(dim) <- "integer" # see ?as.integer
     num.hidden <- num.lay - 2 # number of hidden layers (= number of layers - input - output); can be 0
-    ind.hid.lay <- seq_len(num.hidden) # note: num.hidden can be 0
 
     ## 1) Set up layers
     ## 1.1) Input layer
     in.lay <- layer_input(shape = dim[1])
 
     ## 1.2) Hidden layers (multi-layer perceptron)
-    for(i in ind.hid.lay) {
+    for(i in seq_len(num.hidden)) {
         hid.lay <- layer_dense(if(i == 1) in.lay else hid.lay,
                                units = dim[1 + i], # dimensions of hidden layers (input layer is in 1st component)
                                activation = activation[i]) # 'activation' starts with hidden layers
@@ -84,7 +83,8 @@ GMMN <- function(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     }
 
     ## 1.3) Output layer
-    out.lay <- layer_dense(hid.lay, units = dim[1 + num.hidden + 1],
+    out.lay <- layer_dense(if(num.hidden == 0) in.lay else hid.lay,
+                           units = dim[1 + num.hidden + 1],
                            activation = activation[num.hidden + 1])
 
     ## 2) Define the GMMN

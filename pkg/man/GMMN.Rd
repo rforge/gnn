@@ -6,7 +6,7 @@
   an object of \code{\link{S3}} class \code{"gnn_GMMN"}.
 }
 \usage{
-GMMN(dim, activation = c(rep("relu", length(dim) - 2), "sigmoid"),
+GMMN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
      batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
 }
 \arguments{

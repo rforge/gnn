@@ -10,8 +10,18 @@
 - fitGNN
   + check verbose argument (and perhaps do your own version)
   + can we save the loss function values after every epoch?
-- remove all demos and saved NNs and store them locally (with those version of the package)
-- Use all new methods in all demos => update ./pro/time and ./pro/qmc_time
+
+  \item{copula}{object of \code{\link{S4}} class \code{"Copula"} for
+    which the method \code{\link{rCopula}()} is available; see the \R
+    package \pkg{copula}.}
+  \item{qmargins}{marginal quantile function or a \code{\link{list}}
+    of length \code{dim(x)[1]} of such.}
+  \item{method}{\code{\link{character}} string indicating the sampling
+    method. If \code{"sobol"}, then randomization \code{"digital.shift"}
+    is used with seed 271; see the \R package \pkg{qrng}.}
+  \item{\dots}{additional arguments passed to \code{method}.}
+
+- Use all new methods in all demos => update ./old/2021-01-01_demo
 
 - implement and export constructor for class gnn_Model (slots model and type)
 - implement and export methods rModel, fitModel, save/load
@@ -25,14 +35,3 @@
         (Simpler) extensions to consider first: encoder maps to non-diagonal
         covariance matrix, Kendall matrix (which we then transform to covariance
         matrix for use in KL()).
-
-
-  \item{copula}{object of \code{\link{S4}} class \code{"Copula"} for
-    which the method \code{\link{rCopula}()} is available; see the \R
-    package \pkg{copula}.}
-  \item{qmargins}{marginal quantile function or a \code{\link{list}}
-    of length \code{dim(x)[1]} of such.}
-  \item{method}{\code{\link{character}} string indicating the sampling
-    method. If \code{"sobol"}, then randomization \code{"digital.shift"}
-    is used with seed 271; see the \R package \pkg{qrng}.}
-  \item{\dots}{additional arguments passed to \code{method}.}
