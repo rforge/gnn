@@ -1,3 +1,24 @@
+### GNN basic functions ########################################################
+
+##' @title Check for Class "gnn_GNN"
+##' @param x single object or list of such
+##' @return logical indicating if GNN
+##' @author Marius Hofert
+##' @note a bit smarter than 'just' inherits(x, "gnn_GNN") which is
+##'       still useful for exact checks
+is.GNN <- function(x)
+{
+    is.gnn <- inherits(x, "gnn_GNN")
+    if(is.gnn) {
+        TRUE
+    } else if(is.list(x)) { # could still be a list of such
+        sapply(x, function(x.) inherits(x., "gnn_GNN"))
+    } else { # not even a list
+        FALSE
+    }
+}
+
+
 ### GNN basic generics #########################################################
 
 ## Note: - print(), str(), summary() are already generics, so don't need to be
@@ -8,8 +29,6 @@
 ##         otherwise "checking S3 generic/method consistency ... WARNING" appears.
 ##       - For defining a generic without overwriting already defined generics,
 ##         see https://gist.github.com/datalove/88f5a24758b2d8356e32
-
-is.GNN <- function(x) UseMethod("is.GNN")
 
 
 ### GNN basic methods ##########################################################
@@ -66,22 +85,4 @@ dim.gnn_GNN <- function(x)
 {
     stopifnot(inherits(x, "gnn_GNN"))
     x[["dim"]]
-}
-
-##' @title Check for Class "gnn_GNN"
-##' @param x single object or list of objects
-##' @return logical (possibly a vector)
-##' @author Marius Hofert
-##' @note a bit smarter than 'just' inherits(x, "gnn_GNN") which is
-##'       still useful for exact checks
-is.GNN.gnn_GNN <- function(x)
-{
-    is.gnn <- inherits(x, "gnn_GNN")
-    if(is.gnn) {
-        TRUE
-    } else if(is.list(x)) { # could still be a list of such
-        sapply(x, function(x.) inherits(x., "gnn_GNN"))
-    } else { # not even a list
-        FALSE
-    }
 }

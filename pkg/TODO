@@ -1,6 +1,5 @@
 ## Short-term
-- fix 'svn st'
-- allow "trained(x) <- FALSE"
+- GMMN(c(2,2)) fails; perhaps make that the default!
 - export and test:
   + rPrior() (use the pasted part below)
   + method is.trained()
@@ -37,7 +36,3 @@
     method. If \code{"sobol"}, then randomization \code{"digital.shift"}
     is used with seed 271; see the \R package \pkg{qrng}.}
   \item{\dots}{additional arguments passed to \code{method}.}
-
-library(gnn)
-x <- GMMN(c(2, 30, 2))
-y <- list(x, x),

@@ -1,7 +1,63 @@
-### GNN training generics ######################################################
+### GNN basic training functions ###############################################
 
-## Generic for checking whether a GNN is trained
-is.trained <- function(x) UseMethod("is.trained")>
+##' @title Checking Method for Objects of Class "gnn_GNN"
+##' @param x object of class "gnn_GNN"
+##' @return logical indicating whether 'x' is trained
+##' @author Marius Hofert
+trained <- function(x)
+{
+    if(inherits(x, "gnn_GNN")) {
+        !is.na(x[["n.train"]])
+    } else {
+        stop("'x' is not an object of class \"gnn_GNN\"")
+    }
+}
+
+##' @title Wipe or Set Training Slots
+##' @param x object of class "gnn_GNN"
+##' @param value if 'x' is trained, FALSE, otherwise numeric(3)
+##' @return changed x
+##' @author Marius Hofert
+"trained<-" <- function(x, value)
+{
+    stopifnot(inherits(x, "gnn_GNN"))
+    if(trained(x)) {
+        if(is.logical(value) && (is.na(value) || !value)) { # value = NA or FALSE
+            ## Wipe out components
+            x[["n.train"]] <- NA_integer_
+            x[["batch.size"]] <- NA_integer_
+            x[["n.epoch"]] <- NA_integer_
+        } else stop("Trained 'x' only allow value = FALSE")
+    } else { # not trained
+        if(is.numeric(value) && length(value) == 3 && all(value >= 1)) {
+            ## Wipe out components
+            x[["n.train"]] <- value[1]
+            x[["batch.size"]] <- value[2]
+            x[["n.epoch"]] <- value[3]
+        } else stop("Untrained 'x' only allow value to be a 3-vector of positive integers")
+    }
+    x
+}
+
+##' @title Check for Objects of Class "gnn_GNN" or Lists of Such
+##' @param x single object of class "gnn_GNN" or list of such
+##' @return logical indicating whether GNN(s) is (are) trained
+##' @author Marius Hofert
+##' @note similar to is.GNN()
+is.trained <- function(x)
+{
+    is.gnn <- inherits(x, "gnn_GNN")
+    if(is.gnn) {
+        !is.na(x[["n.train"]])
+    } else if(is.list(x)) { # could still be a list of such
+        sapply(x, function(x.) {
+            inherits(x., "gnn_GNN") && !is.na(x.[["n.train"]])
+        })
+    } else stop("'x' is not an object of class \"gnn_GNN\" or list of such")
+}
+
+
+### GNN training generics ######################################################
 
 ## Generic for main training routine
 fitGNN <- function(x, data, ...) UseMethod("fitGNN")
@@ -11,16 +67,6 @@ fitGNNonce <- function(x, data, ...) UseMethod("fitGNNonce")
 
 
 ### GNN training methods #######################################################
-
-##' @title Checking Method for Objects of Class "gnn_GNN"
-##' @param x object of class "gnn_GNN"
-##' @return logical indicating whether a GNN is trained
-##' @author Marius Hofert
-is.trained.gnn_GNN <- function(x)
-{
-    stopifnot(inherits(x, "gnn_GNN"))
-    if(!is.na(x[["n.train"]])) TRUE else FALSE
-}
 
 ##' @title Training GNNs
 ##' @param x a single GNN object as returned by constructor(s)

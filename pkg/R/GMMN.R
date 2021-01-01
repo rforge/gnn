@@ -1,4 +1,4 @@
-### GMMN constructor ###########################################################
+### GMMN basic functions #######################################################
 
 ##' @title Determine the Number of Parameters
 ##' @param x object of class "keras.engine.training.Model"
@@ -21,6 +21,9 @@ nparam_GMMN <- function(x)
       "non-trainable" = num.tot.params - num.trainable.params,
       "total" = num.tot.params)
 }
+
+
+### GMMN constructor ###########################################################
 
 ##' @title Generative Moment Matching Network (GMMN) Constructor
 ##' @param dim integer vector of length at least two giving the dimensions
