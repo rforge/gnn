@@ -1,14 +1,13 @@
 ## Short-term
-- document
-  ‘is.GNN’ ‘is.trained’ ‘loadGNN’ ‘saveGNN’ ‘trained’ ‘trained<-’
-  - method is.GNN()
-- check verbose argument of fitGNN() (and perhaps do your own version)
-- can we save the loss function values after every epoch?
-- check GMMN()
-
+- make is.GNN and is.trained methods and write is.xxx.gnn_GNN and is.xxx.list methods
+- fitGNNonce should actually be fitGNN.list... zumindest fitGNNonce.list
+- export the is.xxx.* methods
+- export ‘loadGNN’ ‘saveGNN’
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
-- implement and export constructor for class gnn_Model (slots model and type)
+## Medium-term
+- can we make a suggestion for a 'verbose = 4' to keras?
+- implement and export constructor for superclass gnn_Model (slots model and type)
 - implement and export methods rModel, fitModel, save/load
 - incorporate S4 methods of 'copula' as S3 methods in gnn (objects, rCopula, fitCopula)
 
@@ -20,3 +19,23 @@
         (Simpler) extensions to consider first: encoder maps to non-diagonal
         covariance matrix, Kendall matrix (which we then transform to covariance
         matrix for use in KL()).
+
+library(gnn)
+
+d <- 2
+P <- matrix(0.9, nrow = d, ncol = d)
+diag(P) <- 1
+A <- t(chol(P))
+set.seed(271)
+ntrn <- 60000
+Z <- matrix(rnorm(ntrn * d), ncol = d)
+X <- t(A %*% t(Z)) # d-dimensional equicorrelated normal
+U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
+
+GMMN <- GMMN(c(d, 300, d))
+GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3, verbose = 3)
+plot_loss(GMMN)
+
+set.seed(271)
+V <- rGNN(GMMN, size = 2000) # sample
+plot(V, xlab = expression(V[1]), ylab = expression(V[2]))

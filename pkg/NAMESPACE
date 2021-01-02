@@ -34,6 +34,9 @@ importFrom("stats",
 importFrom("tools",
            "file_path_sans_ext")
 
+importFrom("graphics",
+           "mtext")
+
 importFrom("copula",
            "rCopula", "cCopula", "indepCopula")
 
@@ -46,16 +49,16 @@ export("range_trafo", "logis_trafo", "PCA_trafo")
 export("save_rda", "exists_rda", "load_rda", "modify_rda", "saveGNN", "loadGNN")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
        "rm_ext", "human_time")
-export("is.GNN", "is.trained")
-export("trained", "trained<-")
 export("rPrior")
+export("plot_loss")
 
 ## Constructors
 export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
 
 ## Generics
+export("is.GNN")
 export("ffGNN")
-export("fitGNN", "fitGNNonce")
+export("fitGNN", "fitGNNonce", "is.trained")
 export("rGNN")
 export("as.keras")
 
@@ -64,11 +67,13 @@ S3method("print",      "gnn_GNN")
 S3method("str",        "gnn_GNN")
 S3method("summary",    "gnn_GNN")
 S3method("dim",        "gnn_GNN")
+S3method("is.GNN",     "gnn_GNN")
+S3method("is.GNN",     "list")
 S3method("ffGNN",      "gnn_GNN")
 S3method("fitGNN",     "gnn_GNN")
-S3method("fitGNNonce", "gnn_GNN")
+S3method("is.trained", "gnn_GNN")
+S3method("fitGNNonce", "list")
+S3method("is.trained", "list")
 S3method("rGNN",       "gnn_GNN")
 S3method("as.raw",     "gnn_GNN")
 S3method("as.keras",   "gnn_GNN")
-
-

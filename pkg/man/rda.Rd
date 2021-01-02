@@ -3,9 +3,12 @@
 \alias{load_rda}
 \alias{save_rda}
 \alias{modify_rda}
-\title{Check Existence, Read, Save and Rename .rda Files and their Objects}
+\alias{saveGNN}
+\alias{loadGNN}
+\title{Check Existence, Read, Save and Rename .rda Files}
 \description{
-  Check Existence, Read, Save and Rename \code{.rda} Files and their Objects.
+  Check existence, read, save and rename \code{.rda} files. Furthermore,
+  save and load GNN objects.
 }
 \usage{
 save_rda(..., file, names = NULL)
@@ -14,6 +17,8 @@ load_rda(file, names, package = NULL)
 modify_rda(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
            newname, newfile = paste0(newname, collapse = "_", ".rda"),
 	   package = NULL)
+saveGNN(..., file)
+loadGNN(file)
 }
 \arguments{
   \item{file}{
@@ -21,10 +26,10 @@ modify_rda(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
       \item{exists_rda()}{\code{\link{character}} string (with or
 	without ending \code{.rda}) specifying the name of the file
 	to check existence of (if \code{pacakge = NULL}) or in (otherwise).}
-      \item{load_rda()}{\code{\link{character}} string (with or without ending
-	\code{.rda}) specifying the file to read from.}
-      \item{save_rda()}{\code{\link{character}} string (with or without ending
-	\code{.rda}) specifying the file to save to.}
+      \item{load_rda(), loadGNN()}{\code{\link{character}} string (with or without
+	ending \code{.rda}) specifying the file to read from.}
+      \item{save_rda(), saveGNN()}{\code{\link{character}} string (with or without
+	ending \code{.rda}) specifying the file to save to.}
     }
   }
   \item{names}{
@@ -68,9 +73,12 @@ modify_rda(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
       \code{.rda} file \code{file} exists (if \code{names} is not
       provided) or whether the objects with names \code{names}
       exist inside \code{file} (if \code{names} is provided).}
-    \item{load_rda()}{the object read from the \code{.rda}.}
-    \item{save_rda()}{nothing (generated an \code{.rda} by side-effect).}
-    \item{modify_rda()}{nothing (generated an \code{.rda} by side-effect).}
+    \item{load_rda()}{object(s) read from the \code{.rda}.}
+    \item{save_rda()}{nothing (generates an \code{.rda} by side-effect).}
+    \item{modify_rda()}{nothing (generates an \code{.rda} by
+      side-effect).}
+    \item{saveGNN()}{nothing (generates an \code{.rda} by side-effect).}
+    \item{loadGNN()}{the loaded object(s).}
   }
 }
 \author{Marius Hofert}

@@ -104,8 +104,8 @@ GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "si
     loss_fn <- function(x, y = out.lay)
         loss(x, y = y, type = "MMD", ...) # GMMNs need to have "MMD" (otherwise not GMMNs)
 
-    ## 4) Compile the model
-    model %>% compile(optimizer = "adam", loss = loss_fn)
+    ## 4) Compile the model (compile() modifies 'model' in place)
+    compile(model, optimizer = "adam", loss = loss_fn) # configure the model's learning process with the compile method
 
     ## Return
     structure(list(
@@ -122,7 +122,8 @@ GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "si
         ## Training
         n.train = NA_integer_, # integer(1) specifying the sample size for training (or NA if not trained)
         batch.size = NA_integer_, # integer(1) specifying the batch size used for training (or NA if not trained)
-        n.epoch = NA_integer_), # integer(1) specifying the number of epochs used for training (or NA if not trained)
+        n.epoch = NA_integer_, # integer(1) specifying the number of epochs used for training (or NA if not trained)
+        loss = NA), # numeric(n.epoch) containing the loss function values per epoch of training (or NA if not trained)
         ## Class (part of structure())
         class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
 }

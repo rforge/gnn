@@ -153,10 +153,10 @@ modify_rda <- function(oldname, oldfile = paste0(oldname, collapse = "_"), FUN,
 saveGNN <- function(..., file)
 {
     args <- list(...)
-    stopifnot(length(args) >= 1, inherits(args[[1]], "gnn_GNN"), !missing(file))
+    stopifnot(length(args) >= 1)
     ## Convert model components of all GNNs to 'raw' for saving
-    args <- lapply(args, function(x) {
-        if(inherits(x, "gnn_GNN")) as.raw(x) else x
+    args <- lapply(args, function(x.) {
+        if(inherits(x., "gnn_GNN")) as.raw(x.) else x.
     })
     ## Save
     do.call(save_rda, args = c(args, file = file))
