@@ -1,8 +1,4 @@
 ## Short-term
-- make is.GNN and is.trained methods and write is.xxx.gnn_GNN and is.xxx.list methods
-- fitGNNonce should actually be fitGNN.list... zumindest fitGNNonce.list
-- export the is.xxx.* methods
-- export ‘loadGNN’ ‘saveGNN’
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
