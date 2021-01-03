@@ -1,5 +1,5 @@
 ## Short-term
-- make output of fitGNN() on verbose = 2 case nicer
+- make default output of fitGNN() nicer
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
@@ -32,4 +32,6 @@ U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 library(gnn)
 GMMN <- GMMN(c(d, 300, d))
 GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3) "Train on [...] samples\n Epoch i/n..."
+
+
 

@@ -40,7 +40,8 @@
     \describe{
       \item{0}{silent (no output).}
       \item{1}{progress bar (via \code{\link{txtProgressBar}()}).}
-      \item{2}{output after each block of epochs.}
+      \item{2}{output after each block of epochs (block size is about
+	\code{n.epoch^(1/2)}).}
       \item{3}{output after each expoch.}
     }
   }
