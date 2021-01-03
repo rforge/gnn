@@ -33,7 +33,9 @@ progress <-
                     { # verbose = 2
                         ndigits <- floor(log10(self$n.epoch)) + 1
                         fmt.strng <- paste0("Epoch %",ndigits,"d/%d finished with loss %f\n")
-                        div <- ceiling(sqrt(self$n.epoch))
+                        mult <- function(n) # output is written at multiple of 'mult'
+                            ifelse(n <= 100, ceiling(n/10), ceiling(sqrt(n)))
+                        div <- mult(self$n.epoch)
                         if(epo %% div == 0)
                             cat(sprintf(fmt.strng, epo, self$n.epoch, logs[["loss"]]))
                     },

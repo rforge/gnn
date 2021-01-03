@@ -41,7 +41,8 @@
       \item{0}{silent (no output).}
       \item{1}{progress bar (via \code{\link{txtProgressBar}()}).}
       \item{2}{output after each block of epochs (block size is about
-	\code{n.epoch^(1/2)}).}
+	\code{n.epoch/10} if \code{n.epoch <= 100} and about
+	\code{n.epoch^(1/2)} if \code{n.epoch >= 100}).}
       \item{3}{output after each expoch.}
     }
   }

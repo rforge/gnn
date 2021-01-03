@@ -1,5 +1,6 @@
 ## Short-term
-- make default output of fitGNN() nicer
+- pass more computations from fitGNN() to progress bar class (like div etc.)
+- add final timing to fitGNN() if verbose > 0
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
@@ -31,7 +32,5 @@ U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 
 library(gnn)
 GMMN <- GMMN(c(d, 300, d))
-GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3) "Train on [...] samples\n Epoch i/n..."
-
-
+GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3)
 
