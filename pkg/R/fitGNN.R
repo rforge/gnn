@@ -1,3 +1,55 @@
+### GNN training R6 class for progress #########################################
+
+## See keras/R/callbacks.R, https://keras.rstudio.com/reference/KerasCallback.html
+## and https://cran.r-project.org/web/packages/keras/vignettes/training_callbacks.html
+progress <-
+    R6Class("gnn_progress",
+            inherit = KerasCallback,
+            public = list(
+                n.epoch = integer(1), # argument of new()
+                verbose = integer(1), # argument of new()
+                pb = NULL, # provided to avoid "cannot add bindings to a locked environment"
+                initialize = function(n.epoch, verbose, pb = NULL) { # checks, executed by new()
+                    ## Note: - 'pb' needs to be provided to avoid "object 'pb' not found"
+                    ##       - give 'pb' a default argument to not require it to be provided in new()
+                    stopifnot(n.epoch >= 1,
+                              verbose %% 1 == 0, 0 <= verbose, verbose <= 3)
+                    self$n.epoch <- n.epoch
+                    self$verbose <- verbose
+                },
+                on_train_begin = function(logs) { # 'logs' is required
+                    if(self$verbose == 1)
+                        self$pb <- txtProgressBar(max = self$n.epoch, style = 3)
+                },
+                on_epoch_end = function(epoch, logs = list()) { # 'epoch' and 'logs' are required
+                    epo <- epoch + 1 # epoch starts from 0
+                    switch(self$verbose + 1, # in {1,2,3,4}
+                    { # verbose = 0
+                                        # silent => do nothing
+                    },
+                    { # verbose = 1
+                        setTxtProgressBar(self$pb, epo)
+                    },
+                    { # verbose = 2
+                        if(self$n.epoch <= 10) {
+                            cat(sprintf("Epoch %d/%d finished with loss %f\n", epo, self$n.epoch, logs[["loss"]]))
+                        } else {
+                            if(epo %in% ceiling((1:10) * (self$n.epoch/10)))
+                                cat(sprintf("Epoch %d/%d finished with loss %f\n", epo, self$n.epoch, logs[["loss"]]))
+                        }
+                    },
+                    { # verbose = 3
+                        cat(sprintf("Epoch %d/%d finished with loss %f\n", epo, self$n.epoch, logs[["loss"]]))
+                    },
+                    stop("Wrong 'verbose'"))
+                    },
+                    on_train_end = function(logs) { # 'logs' is required
+                        if(self$verbose == 1) close(self$pb)
+                        if(self$verbose != 0) cat("\n")
+                    }
+    ))
+
+
 ### GNN training generics ######################################################
 
 ## Generic for main training routine
@@ -22,14 +74,14 @@ is.trained <- function(x) UseMethod("is.trained")
 ##' @param prior (n, d)-matrix of prior samples
 ##' @param verbose see keras:::fit.keras.engine.training.Model
 ##'        0 = silent
-##'        1 = Epoch i/n.epoch and progress bars during each epoch and loss
-##'        2 = Epoch i/n.epoch and loss
-##'        3 = Epoch i/n.epoch
+##'        1 = progress bar
+##'        2 = output of max. 10 epochs and their losses
+##'        3 = output of each epoch and its loss
 ##' @param ... additional arguments passed to the underlying keras::fit();
 ##'        see keras:::fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
-fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose = 3, ...)
+fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose = 1, ...)
 {
     ## Checks
     if(!is.matrix(data))
@@ -57,14 +109,19 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
                           ## - x = data to be passed through NN as input
                           ##   y = target/training data to compare against
                           ## - fit() modifies x[["model"]] in place
+                          if(!hasArg(callbacks)) callbacks <- list() # take callbacks...
+                          callbacks <- c(callbacks, progress$new(n.epoch = n.epoch,
+                                                                 verbose = verbose)) # ... and concatenate progess output object
                           fit(x[["model"]], x = prior, y = data,
-                              batch_size = batch.size, epochs = n.epoch, verbose = verbose, ...)
+                              batch_size = batch.size, epochs = n.epoch, verbose = 0, # silent, but...
+                              callbacks = callbacks, ...) # ... progress determined through callback
                       },
                       ## "VAE" = {
                       ##     ## Note:
-                      ##     ## Both input and output to the NN are the target/training data
+                      ##     ## - Not updated (callbacks etc.)
+                      ##     ## - Both input and output to the NN are the target/training data
                       ##     fit(x[["model"]], x = data, y = data,
-                      ##         batch_size = batch.size, epochs = n.epoch, verbose = verbose, ...)
+                      ##         batch_size = batch.size, epochs = n.epoch, verbose = 0, ...)
                       ## },
                       stop("Wrong 'type'"))
 
@@ -95,7 +152,7 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 ##' @return see (list of) trained GNNs
 ##' @author Marius Hofert
 fitGNNonce.list <- function(x, data, batch.size, n.epoch, prior = NULL,
-                            verbose = 3, file = NULL, ...)
+                            verbose = 1, file = NULL, ...)
 {
     ## Basics
     file.given <- !is.null(file)

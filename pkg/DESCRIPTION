@@ -11,7 +11,7 @@ Authors@R: c(person(given = "Marius", family = "Hofert", role = c("aut", "cre"),
                     email = "a2prasad@uwaterloo.ca"))
 Maintainer: Marius Hofert <marius.hofert@uwaterloo.ca>
 Depends: R (>= 3.5.0)
-Imports: keras, tensorflow, methods, qrng, tools, copula
+Imports: keras, tensorflow, methods, R6, qrng, tools, copula
 Suggests: mvtnorm, qrmdata
 Enhances:
 License: GPL (>= 3)

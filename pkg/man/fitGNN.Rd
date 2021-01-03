@@ -12,9 +12,9 @@
 }
 \usage{
 \method{fitGNN}{gnn_GNN}(x, data, batch.size, n.epoch, prior = NULL,
-    verbose = 3, ...)
+    verbose = 1, ...)
 \method{fitGNNonce}{list}(x, data, batch.size, n.epoch, prior = NULL,
-    verbose = 3, file = NULL, ...)
+    verbose = 1, file = NULL, ...)
 \method{is.trained}{gnn_GNN}(x)
 \method{is.trained}{list}(x)
 }

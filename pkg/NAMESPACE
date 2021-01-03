@@ -6,8 +6,8 @@
 
 ### Imports ####################################################################
 
-importFrom("qrng",
-           "sobol")
+importFrom("tensorflow",
+           "tf")
 
 importFrom("keras",
            "layer_input", "layer_dense", "layer_batch_normalization",
@@ -17,13 +17,11 @@ importFrom("keras",
            "loss_mean_squared_error", "loss_binary_crossentropy",
            "save_model_weights_hdf5", "load_model_weights_hdf5",
            "fit", "serialize_model", "unserialize_model",
-           "count_params")
+           "count_params",
+           "KerasCallback")
 
-importFrom("tensorflow",
-           "tf")
-
-importFrom("utils",
-           "data", "packageName", "str", "tail")
+importFrom("R6",
+           "R6Class")
 
 importFrom("methods",
            "hasArg", "is")
@@ -31,11 +29,17 @@ importFrom("methods",
 importFrom("stats",
            "predict", "rnorm", "qnorm", "plogis", "qlogis", "prcomp")
 
+importFrom("utils",
+           "data", "packageName", "str", "tail")
+
 importFrom("tools",
            "file_path_sans_ext")
 
 importFrom("graphics",
            "mtext")
+
+importFrom("qrng",
+           "sobol")
 
 importFrom("copula",
            "rCopula", "cCopula", "indepCopula")

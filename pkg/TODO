@@ -1,8 +1,12 @@
 ## Short-term
+- Implement three progress bars (see test.R):
+  1) one line per epoch but include loss
+  2) max. 10 lines of epoch output with loss
+  3) progress bar (=> make sure .Rout is not messed up => test)
+- Use the progress bar/output functions in fitGNN(, callbacks = NULL)
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
-- can we make a suggestion for a 'verbose = 4' to keras?
 - implement and export constructor for superclass gnn_Model (slots model and type)
 - implement and export methods rModel, fitModel, save/load
 - incorporate S4 methods of 'copula' as S3 methods in gnn (objects, rCopula, fitCopula)
@@ -16,7 +20,8 @@
         covariance matrix, Kendall matrix (which we then transform to covariance
         matrix for use in KL()).
 
-library(gnn)
+
+### Trial zone #################################################################
 
 d <- 2
 P <- matrix(0.9, nrow = d, ncol = d)
@@ -28,10 +33,7 @@ Z <- matrix(rnorm(ntrn * d), ncol = d)
 X <- t(A %*% t(Z)) # d-dimensional equicorrelated normal
 U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 
+library(gnn)
 GMMN <- GMMN(c(d, 300, d))
-GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3, verbose = 3)
-plot_loss(GMMN)
+GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3) "Train on [...] samples\n Epoch i/n..."
 
-set.seed(271)
-V <- rGNN(GMMN, size = 2000) # sample
-plot(V, xlab = expression(V[1]), ylab = expression(V[2]))
