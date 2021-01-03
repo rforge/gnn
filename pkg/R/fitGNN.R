@@ -19,7 +19,7 @@ progress <-
                 },
                 on_train_begin = function(logs) { # 'logs' is required
                     if(self$verbose == 1)
-                        self$pb <- txtProgressBar(max = self$n.epoch, style = 3)
+                        self$pb <- txtProgressBar(max = self$n.epoch)
                 },
                 on_epoch_end = function(epoch, logs = list()) { # 'epoch' and 'logs' are required
                     epo <- epoch + 1 # epoch starts from 0
@@ -31,21 +31,24 @@ progress <-
                         setTxtProgressBar(self$pb, epo)
                     },
                     { # verbose = 2
+                        ndigits <- floor(log10(self$n.epoch)) + 1
+                        fmt.strng <- paste0("Epoch %",ndigits,"d/%d finished with loss %f\n")
                         if(self$n.epoch <= 10) {
-                            cat(sprintf("Epoch %d/%d finished with loss %f\n", epo, self$n.epoch, logs[["loss"]]))
+                            cat(sprintf(fmt.strng, epo, self$n.epoch, logs[["loss"]]))
                         } else {
                             if(epo %in% ceiling((1:10) * (self$n.epoch/10)))
-                                cat(sprintf("Epoch %d/%d finished with loss %f\n", epo, self$n.epoch, logs[["loss"]]))
+                                cat(sprintf(fmt.strng, epo, self$n.epoch, logs[["loss"]]))
                         }
                     },
                     { # verbose = 3
-                        cat(sprintf("Epoch %d/%d finished with loss %f\n", epo, self$n.epoch, logs[["loss"]]))
+                        ndigits <- floor(log10(self$n.epoch)) + 1
+                        fmt.strng <- paste0("Epoch %",ndigits,"d/%d finished with loss %f\n")
+                        cat(sprintf(fmt.strng, epo, self$n.epoch, logs[["loss"]]))
                     },
                     stop("Wrong 'verbose'"))
                     },
                     on_train_end = function(logs) { # 'logs' is required
                         if(self$verbose == 1) close(self$pb)
-                        if(self$verbose != 0) cat("\n")
                     }
     ))
 
@@ -72,16 +75,18 @@ is.trained <- function(x) UseMethod("is.trained")
 ##' @param n.epoch number of epochs (one epoch equals one pass through the complete
 ##'        training dataset while updating the GNN's parameters)
 ##' @param prior (n, d)-matrix of prior samples
-##' @param verbose see keras:::fit.keras.engine.training.Model
+##' @param verbose choices are:
 ##'        0 = silent
 ##'        1 = progress bar
 ##'        2 = output of max. 10 epochs and their losses
 ##'        3 = output of each epoch and its loss
+##'        Note that we internally use fit()'s (= keras:::fit.keras.engine.training.Model)
+##'        verbose = 0 to suppress its (non-ideal) output.
 ##' @param ... additional arguments passed to the underlying keras::fit();
 ##'        see keras:::fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
-fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose = 1, ...)
+fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose = 2, ...)
 {
     ## Checks
     if(!is.matrix(data))
@@ -152,7 +157,7 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 ##' @return see (list of) trained GNNs
 ##' @author Marius Hofert
 fitGNNonce.list <- function(x, data, batch.size, n.epoch, prior = NULL,
-                            verbose = 1, file = NULL, ...)
+                            verbose = 2, file = NULL, ...)
 {
     ## Basics
     file.given <- !is.null(file)

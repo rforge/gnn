@@ -12,9 +12,9 @@
 }
 \usage{
 \method{fitGNN}{gnn_GNN}(x, data, batch.size, n.epoch, prior = NULL,
-    verbose = 1, ...)
+    verbose = 2, ...)
 \method{fitGNNonce}{list}(x, data, batch.size, n.epoch, prior = NULL,
-    verbose = 1, file = NULL, ...)
+    verbose = 2, file = NULL, ...)
 \method{is.trained}{gnn_GNN}(x)
 \method{is.trained}{list}(x)
 }
@@ -36,9 +36,14 @@
   \item{prior}{\eqn{(n, d)}-matrix of prior samples; see also
     \code{\link{rPrior}()}. If \code{prior = NULL} a sample of
     independent N(0,1) random variates is generated.}
-  \item{verbose}{\code{\link{integer}} verbose level. Can be
-    0 (no output), 1 (epoch number and progress bar during each epoch
-    with loss), 2 (epoch number and loss), 3 (epoch number).}
+  \item{verbose}{\code{\link{integer}} verbose level. Choices are:
+    \describe{
+      \item{0}{silent (no output).}
+      \item{1}{progress bar (via \code{\link{txtProgressBar}()}).}
+      \item{2}{output after each block of epochs.}
+      \item{3}{output after each expoch.}
+    }
+  }
   \item{file}{\code{NULL} or a \code{\link{character}} string
     specifying the file in which the trained GNN(s) is (are)
     saved. If \code{file} is provided and the specified file exists,

@@ -1,9 +1,5 @@
 ## Short-term
-- Implement three progress bars (see test.R):
-  1) one line per epoch but include loss
-  2) max. 10 lines of epoch output with loss
-  3) progress bar (=> make sure .Rout is not messed up => test)
-- Use the progress bar/output functions in fitGNN(, callbacks = NULL)
+- make output of fitGNN() on verbose = 2 case nicer
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
