@@ -1,6 +1,7 @@
 ## Short-term
 - pass more computations from fitGNN() to progress bar class (like div etc.)
-- add final timing to fitGNN() if verbose > 0
+- add final timing to fitGNN() if verbose > 0. Or shall we simply always
+  measure run time and add it in a new slot to GNN? better!
 - Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
@@ -33,4 +34,3 @@ U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 library(gnn)
 GMMN <- GMMN(c(d, 300, d))
 GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 3)
-
