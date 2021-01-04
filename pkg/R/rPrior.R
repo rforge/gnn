@@ -10,6 +10,7 @@
 ##' @param ... additional arguments passed to 'method'
 ##' @return (n, d)-matrix
 ##' @author Marius Hofert
+##' @note 'copula' has to be provided to specify the dimension of the sample
 rPrior <- function(n, copula, qmargins = qnorm, method = c("pseudo", "sobol"), ...)
 {
     ## Checks
