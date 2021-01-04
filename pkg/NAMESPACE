@@ -43,7 +43,7 @@ importFrom("qrng",
            "sobol")
 
 importFrom("copula",
-           "rCopula", "cCopula", "indepCopula")
+           "rCopula", "cCopula", "indepCopula", "pobs")
 
 
 ### Exports ####################################################################
@@ -56,6 +56,7 @@ export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q(
        "rm_ext")
 export("rPrior")
 export("plot_loss")
+export("as.human")
 
 ## Constructors
 export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")

@@ -11,6 +11,8 @@ rGNN <- function(x, ...)  UseMethod("rGNN")
 ##' @param size sample size
 ##' @param prior NULL (in which case N(0,1)^d is pseudo-sampled via rPrior())
 ##'        or a (size, d)-matrix of prior samples.
+##' @param pobs logical indicating whether pobs() is applied to the output
+##'        before returning
 ##' @param ... additional arguments passed to rPrior() if prior = NULL
 ##' @return Sample from the GNN 'x' (feedforwarded prior sample)
 ##' @author Marius Hofert
@@ -19,10 +21,11 @@ rGNN <- function(x, ...)  UseMethod("rGNN")
 ##'       weird. And omitting 'n' then leads to error 'no applicable method for
 ##'       'rGNN' applied to an object of class "name"'. The current version acts
 ##'       more like sample()
-rGNN.gnn_GNN <- function(x, size, prior = NULL, ...)
+rGNN.gnn_GNN <- function(x, size, prior = NULL, pobs = FALSE, ...)
 {
-    stopifnot(inherits(x, "gnn_GNN"))
+    stopifnot(inherits(x, "gnn_GNN"), is.logical(pobs))
     if(is.null(prior))
         prior <- rPrior(size, copula = indepCopula(dim(x)[1]), ...) # independent N(0,1)
-    ffGNN(x, data = prior)
+    res <- ffGNN(x, data = prior)
+    if(pobs) pobs(res) else res
 }

@@ -6,7 +6,7 @@
   Sampling method for objects of \code{\link{S3}} class \code{"gnn_GNN"}.
 }
 \usage{
-\method{rGNN}{gnn_GNN}(x, size, prior = NULL, ...)
+\method{rGNN}{gnn_GNN}(x, size, prior = NULL, pobs = FALSE, ...)
 }
 \arguments{
   \item{x}{object of \code{\link{S3}} class \code{"gnn_GNN"}.}
@@ -19,6 +19,8 @@
 	given sample through the GNN \code{x}. Such a matrix is
         internally and typically obtained via \code{\link{rPrior}()}.}
   }}
+  \item{pobs}{\code{\link{logical}} indicating whether the
+    pseudo-observations of the generated samples should be returned.}
   \item{\dots}{additional arguments passed to the underlying
     \code{\link{rPrior}()} if \code{prior = NULL}.}
 }
