@@ -101,39 +101,42 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 
     ## Train and possibly save
     type <- x[["type"]]
-    history <- switch(type,
-                      "GMMN" = {
-                          if(is.null(prior)) {
-                              prior <- rPrior(nrow(data), copula = indepCopula(ncol(data))) # independent N(0,1)
-                          } else {
-                              if(!all(dim(data) == dim(prior)))
-                                  stop("dim(data) != dim(prior)")
-                          }
-                          ## Note:
-                          ## - x = data to be passed through NN as input
-                          ##   y = target/training data to compare against
-                          ## - fit() modifies x[["model"]] in place
-                          if(!hasArg(callbacks)) callbacks <- list() # take callbacks...
-                          callbacks <- c(callbacks, progress$new(n.epoch = n.epoch,
-                                                                 verbose = verbose)) # ... and concatenate progess output object
-                          fit(x[["model"]], x = prior, y = data,
-                              batch_size = batch.size, epochs = n.epoch, verbose = 0, # silent, but...
-                              callbacks = callbacks, ...) # ... progress determined through callback
-                      },
-                      ## "VAE" = {
-                      ##     ## Note:
-                      ##     ## - Not updated (callbacks etc.)
-                      ##     ## - Both input and output to the NN are the target/training data
-                      ##     fit(x[["model"]], x = data, y = data,
-                      ##         batch_size = batch.size, epochs = n.epoch, verbose = 0, ...)
-                      ## },
-                      stop("Wrong 'type'"))
+    switch(type,
+           "GMMN" = {
+               if(is.null(prior)) {
+                   prior <- rPrior(nrow(data), copula = indepCopula(ncol(data))) # independent N(0,1)
+               } else {
+                   if(!all(dim(data) == dim(prior)))
+                       stop("dim(data) != dim(prior)")
+               }
+               ## Note:
+               ## - x = data to be passed through NN as input
+               ##   y = target/training data to compare against
+               ## - fit() modifies x[["model"]] in place
+               if(!hasArg(callbacks)) callbacks <- list() # take callbacks...
+               callbacks <- c(callbacks, progress$new(n.epoch = n.epoch,
+                                                      verbose = verbose)) # ... and concatenate progess output object
+               tm <- system.time(
+                   history <- fit(x[["model"]], x = prior, y = data,
+                                  batch_size = batch.size, epochs = n.epoch, verbose = 0, # silent, but...
+                                  callbacks = callbacks, ...) # ... progress determined through callback
+               )
+           },
+           ## "VAE" = {
+           ##     ## Note:
+           ##     ## - Not updated (callbacks, time measurement etc.)
+           ##     ## - Both input and output to the NN are the target/training data
+           ##     fit(x[["model"]], x = data, y = data,
+           ##         batch_size = batch.size, epochs = n.epoch, verbose = 0, ...)
+           ## },
+           stop("Wrong 'type'"))
 
     ## Update slots of 'x'
     x[["n.train"]] <- dim.train[1]
     x[["batch.size"]] <- batch.size
     x[["n.epoch"]] <- n.epoch
     x[["loss"]] <- history[["metrics"]][["loss"]] # (only interesting component in there)
+    x[["time"]] <- tm
 
     ## Return trained GNN
     x

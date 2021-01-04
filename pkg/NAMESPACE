@@ -27,7 +27,8 @@ importFrom("methods",
            "hasArg", "is")
 
 importFrom("stats",
-           "predict", "rnorm", "qnorm", "plogis", "qlogis", "prcomp")
+           "predict", "rnorm", "qnorm", "plogis", "qlogis", "prcomp",
+           "time") # generic time()
 
 importFrom("utils",
            "data", "packageName", "str", "tail")
@@ -52,7 +53,7 @@ export("loss")
 export("range_trafo", "logis_trafo", "PCA_trafo")
 export("save_rda", "exists_rda", "load_rda", "modify_rda", "saveGNN", "loadGNN")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
-       "rm_ext", "human_time")
+       "rm_ext")
 export("rPrior")
 export("plot_loss")
 
@@ -81,3 +82,4 @@ S3method("is.trained", "list")
 S3method("rGNN",       "gnn_GNN")
 S3method("as.raw",     "gnn_GNN")
 S3method("as.keras",   "gnn_GNN")
+S3method("time",       "gnn_GNN")

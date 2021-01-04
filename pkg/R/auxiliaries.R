@@ -70,24 +70,25 @@ rm_ext <- function(x)
 
 ### system.time() with human-readable output ###################################
 
-##' @title system.time() with Human-Readable Output
-##' @param ... arguments passed to the underlying system.time()
-##' @param digits see ?round
-##' @return timings in human-readable format
+##' @title Turn Object of Class "proc_time" into Human-Readable Format
+##' @param x object of class "proc_time"
+##' @param fmt sprintf() format string
+##' @return character(3) giving the user, system and elapsed times in human
+##'         readable format
 ##' @author Marius Hofert
-human_time <- function(..., digits = 2) {
-    toHuman <- function(t) {
-        if(!is.numeric(t)) return(character(0))
+as.human <- function(x, fmt = "%.2f")
+{
+    if(!inherits(x, "proc_time")) return(character(0))
+    x <- x[1:3] # grab out first three components only
+    res <- sapply(x, function(t) {
         if(t < 60) {
-            paste0(round(t, digits = digits),"s")
+            sprintf(paste0(fmt,"s"), t)
         } else if(t < 3600) {
-            paste0(round(t/60, digits = digits),"min")
+            sprintf(paste0(fmt,"min"), t/60)
         } else {
-            paste0(round(t/3600, digits = digits),"h")
+            sprintf(paste0(fmt,"h"), t/3600)
         }
-    }
-    tm <- system.time(...) # note: has NA for Windows, see ?proc.time
-    res <- sapply(tm[1:3], toHuman)
+    })
     names(res) <- c("user", "system", "elapsed")
-    noquote(res)
+    res
 }

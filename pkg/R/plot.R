@@ -7,8 +7,9 @@
 ##' @param ... additional arguments passed to the underlying plot()
 ##' @return loss per epoch (invisibly)
 ##' @author Marius Hofert
-##' @note Could allow to plot (and return) various loss functions (if
-##'       'x' is a list), but probably of little value
+##' @note - Could allow to plot (and return) various loss functions (if
+##'         'x' is a list), but probably of little value
+##'       - Could also add training time, but not directly loss related
 plot_loss <- function(x, type = "l", xlab = "Epoch", ylab = "Loss", y2lab = NULL, ...)
 {
     if(!is.trained.gnn_GNN(x))

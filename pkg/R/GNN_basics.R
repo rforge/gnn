@@ -1,8 +1,8 @@
 ### GNN basic generics #########################################################
 
-## Note: - print(), str(), summary() are already generics, so don't need to be
-##         defined as such. Also note that dim() is already a generic (even if
-##         not directly visible on 'dim').
+## Note: - print(), str(), summary(), for example, are already generics, so
+##         don't need to be defined as such. Also note that dim() is already a
+##         generic (even if not directly visible on 'dim').
 ##       - But note that the corresponding methods need to have the same
 ##         or at least compatible arguments with the (already defined) generics;
 ##         otherwise "checking S3 generic/method consistency ... WARNING" appears.
@@ -83,5 +83,27 @@ is.GNN.list <- function(x)
 {
     if(inherits(x, "list")) {
         sapply(x, function(x.) inherits(x., "gnn_GNN"))
-    } else stop("'x' is not a list")
+    } else stop("'x' must be a list")
+}
+
+##' @title Time Method for Objects of Class "gnn_GNN"
+##' @param x object of class "gnn_GNN"
+##' @param human logical indicating whether to convert
+##'        times into human-readable format
+##' @param ... additional arguments passed to the underlying as.human()
+##' @return character(3) of user, system and elapsed times (invisibly).
+##' @author Marius Hofert
+time.gnn_GNN <- function(x, human = TRUE, ...)
+{
+    if(inherits(x, "gnn_GNN")) {
+        if(human) {
+            time.strng <- as.human(x[["time"]], ...)
+            print(noquote(time.strng))
+        } else {
+            time.strng <- x[["time"]][1:3]
+            names(time.strng) <- c("user", "system", "elapsed")
+            print(time.strng)
+        }
+        invisible(time.strng)
+    } else stop("'x' must be an object of class \"gnn_GNN\"")
 }
