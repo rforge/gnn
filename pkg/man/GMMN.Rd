@@ -94,8 +94,8 @@ d <- 2 # bivariate case
 P <- matrix(0.9, nrow = d, ncol = d); diag(P) <- 1 # correlation matrix
 ntrn <- 60000 # training data sample size
 set.seed(271)
-library(mvtnorm)
-X <- rmvnorm(ntrn, sigma = P) # N(0,P) samples
+library(nvmix)
+X <- rNorm(ntrn, scale = P) # N(0,P) samples
 X. <- abs(X) # |X|
 
 ## Plot a subsample
@@ -131,6 +131,9 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
 plot(V.,      xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 layout(1)
 par(opar)
+
+## Plot the loss function values after each epoch
+plot_loss(GMMN)
 }
 }
 \keyword{models}
