@@ -76,35 +76,4 @@
   \code{\link{GMMN}()}, \code{\link{saveGNN}()},
   \code{\link{loadGNN}()}.
 }
-\examples{
-\donttest{
-## Training data
-d <- 2
-P <- matrix(0.9, nrow = d, ncol = d)
-diag(P) <- 1
-A <- t(chol(P))
-set.seed(271)
-ntrn <- 60000
-Z <- matrix(rnorm(ntrn * d), ncol = d)
-X <- t(A \%*\% t(Z)) # d-dimensional equicorrelated normal
-U <- apply(abs(X), 2, rank) / (ntrn + 1) # pseudo-observations of |X|
-plot(U[1:2000,], xlab = expression(U[1]), ylab = expression(U[2]))
-
-## Define the model and 'train' it
-GMMN <- GMMN(c(d, 300, d))
-GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 2)
-stopifnot(is.trained(GMMN)) # check if trained
-## Note: Obviously, in a real-world application, batch.size and n.epoch
-##       should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
-
-## Plot the loss function
-plot_loss(GMMN)
-
-## Evaluate (roughly picks up the shape even with our bad choices of
-## batch.size and n.epoch)
-set.seed(271)
-V <- rGNN(GMMN, size = 2000) # sample
-plot(V, xlab = expression(V[1]), ylab = expression(V[2]))
-}
-}
 \keyword{optimize}

@@ -93,7 +93,7 @@ is.GNN.list <- function(x)
 ##' @param ... additional arguments passed to the underlying as.human()
 ##' @return character(3) of user, system and elapsed times (invisibly).
 ##' @author Marius Hofert
-time.gnn_GNN <- function(x, human = TRUE, ...)
+time.gnn_GNN <- function(x, human = FALSE, ...)
 {
     if(inherits(x, "gnn_GNN")) {
         if(human) {

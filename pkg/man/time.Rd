@@ -8,7 +8,7 @@
 }
 \usage{
 as.human(x, fmt = "\%.2f")
-\method{time}{gnn_GNN}(x, human = TRUE, ...)
+\method{time}{gnn_GNN}(x, human = FALSE, ...)
 }
 \arguments{
   \item{x}{
