@@ -13,7 +13,8 @@ as.human(x, fmt = "\%.2f")
 \arguments{
   \item{x}{
     \describe{
-      \item{as.human()}{object of class \code{"proc_time"}.}
+      \item{as.human()}{object of class \code{"proc_time"}, for example
+	produced by a call to \code{\link{system.time}()}.}
       \item{time()}{object of class \code{"gnn_GNN"}.}
     }
   }
@@ -26,7 +27,7 @@ as.human(x, fmt = "\%.2f")
 \value{
   \describe{
     \item{as.human()}{named \code{\link{character}(3)} providing
-      user, system and elapsed time.}
+      user, system and elapsed time in human-readable format.}
     \item{time()}{named \code{\link{character}(3)} (invisibly) providing
       user, system and elapsed time; prints these times by side-effect.}
   }
