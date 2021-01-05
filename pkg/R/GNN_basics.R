@@ -9,8 +9,11 @@
 ##       - For defining a generic without overwriting already defined generics,
 ##         see https://gist.github.com/datalove/88f5a24758b2d8356e32
 
-## Generic for checking whether an object is of class gnn_GNN
+## Generic for checking whether an object is of class "gnn_GNN"
 is.GNN <- function(x) UseMethod("is.GNN")
+
+## Generic for printing objects of class "human_proc_time"
+print.as.human <- function(x) UseMethod("print.as.human")
 
 
 ### GNN basic methods ##########################################################
@@ -84,26 +87,4 @@ is.GNN.list <- function(x)
     if(inherits(x, "list")) {
         sapply(x, function(x.) inherits(x., "gnn_GNN"))
     } else stop("'x' must be a list")
-}
-
-##' @title Time Method for Objects of Class "gnn_GNN"
-##' @param x object of class "gnn_GNN"
-##' @param human logical indicating whether to convert
-##'        times into human-readable format
-##' @param ... additional arguments passed to the underlying as.human()
-##' @return character(3) of user, system and elapsed times (invisibly).
-##' @author Marius Hofert
-time.gnn_GNN <- function(x, human = FALSE, ...)
-{
-    if(inherits(x, "gnn_GNN")) {
-        if(human) {
-            time.strng <- as.human(x[["time"]], ...)
-            print(noquote(time.strng))
-        } else {
-            time.strng <- x[["time"]][1:3]
-            names(time.strng) <- c("user", "system", "elapsed")
-            print(time.strng)
-        }
-        invisible(time.strng)
-    } else stop("'x' must be an object of class \"gnn_GNN\"")
 }

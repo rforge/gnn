@@ -66,29 +66,3 @@ rm_ext <- function(x)
             sub("\\.(?:[^0-9.][^.]*)?$", "", x.) # see https://stackoverflow.com/questions/57182339/how-to-strip-off-a-file-ending-but-only-when-it-starts-with-a-non-digit-a-rege
         } else file_path_sans_ext(x.)
     }, USE.NAMES = FALSE)
-
-
-### system.time() with human-readable output ###################################
-
-##' @title Turn Object of Class "proc_time" into Human-Readable Format
-##' @param x object of class "proc_time"
-##' @param fmt sprintf() format string
-##' @return character(3) giving the user, system and elapsed times in human
-##'         readable format
-##' @author Marius Hofert
-as.human <- function(x, fmt = "%.2f")
-{
-    if(!inherits(x, "proc_time")) return(character(0))
-    x <- x[1:3] # grab out first three components only
-    res <- sapply(x, function(t) {
-        if(t < 60) {
-            sprintf(paste0(fmt,"s"), t)
-        } else if(t < 3600) {
-            sprintf(paste0(fmt,"min"), t/60)
-        } else {
-            sprintf(paste0(fmt,"h"), t/3600)
-        }
-    })
-    names(res) <- c("user", "system", "elapsed")
-    res
-}

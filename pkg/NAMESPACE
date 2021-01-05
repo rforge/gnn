@@ -56,7 +56,7 @@ export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q(
        "rm_ext")
 export("rPrior")
 export("plot_loss")
-export("as.human")
+export("as.human", "human.time", "time")
 
 ## Constructors
 export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
@@ -83,4 +83,4 @@ S3method("is.trained", "list")
 S3method("rGNN",       "gnn_GNN")
 S3method("as.raw",     "gnn_GNN")
 S3method("as.keras",   "gnn_GNN")
-S3method("time",       "gnn_GNN")
+S3method("print",      "gnn_proc_time")
