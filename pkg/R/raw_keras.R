@@ -42,8 +42,8 @@ as.keras <- function(x) UseMethod("as.keras")
 
 ##' @title Convert keras Model to raw
 ##' @param x object of S3 class "gnn_GNN" to be converted
-##' @return object of S3 class "gnn_GNN" with 'model' component converted to raw
-##'         object
+##' @return object of S3 class "gnn_GNN" with 'model' component converted to
+##'         object of class "raw"
 ##' @author Marius Hofert
 ##' @note For a VAE, one would need to use serialize_weights() and apply this to
 ##'       'model', 'encoder' and 'generator'.
@@ -57,7 +57,7 @@ as.raw.gnn_GNN <- function(x) # needs 'x' because of generic being already defin
 ##' @title Convert raw Model to keras
 ##' @param x object of S3 class "gnn_GNN" to be converted
 ##' @return object of S3 class "gnn_GNN" with 'model' component converted to keras
-##'         object
+##'         object of class "keras.engine.training.Model"
 ##' @author Marius Hofert
 ##' @note - For a VAE, one would need to use unserialize_weights() and apply this to
 ##'         'model', 'encoder' and 'generator'.

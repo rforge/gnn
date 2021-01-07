@@ -143,10 +143,9 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 }
 
 ##' @title Training GNNs with Saving and Restoring
-##' @param x object of class gnn_GNN or list of such.
-##'        All GNNs (even if already trained) are trained and then saved,
-##'        unless 'file' is provided and exists in which case 'file' is loaded
-##'        and returned.
+##' @param x object of class gnn_GNN. The GNN is trained (even if already trained)
+##'        and then saved, unless 'file' is provided and exists in which case 'file'
+##'        is loaded and returned.
 ##' @param data see fitGNN.gnn_GNN()
 ##' @param batch.size see fitGNN.gnn_GNN()
 ##' @param n.epoch see fitGNN.gnn_GNN()
@@ -155,11 +154,12 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 ##' @param file NULL or a file name in which case the trained GNN is saved in the
 ##'        provided file. If called again and the file exists, no training is done
 ##'        but the trained object loaded from the file.
+##' @param name character string giving the name under which the fitted 'x' is saved
 ##' @param ... see fitGNN.gnn_GNN()
-##' @return see (list of) trained GNNs
+##' @return trained GNN
 ##' @author Marius Hofert
-fitGNNonce.list <- function(x, data, batch.size, n.epoch, prior = NULL,
-                            verbose = 2, file = NULL, ...)
+fitGNNonce.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL,
+                               verbose = 2, file = NULL, name = NULL, ...)
 {
     ## Basics
     file.given <- !is.null(file)
@@ -177,29 +177,15 @@ fitGNNonce.list <- function(x, data, batch.size, n.epoch, prior = NULL,
 
     } else {
 
-        if(inherits(x, "gnn_GNN")) { # single GNN
-            x <- fitGNN(x, data = data, batch.size = batch.size, n.epoch = n.epoch,
-                        prior = prior, verbose = verbose, ...)
-        } else { # list of GNNs
-            ## Check
-            is.gnn <- is.GNN(x)
-            if(!any(is.gnn))
-                stop("No object of class 'gnn_GNN' found in 'x'")
-            whch.gnn <- which(is.gnn)
-            ## Train each of the GNNs
-            for(i in whch.gnn) {
-                x[[i]] <- fitGNN(x[[i]], data = data, batch.size = batch.size, n.epoch = n.epoch,
-                                 prior = prior, verbose = verbose, ...)
-            }
-        }
+        ## Training
+        x <- fitGNN(x, data = data, batch.size = batch.size, n.epoch = n.epoch,
+                    prior = prior, verbose = verbose, ...)
 
         ## Saving
-        ## If file was provided, save the trained GNN(s) (thus converting
+        ## If file was provided, save the trained GNN (thus converting
         ## the model component from 'keras' to 'raw')
-        if(file.given) { # automatically means file does not exist, so we can save
-            args <- c(x, file = file)
-            do.call(saveGNN, args = args)
-        }
+        if(file.given)
+            saveGNN(x, file = file, name = name)
 
         ## Return trained GNN(s)
         x

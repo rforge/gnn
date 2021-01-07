@@ -1,7 +1,7 @@
 ### GMMN basic functions #######################################################
 
 ##' @title Determine the Number of Parameters
-##' @param x object of class "keras.engine.training.Model"
+##' @param x object of class "keras.engine.training.Model" or "gnn_GNN"
 ##' @return 3-vector with the number of trainable, non-trainable and the total
 ##'         number of parameters
 ##' @author Marius Hofert
@@ -9,6 +9,7 @@
 ##'       for the meaning of 'trainable' vs 'non-trainable'
 nparam_GMMN <- function(x)
 {
+    if(inherits(x, "gnn_GNN")) x <- x[["model"]]
     num.tot.params <- count_params(x) # total number of parameters
     ## For the trainable parameters, there's no function, so we extract the information
     x.as.char <- as.character(x)

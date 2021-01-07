@@ -2,7 +2,7 @@
 \alias{fitGNN}
 \alias{fitGNN.gnn_GNN}
 \alias{fitGNNonce}
-\alias{fitGNNonce.list}
+\alias{fitGNNonce.gnn_GNN}
 \alias{is.trained}
 \alias{is.trained.gnn_GNN}
 \alias{is.trained.list}
@@ -13,17 +13,17 @@
 \usage{
 \method{fitGNN}{gnn_GNN}(x, data, batch.size, n.epoch, prior = NULL,
     verbose = 2, ...)
-\method{fitGNNonce}{list}(x, data, batch.size, n.epoch, prior = NULL,
-    verbose = 2, file = NULL, ...)
+\method{fitGNNonce}{gnn_GNN}(x, data, batch.size, n.epoch, prior = NULL,
+    verbose = 2, file = NULL, name = NULL, ...)
 \method{is.trained}{gnn_GNN}(x)
 \method{is.trained}{list}(x)
 }
 \arguments{
   \item{x}{
     \describe{
-      \item{fitGNN(), is.trained.gnn_GNN()}{object of class
+      \item{fitGNN(), fitGNNonce(), is.trained.gnn_GNN()}{object of class
 	\code{"gnn_GNN"} to be trained.}
-      \item{fitGNNonce(), is.trained.list()}{object of class
+      \item{is.trained.gnn_GNN()}{object of class
 	\code{"gnn_GNN"} to be trained or a list of such.}
     }
   }
@@ -50,14 +50,16 @@
     specifying the file in which the trained GNN(s) is (are)
     saved. If \code{file} is provided and the specified file exists,
     it is loaded and returned via \code{\link{loadGNN}()}.}
+  \item{name}{\code{\link{character}} string giving the name under
+    which the fitted \code{x} is saved (if \code{NULL} the fitted
+    \code{x} is saved under the name \code{"x"}).}
   \item{\dots}{additional arguments passed to the underlying
     \code{fit()} (which is \code{keras:::fit.keras.engine.training.Model()}).}
 }
 \value{
   \describe{
     \item{fitGNN()}{the trained \code{x}.}
-    \item{fitGNNonce()}{object of class as \code{x} with the GNNs
-      trained.}
+    \item{fitGNNonce()}{object of class as \code{x} with the trained GNN.}
     \item{is.trained.gnn_GNN()}{\code{\link{logical}}
       indicating whether \code{x} is trained.}
     \item{is.trained.list()}{\code{\link{logical}} of length
