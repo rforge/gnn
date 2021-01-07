@@ -7,8 +7,8 @@
   Keras objects cannot be saved like other R objects.
   The methods \code{as.raw()} and \code{as.keras()} can
   be used to convert the \code{model} slots of objects
-  of \code{\link{S3}} class \code{"gnn_GNN"} to \code{\link{raw}}
-  or \code{keras.engine.training.Model} objects.
+  of \code{\link{S3}} class \code{"gnn_GNN"} to \code{\link{"raw"}}
+  or \code{"keras.engine.training.Model"} objects.
 }
 \usage{
 \method{as.raw}{gnn_GNN}(x)
