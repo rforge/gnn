@@ -32,8 +32,8 @@ print.gnn_GNN <- function(x, ...)
     stopifnot(inherits(x, "gnn_GNN"))
     res <- x
     res[["model"]] <- noquote(paste0("object of class \"",class(res[["model"]])[1],"\""))
-    if(length(res[["loss"]] > 10))
-        noquote(paste(paste(res[["loss"]][1:10], collapse = " "), "..."))
+    if(length(res[["loss"]] > 7))
+        res[["res"]] <- noquote(paste(paste(res[["loss"]][1:7], collapse = " "), "..."))
     res <- unclass(res) # see 'note' above
     print(res)
 }
