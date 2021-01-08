@@ -26,9 +26,9 @@ saveGNN <- function(..., file, name = NULL)
     if(length(name) != len)
         stop("Length of 'name' must be equal to the number of objects provided by '...'")
     for(i in seq_len(len)) {
-        assign(name[i], value = args[[i]]) # name the objects in 'args' as specified by 'name'
-        if(inherits(args[[i]], "gnn_GNN"))
-            args[[i]] <- as.raw(args[[i]])
+        if(inherits(args[[i]], "gnn_GNN")) # order import (otherwise the saved $model component is <pointer: 0x0>)
+            args[[i]] <- as.raw(args[[i]]) # first convert...
+        assign(name[i], value = args[[i]]) # ... then name the objects in 'args' as specified by 'name'
     }
     ## Save
     save(list = name, file = file) # save R objects in 'file' under the provided 'name'

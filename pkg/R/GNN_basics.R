@@ -22,13 +22,20 @@ print.as.human <- function(x) UseMethod("print.as.human")
 ##' @param x object of class "gnn_GNN"
 ##' @return return value of the print method for objects of class "list"
 ##' @author Marius Hofert
-##' @note Just replace component 'model' by our own (to avoid keras print method)
+##' @note - A frequent problem when modifying print using print is the error
+##'         "Error: C stack usage  7971664 is too close to the limit" due
+##'         to recursive calling of the print method for objects of this class
+##'         => unclass
+##'       - '...' are required because of print generic of this form
 print.gnn_GNN <- function(x, ...)
 {
     stopifnot(inherits(x, "gnn_GNN"))
-    cls <- class(x[["model"]])[1]
-    print(c("model" = noquote(paste0("object of class \"",cls,"\"")), # new 'model' component
-            x[names(x) != "model"]))
+    res <- x
+    res[["model"]] <- noquote(paste0("object of class \"",class(res[["model"]])[1],"\""))
+    if(length(res[["loss"]] > 10))
+        noquote(paste(paste(res[["loss"]][1:10], collapse = " "), "..."))
+    res <- unclass(res) # see 'note' above
+    print(res)
 }
 
 ##' @title Str Method for Objects of Class "gnn_GNN"
