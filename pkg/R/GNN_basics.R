@@ -32,7 +32,7 @@ print.gnn_GNN <- function(x, ...)
     stopifnot(inherits(x, "gnn_GNN"))
     res <- x
     res[["model"]] <- noquote(paste0("object of class \"",class(res[["model"]])[1],"\""))
-    if(length(res[["loss"]] > 7)) {
+    if(length(res[["loss"]]) > 7) {
         dgts <- getOption("digits")
         fmt <- paste0("%.",dgts,"f")
         res[["loss"]] <- noquote(paste(paste(sprintf(fmt, res[["loss"]][1:7]), collapse = " "), "..."))

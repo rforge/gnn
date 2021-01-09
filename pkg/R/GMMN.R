@@ -124,7 +124,7 @@ GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "si
         n.train = NA_integer_, # integer(1) specifying the sample size for training (or NA if not trained)
         batch.size = NA_integer_, # integer(1) specifying the batch size used for training (or NA if not trained)
         n.epoch = NA_integer_, # integer(1) specifying the number of epochs used for training (or NA if not trained)
-        loss = NA, # numeric(n.epoch) containing the loss function values per epoch of training (or NA if not trained)
+        loss = NA_real_, # numeric(n.epoch) containing the loss function values per epoch of training (or NA if not trained)
         time = system.time(NULL)), # object of class "proc_time" (for training time)
         ## Class (part of structure())
         class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
