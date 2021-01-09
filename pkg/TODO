@@ -1,5 +1,4 @@
 ## Short-term
-- Use all new methods in all demos => update ./old/2021-01-01_demo
 
 ## Medium-term
 - implement and export constructor for superclass gnn_Model (slots model and type)
