@@ -50,7 +50,7 @@ human.time <- function(expr, print = TRUE, ...)
 ##' @param ... additional arguments passed to the underlying as.human()
 ##' @return object of class "gnn_proc_time"
 ##' @author Marius Hofert
-time <- function(x, human = FALSE, ...)
+time.gnn_GNN <- function(x, human = FALSE, ...)
 {
     if(!inherits(x, "gnn_GNN"))
         stop("'x' must be an object of class \"gnn_GNN\"")

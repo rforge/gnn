@@ -1,7 +1,7 @@
 \name{time}
 \alias{as.human}
 \alias{human.time}
-\alias{time}
+\alias{time.gnn_GNN}
 \alias{print.gnn_proc_time}
 \title{Human-Readable Time Measurement}
 \description{
@@ -11,7 +11,7 @@
 \usage{
 as.human(x, fmt = "\%.2f")
 human.time(expr, print = TRUE, ...)
-time(x, human = FALSE, ...)
+\method{time}{gnn_GNN}(x, human = FALSE, ...)
 \method{print}{gnn_proc_time}(x, ...)
 }
 \arguments{
@@ -19,7 +19,7 @@ time(x, human = FALSE, ...)
     \describe{
       \item{as.human()}{object of class \code{"proc_time"} as
 	returned by \code{\link{system.time}()}.}
-      \item{time()}{object of class \code{"gnn_GNN"}.}
+      \item{time.gnn_GNN()}{object of class \code{"gnn_GNN"}.}
       \item{print.gnn_proc_time()}{object of class
 	\code{"gnn_proc_time"} as returned by \code{time()}.}
     }
@@ -30,7 +30,7 @@ time(x, human = FALSE, ...)
     result; either way, it is returned (invisibly if \code{print = TRUE}).}
   \item{human}{\code{\link{logical}} indicating whether the result is to
     be returned in human-readable format.}
-  \item{\dots}{for \code{human.time()} and \code{time()} additional
+  \item{\dots}{for \code{human.time()} and \code{time.gnn_GNN()} additional
     arguments passed to the underlying \code{as.human()}; unused for
     \code{print.gnn_proc_time()}.}
 }
@@ -38,7 +38,7 @@ time(x, human = FALSE, ...)
   \describe{
     \item{as.human(), human.time()}{named \code{\link{character}(3)} providing
       user, system and elapsed time in human-readable format.}
-    \item{time()}{object of class \code{"gnn_proc_time"}.}
+    \item{time.gnn_GNN()}{object of class \code{"gnn_proc_time"}.}
     \item{print.gnn_proc_time()}{\code{x} (invisibly).}
   }
 }
