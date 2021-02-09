@@ -14,17 +14,22 @@
 ##'         look up the corresponding Python function on https://www.tensorflow.org/api_docs/python.
 ##'       - This implementation is partially based on the Python code from
 ##'         https://github.com/tensorflow/models/blob/master/research/domain_adaptation/domain_separation/utils.py
+##'       - Gaussian kernel K_h(x) = dnorm(x, sd = h), h = bandwidth
 Gaussian_mixture_kernel <- function(x, y, bandwidth = c(0.001, 0.01, 0.15, 0.25, 0.50, 0.75))
 {
-    dst <- tf$transpose(tf$reduce_sum(tf$square((tf$expand_dims(x, axis = 2L) -
-                                                 tf$transpose(y))), axis = 1L))
-    b <- tf$reshape(dst, shape = c(1L, -1L))
+    dst <- tf$transpose(tf$reduce_sum(tf$square((tf$expand_dims(x,  axis = 2L) -
+                                                 tf$transpose(y))),
+                                      axis = 1L)) # (x - y)^2
+    b <- tf$reshape(dst, shape = c(1L, -1L)) # reshapes tensor dst into the dim (1, -1), where -1 means that the 2nd dimension is determined automatically (here: based on the first being 1) => create one row vector
     exponent <- if(length(bandwidth) == 1) {
-                    tf$multiply(1 / (2 * bandwidth), b)
+                    tf$multiply(1 / (2 * bandwidth), b) # (x - y)^2 / (2 * h) # TODO: shouldn't that be h^2?
                 } else {
                     tf$matmul(1 / (2 * tf$expand_dims(bandwidth, axis = 1L)), b = b)
                 }
-    tf$reshape(tf$reduce_sum(tf$exp(-exponent), axis = 0L), shape = tf$shape(dst))
+    tf$reshape(tf$reduce_sum(tf$exp(-exponent), axis = 0L), shape = tf$shape(dst)) # exp(-(x-y)^2/(2h))
+    ## Note: tf$reduce_sum(, axis = 0L) = colSums
+    ## TODO: shouldn't there be weights => weighted sum with 1/|bandwidth| weights?
+    ## TODO: why no 1/sqrt{2*pi*h^2}
 }
 
 
