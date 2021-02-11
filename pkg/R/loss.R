@@ -45,7 +45,7 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
     dst2 <- tf$reduce_sum(sq.dff, axis = 1L) # (n, m)-matrix with (i, j) element containing sum_{k = 1}^d (x[i,k] - y[j,k])^2
     dst2.vec <- tf$reshape(dst2, shape = c(1L, -1L)) # tensor dst2 reshaped into dim (1, -1), where -1 means that the 2nd dimension is determined automatically (here: based on the first argument of (1, -1) being 1) => create one (n * m)-long row vector
     fctr <- as.matrix(1 / 2 * bandwidth^2) # create length(bandwidth)-column-vector
-    fctr.tf <- tf$convert_to_tensor(fctr) # convert to 1-column tensor
+    fctr.tf <- tf$convert_to_tensor(fctr, dtype = "float32") # convert to 1-column tensor (of float32 as that's what training needs)
     xpn <- tf$matmul(fctr.tf, b = dst2.vec) # (x - y)^2 / (2 * h^2); matrix multiplication of (length(bandwidth), 1)-tensor with (1, n * m)-tensor
     kernels <- tf$exp(-xpn) # (length(bandwidth), n * m)-tensor
     tf$reshape(tf$reduce_mean(kernels, axis = 0L), # reduce (= apply) over dimension 1 (axis = 0; cols), so compute colMeans() => (1, n * m)-tensor
