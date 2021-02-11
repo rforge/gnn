@@ -105,11 +105,23 @@ plot(X.[1:m,], xlab = expression(X[1]), ylab = expression(X[2])) # plot |X|
 U <- apply(X., 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
-## Define the model and 'train' it
+## Define the model
 GMMN <- GMMN(c(d, 300, d)) # define a GMMN model
+
+## Define the batch size and maximal number of epochs
 batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
 n.epo <- 10 # number of epochs = number of times training data is shuffled
-GMMN <- fitGNN(GMMN, data = U, batch.size = batch, n.epoch = n.epo)
+
+## Train or fit
+library(keras) # for callback_early_stopping()
+## We monitor the loss function and stop earlier (before n.epo-many epochs)
+## if the loss function over the last patience-many epochs has changed by
+## less than min_delta in absolute value. Then we keep the weights that
+## led to the smallest loss seen throughout training.
+GMMN <- fitGNN(GMMN, data = U, batch.size = batch, n.epoch = n.epo,
+               callbacks = callback_early_stopping(monitor = "loss",
+                                                   min_delta = 1e-3, patience = 3,
+                                                   restore_best_weights = TRUE))
 stopifnot(is.trained(GMMN)) # check if trained
 ## Note:
 ## - Obviously, in a real-world application, batch.size and n.epoch

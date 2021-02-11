@@ -113,10 +113,10 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch = 100, prior = NULL, ver
                ## - x = data to be passed through NN as input
                ##   y = target/training data to compare against
                ## - fit() modifies x[["model"]] in place
-               has.callbacks <- hasArg(callbacks)
-               if(!has.callbacks) callbacks <- list() # take callbacks...
-               callbacks <- c(callbacks, progress$new(n.epoch = n.epoch,
-                                                      verbose = verbose)) # ... and concatenate progess output object
+               has.callbacks <- hasArg("callbacks")
+               callbacks <-  if(!has.callbacks) list() else list(...)$callbacks # take callbacks...
+               callbacks <- c(progress$new(n.epoch = n.epoch,
+                                           verbose = verbose), callbacks) # ... and concatenate progress output object
                ## Probably not worth checking whether 'callbacks' already contains a
                ## progress-type object
                args <- list(object = x[["model"]], x = prior, y = data, # see ?fit.keras.engine.training.Model
