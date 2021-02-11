@@ -85,7 +85,7 @@ is.trained <- function(x) UseMethod("is.trained")
 ##'        see keras:::fit.keras.engine.training.Model or ?fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
-fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose = 2, ...)
+fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch = 100, prior = NULL, verbose = 2, ...)
 {
     ## Checks
     if(!is.matrix(data))
@@ -162,7 +162,7 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
 ##' @param ... see fitGNN.gnn_GNN()
 ##' @return trained GNN
 ##' @author Marius Hofert
-fitGNNonce.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL,
+fitGNNonce.gnn_GNN <- function(x, data, batch.size, n.epoch = 100, prior = NULL,
                                verbose = 2, file = NULL, name = NULL, ...)
 {
     ## Basics

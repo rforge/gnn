@@ -11,9 +11,9 @@
   Functions and methods for training generative neural networks.
 }
 \usage{
-\method{fitGNN}{gnn_GNN}(x, data, batch.size, n.epoch, prior = NULL,
+\method{fitGNN}{gnn_GNN}(x, data, batch.size, n.epoch = 100, prior = NULL,
     verbose = 2, ...)
-\method{fitGNNonce}{gnn_GNN}(x, data, batch.size, n.epoch, prior = NULL,
+\method{fitGNNonce}{gnn_GNN}(x, data, batch.size, n.epoch = 100, prior = NULL,
     verbose = 2, file = NULL, name = NULL, ...)
 \method{is.trained}{gnn_GNN}(x)
 \method{is.trained}{list}(x)
@@ -42,7 +42,7 @@
       \item{1}{progress bar (via \code{\link{txtProgressBar}()}).}
       \item{2}{output after each block of epochs (block size is
 	\code{ceiling(n.epoch/10)} if \code{n.epoch <= 100} and
-	\code{ceiling(sqrt(n.epoch))} if \code{n.epoch >= 100}).}
+	\code{ceiling(sqrt(n.epoch))} if \code{n.epoch > 100}).}
       \item{3}{output after each expoch.}
     }
   }
