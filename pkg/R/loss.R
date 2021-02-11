@@ -38,7 +38,7 @@
 ##'         gnn:::radial_basis_function_kernel(x, x) # (n, n)-tensor
 ##'         gnn:::radial_basis_function_kernel(x, y, bandwidth = c(0.1, 0.1)) # (n, m)-tensor
 ##'         gnn:::radial_basis_function_kernel(x, y, bandwidth = 0.1) # (n, m)-tensor
-radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16)) # 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16)
+radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16))
 {
     ## OLD
     ## dst <- tf$transpose(tf$reduce_sum(tf$square((tf$expand_dims(x, axis = 2L) -
