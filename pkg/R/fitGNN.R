@@ -81,8 +81,8 @@ is.trained <- function(x) UseMethod("is.trained")
 ##'        3 = output of each epoch and its loss
 ##'        Note that we internally use fit()'s (= keras:::fit.keras.engine.training.Model)
 ##'        verbose = 0 to suppress its (non-ideal) output.
-##' @param ... additional arguments passed to the underlying keras::fit();
-##'        see keras:::fit.keras.engine.training.Model
+##' @param ... additional arguments passed to the underlying fit.keras.engine.training.Model;
+##'        see keras:::fit.keras.engine.training.Model or ?fit.keras.engine.training.Model
 ##' @return trained GNN
 ##' @author Marius Hofert
 fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose = 2, ...)
@@ -113,14 +113,18 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch, prior = NULL, verbose =
                ## - x = data to be passed through NN as input
                ##   y = target/training data to compare against
                ## - fit() modifies x[["model"]] in place
-               if(!hasArg(callbacks)) callbacks <- list() # take callbacks...
+               has.callbacks <- hasArg(callbacks)
+               if(!has.callbacks) callbacks <- list() # take callbacks...
                callbacks <- c(callbacks, progress$new(n.epoch = n.epoch,
                                                       verbose = verbose)) # ... and concatenate progess output object
-               tm <- system.time(
-                   history <- fit(x[["model"]], x = prior, y = data,
-                                  batch_size = batch.size, epochs = n.epoch, verbose = 0, # silent, but...
-                                  callbacks = callbacks, ...) # ... progress determined through callback
-               )
+               ## Probably not worth checking whether 'callbacks' already contains a
+               ## progress-type object
+               args <- list(object = x[["model"]], x = prior, y = data, # see ?fit.keras.engine.training.Model
+                            batch_size = batch.size, epochs = n.epoch, verbose = 0, # silent, but...
+                            callbacks = callbacks) # ... progress determined through callback
+               dots <- list(...)
+               if(has.callbacks) dots$callbacks <- NULL # remove callbacks from '...'
+               tm <- system.time(history <- do.call(fit, args = c(args, dots)))
            },
            ## "VAE" = {
            ##     ## Note:

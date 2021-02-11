@@ -28,7 +28,7 @@
 ##'         small bandwidths.
 ##'       - No checks are done for performance reasons.
 ##'       - Formerly used bandwidths: sqrt(c(0.001, 0.01, 0.15, 0.25, 0.50, 0.75))
-##'       - MWE for how to call
+##'       - MWE for how to call (outside training)
 ##'         n <- 3
 ##'         m <- 4
 ##'         d <- 2
