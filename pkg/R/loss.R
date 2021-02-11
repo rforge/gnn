@@ -27,6 +27,7 @@
 ##'         to blow up the value for small distances between x and y due to
 ##'         small bandwidths.
 ##'       - No checks are done for performance reasons.
+##'       - Formerly used bandwidths: sqrt(c(0.001, 0.01, 0.15, 0.25, 0.50, 0.75))
 ##'       - MWE for how to call
 ##'         n <- 3
 ##'         m <- 4
@@ -37,18 +38,25 @@
 ##'         gnn:::radial_basis_function_kernel(x, x) # (n, n)-tensor
 ##'         gnn:::radial_basis_function_kernel(x, y, bandwidth = c(0.1, 0.1)) # (n, m)-tensor
 ##'         gnn:::radial_basis_function_kernel(x, y, bandwidth = 0.1) # (n, m)-tensor
-radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16))
+radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16)) # 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16)
 {
+    ## OLD
+    ## dst <- tf$transpose(tf$reduce_sum(tf$square((tf$expand_dims(x, axis = 2L) -
+    ##                                              tf$transpose(y))), axis = 1L))
+    ## b <- tf$reshape(dst, shape = c(1L, -1L))
+    ## exponent <- if(length(bandwidth) == 1) {
+    ##                 tf$multiply(1 / (2 * bandwidth), b)
+    ##             } else {
+    ##                 tf$matmul(1 / (2 * tf$expand_dims(bandwidth, axis = 1L)), b = b)
+    ##             }
+    ## tf$reshape(tf$reduce_sum(tf$exp(-exponent), axis = 0L), shape = tf$shape(dst))
     x.1 <- tf$expand_dims(x, axis = 2L) # (n, d, 1)-tensor
     y.t <- tf$transpose(y) # (d, m)-tensor
-    dff <- x.1 - y.t # (n, d, m)-tensor with (i, k, j) element containing x[i,k] - y[j,k]
-    sq.dff <- tf$square(x.1 - y.t) # (n, d, m)-tensor
-    dst2 <- tf$reduce_sum(sq.dff, axis = 1L) # (n, m)-matrix with (i, j) element containing sum_{k = 1}^d (x[i,k] - y[j,k])^2
+    dff2 <- tf$square(x.1 - y.t) # (n, d, m)-tensor with (i, k, j) element containing (x[i,k] - y[j,k])^2
+    dst2 <- tf$reduce_sum(dff2, axis = 1L) # (n, m)-matrix with (i, j) element containing sum_{k = 1}^d (x[i,k] - y[j,k])^2
     dst2.vec <- tf$reshape(dst2, shape = c(1L, -1L)) # tensor dst2 reshaped into dim (1, -1), where -1 means that the 2nd dimension is determined automatically (here: based on the first argument of (1, -1) being 1) => create one (n * m)-long row vector
-    fctr <- as.matrix(1 / 2 * bandwidth^2) # create length(bandwidth)-column-vector
-    fctr.tf <- tf$convert_to_tensor(fctr, dtype = dst2.vec$dtype) # convert to 1-column tensor (of float32/float64 as dst2.vec so that they can be multiplied without problems; note that training uses float32)
-    xpn <- tf$matmul(fctr.tf, b = dst2.vec) # (x - y)^2 / (2 * h^2); matrix multiplication of (length(bandwidth), 1)-tensor with (1, n * m)-tensor
-    kernels <- tf$exp(-xpn) # (length(bandwidth), n * m)-tensor
+    fctr.tf <- tf$convert_to_tensor(as.matrix(1 / (2 * bandwidth^2)), dtype = dst2.vec$dtype) # convert column vector (as.matrix()) to 1-column tensor (of float32/float64, as dst2.vec so that they can be multiplied without problems; note that training uses float32 whereas evaluation afterwards typically float64)
+    kernels <- tf$exp(-tf$matmul(fctr.tf, b = dst2.vec)) # exp(-(x - y)^2 / (2 * h^2)); matrix multiplication of (length(bandwidth), 1)-tensor with (1, n * m)-tensor => (length(bandwidth), n * m)-tensor
     tf$reshape(tf$reduce_mean(kernels, axis = 0L), # reduce (= apply) over dimension 1 (axis = 0; cols), so compute colMeans() => (1, n * m)-tensor
                shape = tf$shape(dst2)) # reshape into the original (n, m) shape
 }
@@ -69,6 +77,7 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
 ##'        be provided.
 ##' @return 0d tensor containing the reconstruction loss
 ##' @author Marius Hofert and Avinash Prasad
+##' @note For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
 loss <- function(x, y, type = c("MSE", "binary.cross", "MMD"), ...)
 {
     type <- match.arg(type)
