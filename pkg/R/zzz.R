@@ -1,6 +1,6 @@
 ## Function to be executed when package is loaded (or attached)
 .onLoad <- function(libname, pkgname) {
-    ## Avoid startup message of layer_dense() in GMMN() if TensorFlow is not
+    ## Avoid startup message of layer_dense() in FNN() if TensorFlow is not
     ## built with CPU extensions such as AVX (speed improvements on CPUs)
     ## See https://stackoverflow.com/questions/65453529/suppress-hard-to-catch-output-of-an-r-function
     ## https://github.com/rstudio/tensorflow/issues/411

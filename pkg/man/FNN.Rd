@@ -2,7 +2,7 @@
 \alias{FNN}
 \title{Generative Moment Matching Network}
 \description{
-  Constructor for a generative moment matching network (GMMN) model,
+  Constructor for a generative feedforward neural network (FNN) model,
   an object of \code{\link{S3}} class \code{"gnn_FNN"}.
 }
 \usage{
@@ -110,23 +110,23 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
 ## Define the models
 NN <- FNN(c(d, 300, d), loss.fun = "MSE") # define a basic NN
-GMMN <- FNN(c(d, 300, d)) # define a GMMN model
+GMMN <- FNN(c(d, 300, d)) # Feedforward NN with MMD loss (a GMMN; random weights)
 
-## Define the batch size and maximal number of epochs
-batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
-n.epo <- 10 # number of epochs = number of times training data is shuffled
+## For a fair comparison in training, we use batch optimization (all 'm' data points)
+## for training NN and 40 epochs, and mini-batch optimization based on
+## 500 samples (25% = 4 gradient steps/epoch) for 10 epochs for GMMN.
 
 ## Train the NN
-NN <- fitGNN(NN, data = U, batch.size = batch, n.epoch = n.epo)
+NN <- fitGNN(NN, data = U, n.epoch = 40) # uses batch.size = nrow(U)
 stopifnot(is.trained(NN))
 
 ## Train the GMMN
 library(keras) # for callback_early_stopping()
-## We monitor the loss function and stop earlier (before n.epo-many epochs)
-## if the loss function over the last patience-many epochs has changed by
-## less than min_delta in absolute value. Then we keep the weights that
-## led to the smallest loss seen throughout training.
-GMMN <- fitGNN(GMMN, data = U, batch.size = batch, n.epoch = n.epo,
+## We monitor the loss function and stop earlier if the loss function
+## over the last patience-many epochs has changed by less than min_delta
+## in absolute value. Then we keep the weights that led to the smallest
+## loss seen throughout training.
+GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 10,
                callbacks = callback_early_stopping(monitor = "loss",
                                                    min_delta = 1e-3, patience = 3,
                                                    restore_best_weights = TRUE))
@@ -142,7 +142,8 @@ V.NN <- rGNN(NN, size = m)
 set.seed(271)
 V.GMMN <- rGNN(GMMN, size = m)
 
-## Joint plot of training subsample with GMMN PRNs
+## Joint plot of training subsample with GMMN PRNs. Clearly, the MSE
+## cannot be used to learn the distribution correctly.
 layout(t(1:3))
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
 plot(V.NN,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
@@ -150,15 +151,16 @@ plot(V.GMMN,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 
 ## Joint plot of training subsample with GMMN QRNs
 library(qrng) # for sobol()
-V.NN   <- rGNN(NN,   size = m, method = "sobol", randomize = "Owen")
-V.GMMN <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
+V.NN.   <- rGNN(NN,   size = m, method = "sobol", randomize = "Owen")
+V.GMMN. <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
-plot(V.NN,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
-plot(V.GMMN,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.NN.,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.GMMN.,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 layout(1)
 par(opar)
 
 ## Plot the loss function values after each epoch
+plot_loss(NN)
 plot_loss(GMMN)
 }
 }

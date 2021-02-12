@@ -1,4 +1,4 @@
-### GMMN basic functions #######################################################
+### FNN basic functions ########################################################
 
 ##' @title Determine the Number of Parameters
 ##' @param x object of class "keras.engine.training.Model" or "gnn_GNN"
@@ -7,7 +7,7 @@
 ##' @author Marius Hofert
 ##' @note See https://stackoverflow.com/questions/47312219/what-is-the-definition-of-a-non-trainable-parameter
 ##'       for the meaning of 'trainable' vs 'non-trainable'
-nparam_GMMN <- function(x)
+nparam_FNN <- function(x)
 {
     if(inherits(x, "gnn_GNN")) x <- x[["model"]]
     num.tot.params <- count_params(x) # total number of parameters
@@ -24,9 +24,9 @@ nparam_GMMN <- function(x)
 }
 
 
-### GMMN constructor ###########################################################
+### FNN constructor ############################################################
 
-##' @title Generative Moment Matching Network (GMMN) Constructor
+##' @title Feedforward Neural Network (FNN) Constructor
 ##' @param dim integer vector of length at least two giving the dimensions
 ##'        of the input layer, the hidden layer(s) (if any) and the output layer
 ##' @param activation character vector of length length(dim) - 1 specifying
@@ -49,15 +49,14 @@ nparam_GMMN <- function(x)
 ##' @param ... additional arguments passed to the underlying loss function;
 ##'        at the moment, this can be the bandwith parameter 'bandwidth'
 ##'        which is passed on by loss() to Gaussian_mixture_kernel().
-##' @return An object of class "gnn_GMMN" (inheriting from "gnn_GNN" and
-##'         "gnn_Model") being a list with the Keras model of the GMMN
+##' @return An object of class "gnn_FNN" (inheriting from "gnn_GNN" and
+##'         "gnn_Model") being a list with the Keras model of the FNN
 ##'         and additional information
 ##' @note - Could at some point have an argument 'kernel.type' which specifies
 ##'         a different kernel.
 ##'       - The respective parameters are then passed via '...' (as we do for
 ##'         loss() at the moment).
-##'       - Make sure that the resulting NN is always a GMMN.
-##'       - names(<GMMN>$model) provides slots of "keras.engine.training.Model" object
+##'       - names(<FNN>$model) provides slots of "keras.engine.training.Model" object
 FNN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
                 batch.norm = FALSE, dropout.rate = 0, loss.fun = "MMD", n.GPU = 0, ...)
 {
@@ -89,7 +88,7 @@ FNN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sig
                            units = dim[1 + num.hidden + 1],
                            activation = activation[num.hidden + 1])
 
-    ## 2) Define the GMMN
+    ## 2) Define the FNN
     model <- if(n.GPU > 0) {
                  ## To ensure memory is hosted on the CPU and not on the GPU
                  ## see https://keras.rstudio.com/reference/multi_gpu_model.html
@@ -126,7 +125,7 @@ FNN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sig
         activation = activation, # character vector of activation functions for hidden and output layers
         batch.norm = batch.norm, # logical(1) indicating whether batch normalization layers are added after each hidden layer
         dropout.rate = dropout.rate, # numeric(1) specifying the fraction of input to be dropped
-        n.param = nparam_GMMN(model), # integer(3) giving the number of trainable, non-trainable and the total number of parameters
+        n.param = nparam_FNN(model), # integer(3) giving the number of trainable, non-trainable and the total number of parameters
         ## Training
         loss.type = loss.fun.string, # character string specifying the loss function type
         n.train = NA_integer_, # integer(1) specifying the sample size for training (or NA if not trained)

@@ -1,6 +1,4 @@
 ## Short-term
-- implement a general GNN function (non-exported) which can get the loss function as input
-  and have GMMN call that. Make sure all other functions still work with that.
 
 ## Medium-term
 - implement and export constructor for superclass gnn_Model (slots model and type)
