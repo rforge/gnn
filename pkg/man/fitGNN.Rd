@@ -11,10 +11,10 @@
   Functions and methods for training generative neural networks.
 }
 \usage{
-\method{fitGNN}{gnn_GNN}(x, data, batch.size, n.epoch = 100, prior = NULL,
-    verbose = 2, ...)
-\method{fitGNNonce}{gnn_GNN}(x, data, batch.size, n.epoch = 100, prior = NULL,
-    verbose = 2, file = NULL, name = NULL, ...)
+\method{fitGNN}{gnn_GNN}(x, data, batch.size = nrow(data), n.epoch = 100,
+    prior = NULL, verbose = 2, ...)
+\method{fitGNNonce}{gnn_GNN}(x, data, batch.size = nrow(data), n.epoch = 100,
+    prior = NULL, verbose = 2, file = NULL, name = NULL, ...)
 \method{is.trained}{gnn_GNN}(x)
 \method{is.trained}{list}(x)
 }

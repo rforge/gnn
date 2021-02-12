@@ -108,14 +108,19 @@ plot(X.[1:m,], xlab = expression(X[1]), ylab = expression(X[2])) # plot |X|
 U <- apply(X., 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
-## Define the model
+## Define the models
+NN <- FNN(c(d, 300, d), loss.fun = "MSE") # define a basic NN
 GMMN <- FNN(c(d, 300, d)) # define a GMMN model
 
 ## Define the batch size and maximal number of epochs
 batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)
 n.epo <- 10 # number of epochs = number of times training data is shuffled
 
-## Train or fit
+## Train the NN
+NN <- fitGNN(NN, data = U, batch.size = batch, n.epoch = n.epo)
+stopifnot(is.trained(NN))
+
+## Train the GMMN
 library(keras) # for callback_early_stopping()
 ## We monitor the loss function and stop earlier (before n.epo-many epochs)
 ## if the loss function over the last patience-many epochs has changed by
@@ -131,20 +136,25 @@ stopifnot(is.trained(GMMN)) # check if trained
 ##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
 ## - The above training is not reproducible (due to keras).
 
-## Evaluate GMMN based on prior sample (already roughly picks up the shape)
+## Generate from the two FNNs
 set.seed(271)
-V <- rGNN(GMMN, size = m) # sample
+V.NN <- rGNN(NN, size = m)
+set.seed(271)
+V.GMMN <- rGNN(GMMN, size = m)
 
 ## Joint plot of training subsample with GMMN PRNs
-layout(t(1:2))
+layout(t(1:3))
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
-plot(V,       xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.NN,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.GMMN,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 
 ## Joint plot of training subsample with GMMN QRNs
 library(qrng) # for sobol()
-V. <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
+V.NN   <- rGNN(NN,   size = m, method = "sobol", randomize = "Owen")
+V.GMMN <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
-plot(V.,      xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.NN,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.GMMN,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 layout(1)
 par(opar)
 
