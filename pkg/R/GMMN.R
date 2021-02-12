@@ -39,6 +39,7 @@ nparam_GMMN <- function(x)
 ##' @param dropout.rate numeric value in [0,1] specifying the fraction of input
 ##'        to be dropped; see the rate parameter of layer_dropout().
 ##'        Only if positive, dropout layers are added after each hidden layer.
+##' @param loss.fun loss function specified as character string or function.
 ##' @param n.GPU non-negative integer specifying the number of GPUs available
 ##'        if the GPU version of TensorFlow is installed. If positive, a
 ##'        (special) multiple GPU model for data parallelism is instantiated.
@@ -57,8 +58,8 @@ nparam_GMMN <- function(x)
 ##'         loss() at the moment).
 ##'       - Make sure that the resulting NN is always a GMMN.
 ##'       - names(<GMMN>$model) provides slots of "keras.engine.training.Model" object
-GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
-                 batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
+FNN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
+                batch.norm = FALSE, dropout.rate = 0, loss.fun = "MMD", n.GPU = 0, ...)
 {
     ## Basic input checks and definitions
     num.lay <- length(dim) # number of layers (including input and output layer)
@@ -102,18 +103,24 @@ GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "si
     ##    Note: - Required to be provided like that as otherwise:
     ##            "Error in loss(x, y = out.lay, ...) : object 'x' not found"
     ##          - unserialize_model() calls need to provide 'custom_objects = c(loss = loss)'
-    loss_fn <- function(x, y = out.lay)
-        loss(x, y = y, type = "MMD", ...) # GMMNs need to have "MMD" (otherwise not GMMNs)
+    if(is.character(loss.fun)) {
+        loss.fun.string <- loss.fun # see loss()
+        loss_fun <- function(x, y = out.lay)
+            loss(x, y = y, type = loss.fun.string, ...)
+    } else if(is.function(loss.fun)) {
+        loss.fun.string <- "custom"
+        loss_fun <- function(x, y = out.lay)
+            loss.fun(x, y, ...)
+    } else stop("'loss.fun' needs to be a character string or a function of the form function(x, y)")
 
     ## 4) Compile the model (compile() modifies 'model' in place)
-    compile(model, optimizer = "adam", loss = loss_fn) # configure the model's learning process with the compile method
+    compile(model, optimizer = "adam", loss = loss_fun) # configure the model's learning process with the compile method
 
     ## Return
     structure(list(
         ## Main object
         model = model, # object of R6 class keras.engine.training.Model (directed acyclic graph of layers)
-        ## Model string
-        type = "GMMN", # character string
+        type = "FNN", # model type
         ## Specification
         dim = dim, # integer vector of dimensions for input, hidden, output layers
         activation = activation, # character vector of activation functions for hidden and output layers
@@ -121,11 +128,12 @@ GMMN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "si
         dropout.rate = dropout.rate, # numeric(1) specifying the fraction of input to be dropped
         n.param = nparam_GMMN(model), # integer(3) giving the number of trainable, non-trainable and the total number of parameters
         ## Training
+        loss.type = loss.fun.string, # character string specifying the loss function type
         n.train = NA_integer_, # integer(1) specifying the sample size for training (or NA if not trained)
         batch.size = NA_integer_, # integer(1) specifying the batch size used for training (or NA if not trained)
         n.epoch = NA_integer_, # integer(1) specifying the number of epochs used for training (or NA if not trained)
         loss = NA_real_, # numeric(n.epoch) containing the loss function values per epoch of training (or NA if not trained)
         time = system.time(NULL)), # object of class "proc_time" (for training time)
         ## Class (part of structure())
-        class = c("gnn_GMMN", "gnn_GNN", "gnn_Model"))
+        class = c("gnn_FNN", "gnn_GNN", "gnn_Model"))
 }

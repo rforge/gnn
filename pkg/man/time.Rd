@@ -46,7 +46,7 @@ human.time(expr, print = TRUE, ...)
 \examples{
 human.time(Sys.sleep(0.1)) # print human-readable time
 (proc.obj <- human.time(Sys.sleep(0.1), print = FALSE)) # save the timing (character(3))
-time(GMMN()) # default print method for objects of class "gnn_proc_time"
-time(GMMN(), human = TRUE) # human-readable print method for such objects
+time(FNN()) # default print method for objects of class "gnn_proc_time"
+time(FNN(), human = TRUE) # human-readable print method for such objects
 }
 \keyword{utilities}

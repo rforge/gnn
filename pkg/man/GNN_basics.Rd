@@ -50,7 +50,7 @@
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
 d <- 2
 dim <- c(d, 300, d) # dimensions of the input, hidden and output layers
-GMMN <- GMMN(dim) # define the GMMN model
+GMMN <- FNN(dim) # define the GMMN model
 stopifnot(is.GNN(GMMN)) # check for being a GNN
 GMMN # print() method
 str(GMMN) # str() method

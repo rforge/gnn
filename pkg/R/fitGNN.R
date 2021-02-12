@@ -102,7 +102,7 @@ fitGNN.gnn_GNN <- function(x, data, batch.size, n.epoch = 100, prior = NULL, ver
     ## Train and possibly save
     type <- x[["type"]]
     switch(type,
-           "GMMN" = {
+           "FNN" = {
                if(is.null(prior)) {
                    prior <- rPrior(nrow(data), copula = indepCopula(ncol(data))) # independent N(0,1)
                } else {

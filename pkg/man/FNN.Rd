@@ -1,13 +1,13 @@
-\name{GMMN}
-\alias{GMMN}
+\name{FNN}
+\alias{FNN}
 \title{Generative Moment Matching Network}
 \description{
   Constructor for a generative moment matching network (GMMN) model,
-  an object of \code{\link{S3}} class \code{"gnn_GMMN"}.
+  an object of \code{\link{S3}} class \code{"gnn_FNN"}.
 }
 \usage{
-GMMN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
-     batch.norm = FALSE, dropout.rate = 0, n.GPU = 0, ...)
+FNN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
+    batch.norm = FALSE, dropout.rate = 0, loss.fun = "MMD", n.GPU = 0, ...)
 }
 \arguments{
   \item{dim}{\code{\link{integer}} vector of length at least two, giving
@@ -17,6 +17,8 @@ GMMN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     \code{length(dim) - 1} specifying the activation functions
     for all hidden layers and the output layer (in this order);
     note that the input layer does not have an activation function.}
+  \item{loss.fun}{loss function specified as \code{\link{character}}
+    or \code{\link{function}}.}
   \item{batch.norm}{\code{\link{logical}} indicating whether batch
     normalization layers are to be added after each hidden layer.}
   \item{dropout.rate}{\code{\link{numeric}} value in [0,1] specifying
@@ -33,31 +35,32 @@ GMMN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
   \item{\dots}{additional arguments passed to \code{\link{loss}()}.}
 }
 \value{
-  \code{GMMN()} returns an object of \code{\link{S3}} class \code{"gnn_GMMN"}
+  \code{FNN()} returns an object of \code{\link{S3}} class \code{"gnn_FNN"}
   with components
   \describe{
-    \item{\code{model}}{GMMN model (a \pkg{keras} object inheriting from
+    \item{\code{model}}{FNN model (a \pkg{keras} object inheriting from
       the R6 classes \code{"keras.engine.training.Model"},
       \code{"keras.engine.network.Network"},
       \code{"keras.engine.base_layer.Layer"}
       and \code{"python.builtin.object"}, or a \code{\link{raw}}
       object).}
     \item{\code{type}}{\code{\link{character}} string indicating
-      the type of model (\code{"GMMN"}).}
+      the type of model.}
     \item{\code{dim}}{see above.}
     \item{\code{activation}}{see above.}
     \item{\code{batch.norm}}{see above.}
     \item{\code{dropout.rate}}{see above.}
     \item{\code{n.param}}{number of trainable, non-trainable and total
       number of parameters.}
-    \item{\code{n.train}}{number of training samples (\code{NA_integer_}
+    \item{\code{loss.type}}{type of loss function (\code{\link{character}}).}
+    \item{\code{n.train}}{number of training samples (\code{\link{NA_integer_}}
       unless trained).}
-    \item{\code{batch.size}}{batch size (\code{NA_integer_} unless trained).}
-    \item{\code{n.epoch}}{number of epochs (\code{NA_integer_} unless trained).}
+    \item{\code{batch.size}}{batch size (\code{\link{NA_integer_}} unless trained).}
+    \item{\code{n.epoch}}{number of epochs (\code{\link{NA_integer_}} unless trained).}
   }
 }
 \details{
-  The \code{\link{S3}} class \code{"gnn_GMMN"} is a subclass of the
+  The \code{\link{S3}} class \code{"gnn_FNN"} is a subclass of the
   \code{\link{S3}} class \code{"gnn_GNN"} which in turn is a subclass of
   \code{"gnn_Model"}.
 }
@@ -106,7 +109,7 @@ U <- apply(X., 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
 ## Define the model
-GMMN <- GMMN(c(d, 300, d)) # define a GMMN model
+GMMN <- FNN(c(d, 300, d)) # define a GMMN model
 
 ## Define the batch size and maximal number of epochs
 batch <- 500 # batch size = number of samples per gradient step (120x steps/epoch)

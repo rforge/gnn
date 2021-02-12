@@ -20,7 +20,7 @@
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
 ## Define dummy model
 d <- 2 # bivariate case
-GMMN <- GMMN(c(d, 300, d)) # define a GMMN model (with random weights)
+GMMN <- FNN(c(d, 300, d)) # define a GMMN model (with random weights)
 
 ## Feedforward
 n <- 3

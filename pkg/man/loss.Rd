@@ -6,19 +6,18 @@
   statistical discrepancy between two datasets.
 }
 \usage{
-loss(x, y, type = c("MSE", "binary.cross", "MMD"), ...)
+loss(x, y, type = c("MMD", "MSE", "BCE"), ...)
 }
 \arguments{
   \item{x}{2d tensor with shape (batch size, dimension of input dataset).}
   \item{y}{2d tensor with shape (batch size, dimension of input dataset).}
   \item{type}{\code{\link{character}} string indicating the type of
-    loss used. Currently available are the mean
-    squared error (\code{"MSE"}), binary cross entropy
-    (\code{"binary.cross"})
-    and (kernel) maximum mean discrepancy (\code{"MMD"}).}
-  \item{\dots}{additional arguments passed to the underlying loss function;
-    at the moment, this is only affects \code{type = "MMD"} for which
-    \code{"bandwidth"} can be provided.}
+    loss used. Currently available are the
+    (kernel) maximum mean discrepancy (\code{"MMD"}),
+    the mean squared error (\code{"MSE"}) and the binary cross entropy
+    (\code{"BCE"}).}
+  \item{\dots}{additional arguments passed to the underlying loss function,
+    e.g. \code{bandwidth}.}
 }
 \value{
   \code{loss()} returns a 0d tensor containing the loss.
@@ -31,6 +30,6 @@ loss(x, y, type = c("MSE", "binary.cross", "MMD"), ...)
   See https://keras.rstudio.com/articles/examples/variational_autoencoder.html
 }
 \seealso{
-  \code{\link{GMMN}()} where \code{loss()} is used.
+  \code{\link{FNN}()} where \code{loss()} is used.
 }
 \keyword{univar}

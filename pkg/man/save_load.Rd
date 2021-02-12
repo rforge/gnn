@@ -40,7 +40,7 @@ loadGNN(file)
 \examples{
 \donttest{ # to avoid win-builder error "Error: Installation of TensorFlow not found"
 file <- tempfile("foo", fileext = ".rda")
-GMMN1 <- GMMN()
+GMMN1 <- FNN()
 saveGNN(GMMN1, file = file) # converts GMMN via as.raw()
 GMMN2 <- loadGNN(file) # converts loaded object via as.keras()
 stopifnot(is.GNN(GMMN2), inherits(GMMN2[["model"]], "keras.engine.training.Model"))

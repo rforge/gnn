@@ -59,7 +59,7 @@ export("plot_loss")
 export("as.human", "human.time")
 
 ## Constructors
-export("GMMN") # constructor of object of S3 class c("gnn_GMMN", "gnn_GNN", "gnn_Model")
+export("FNN") # constructor of object of S3 class c("gnn_FNN", "gnn_GNN", "gnn_Model")
 
 ## Generics
 export("is.GNN")

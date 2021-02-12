@@ -66,8 +66,9 @@ as.keras.gnn_GNN <- function(x)
 {
     if(is.raw(x[["model"]]))
         x[["model"]] <- unserialize_model(x[["model"]], # unserialize component 'model'
-                                          custom_objects = c(loss = loss, loss_fn = loss))
-    ## Note: This used to be loss = loss (and loss_fn = loss) when run interactively, but
-    ##       suddenly stopped to work (2019-10-06).
+                                          custom_objects = c(loss = loss, loss_fun = loss))
+    ## Note: - This used to be loss = loss (and loss_fun = loss) when run interactively, but
+    ##         suddenly stopped to work (2019-10-06).
+    ##       - 'loss_fun' has to be the same name as in FNN()
     x
 }

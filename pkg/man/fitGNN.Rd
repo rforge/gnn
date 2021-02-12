@@ -75,7 +75,7 @@
 %% }
 \author{Marius Hofert}
 \seealso{
-  \code{\link{GMMN}()}, \code{\link{saveGNN}()},
+  \code{\link{FNN}()}, \code{\link{saveGNN}()},
   \code{\link{loadGNN}()}.
 }
 \keyword{optimize}

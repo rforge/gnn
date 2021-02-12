@@ -69,29 +69,29 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
 ##'        dataset)
 ##' @param y (m, d)-tensor (for training typically m = n)
 ##' @param type type of reconstruction loss function. Currently available are:
-##'        "MSE": mean squared error
-##'        "binary.cross": binary cross entropy
 ##'        "MMD": (kernel) maximum mean discrepancy
+##'        "MSE": mean squared error
+##'        "BCE": binary cross entropy
 ##' @param ... additional arguments passed to the underlying functions;
 ##'        at the moment, this is only affects "MMD" for which "bandwidth" can
 ##'        be provided.
 ##' @return 0d tensor containing the reconstruction loss
 ##' @author Marius Hofert and Avinash Prasad
 ##' @note For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
-loss <- function(x, y, type = c("MSE", "binary.cross", "MMD"), ...)
+loss <- function(x, y, type = c("MMD", "MSE", "BCE"), ...)
 {
     type <- match.arg(type)
     switch(type,
-           "MSE" = { # requires nrow(x) == nrow(y)
-               loss_mean_squared_error(x, y) # default for calculating the reconstruction error between two observations
-           },
-           "binary.cross" = { # requires nrow(x) == nrow(y)
-               loss_binary_crossentropy(x, y) # useful for black-white images where we can interpret each pixel
-           },
            "MMD" = { # (theoretically) most suitable for measuring statistical discrepancy
                tf$sqrt(    tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
                            tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
                        2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...)))
+           },
+           "MSE" = { # requires nrow(x) == nrow(y)
+               loss_mean_squared_error(x, y) # default for calculating the reconstruction error between two observations
+           },
+           "BCE" = { # requires nrow(x) == nrow(y)
+               loss_binary_crossentropy(x, y) # useful for black-white images where we can interpret each pixel
            },
            stop("Wrong 'type'"))
 }
