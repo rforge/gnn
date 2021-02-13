@@ -56,7 +56,12 @@ FNN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
     \item{\code{n.train}}{number of training samples (\code{\link{NA_integer_}}
       unless trained).}
     \item{\code{batch.size}}{batch size (\code{\link{NA_integer_}} unless trained).}
-    \item{\code{n.epoch}}{number of epochs (\code{\link{NA_integer_}} unless trained).}
+    \item{\code{n.epoch}}{number of epochs (\code{\link{NA_integer_}}
+      unless trained).}
+    \item{\code{loss}}{\code{\link{numeric}(n.epoch)} containing the
+      loss function values per epoch.}
+    \item{\code{time}}{object of class \code{\link{proc_time}}
+      containing the training time (if trained).}
   }
 }
 \details{

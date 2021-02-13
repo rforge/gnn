@@ -5,7 +5,9 @@
   Functions for plotting.
 }
 \usage{
-plot_loss(x, type = "l", xlab = "Epoch", ylab = "Loss", y2lab = NULL, ...)
+plot_loss(x, type = "l", xlab = "Epoch",
+          ylab = paste0("Loss (",x[["loss.type"]],")"),
+          y2lab = NULL, ...)
 }
 \arguments{
   \item{x}{trained object of class \code{"gnn_GNN"}
