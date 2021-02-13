@@ -60,7 +60,7 @@ FNN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
       unless trained).}
     \item{\code{loss}}{\code{\link{numeric}(n.epoch)} containing the
       loss function values per epoch.}
-    \item{\code{time}}{object of class \code{\link{proc_time}}
+    \item{\code{time}}{object of S3 class \code{"proc_time"}
       containing the training time (if trained).}
   }
 }
