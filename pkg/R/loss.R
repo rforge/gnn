@@ -93,7 +93,7 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
 CvM_similarity <- function(x, y)
 {
     ## Idea 1: Simply convert the tensors x and y to R arrays, then call
-    ##         copulas' gofT2stat() for computing CvM2() directly and convert
+    ##         copulas' gofT2stat() for computing CvM() directly and convert
     ##         the result back to a tensor via tf$convert_to_tensor(, dtype = x$dtype):
     ##         tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
     ##         => ... but this idea fails because as.array() fails due to
@@ -132,13 +132,16 @@ CvM_similarity <- function(x, y)
 MMD <- function(x, y, ...)
 {
     ## For when called manually with R objects
-    if(!tf$is_tensor(x)) x <- tf$convert_to_tensor(x, dtype = "float64")
-    if(!tf$is_tensor(y)) y <- tf$convert_to_tensor(y, dtype = "float64")
-
+    is.R.x <- !tf$is_tensor(x)
+    is.R.y <- !tf$is_tensor(y)
+    if(is.R.x) x <- tf$convert_to_tensor(x, dtype = "float64")
+    if(is.R.y) y <- tf$convert_to_tensor(y, dtype = "float64")
     ## Main
-    tf$sqrt(    tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
-                tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
-            2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
+    res <- tf$sqrt(tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
+                   tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
+               2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
+    ## Return
+    if(is.R.x || is.R.y) as.numeric(res) else res
 }
 
 ##' @title Two-sample Cramer--von Mises Statistic of Remillard, Scaillet (2009,
@@ -158,20 +161,23 @@ MMD <- function(x, y, ...)
 ##'       library(tensorflow)
 ##'       x <- tf$convert_to_tensor(x.R, dtype = "float64")
 ##'       y <- tf$convert_to_tensor(y.R, dtype = "float64")
-##'       gnn:::CvM2(x, y) # same
-CvM2 <- function(x, y)
+##'       gnn:::CvM(x, y) # same
+CvM <- function(x, y)
 {
     ## For when called manually with R objects
-    if(!tf$is_tensor(x)) x <- tf$convert_to_tensor(x, dtype = "float64")
-    if(!tf$is_tensor(y)) y <- tf$convert_to_tensor(y, dtype = "float64")
-
+    is.R.x <- !tf$is_tensor(x)
+    is.R.y <- !tf$is_tensor(y)
+    if(is.R.x) x <- tf$convert_to_tensor(x, dtype = "float64")
+    if(is.R.y) y <- tf$convert_to_tensor(y, dtype = "float64")
     ## Main
     res1 <- CvM_similarity(x, x) # x with x
     res2 <- CvM_similarity(x, y) # x with y
     res3 <- CvM_similarity(y, y) # y with y
     n <- nrow(x)
     m <- nrow(y)
-    (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
+    res <- (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
+    ## Return
+    if(is.R.x || is.R.y) as.numeric(res) else res
 }
 
 
@@ -198,7 +204,7 @@ loss <- function(x, y, type = c("MMD", "CvM", "MSE", "BCE"), ...)
                MMD(x, y = y, ...)
            },
            "CvM" = {
-               CvM2(x, y = y)
+               CvM(x, y = y)
            },
            "MSE" = { # from keras; requires nrow(x) == nrow(y)
                loss_mean_squared_error(x, y) # default for calculating the reconstruction error between two observations

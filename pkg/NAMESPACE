@@ -49,7 +49,7 @@ importFrom("copula",
 ### Exports ####################################################################
 
 ## Functions
-export("loss")
+export("loss", "MMD", "CvM")
 export("range_trafo", "logis_trafo", "PCA_trafo")
 export("saveGNN", "loadGNN")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
