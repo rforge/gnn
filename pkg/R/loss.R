@@ -1,6 +1,7 @@
-### Loss functions #############################################################
+### Similarity measures used in loss functions #################################
 
-##' @title Radial Basis Function Kernel (Similarity Measure between two Samples)
+##' @title Radial Basis Function Kernel (Similarity Measure between two Samples
+##'        Used in the MMD)
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
 ##'        dataset)
 ##' @param y (m, d)-tensor (for training typically m = n)
@@ -40,26 +41,84 @@
 ##'         gnn:::radial_basis_function_kernel(x, y, bandwidth = 0.1) # (n, m)-tensor
 radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16))
 {
-    ## OLD
-    ## dst <- tf$transpose(tf$reduce_sum(tf$square((tf$expand_dims(x, axis = 2L) -
+    ## Idea 1:
+    ## dst2 <- tf$transpose(tf$reduce_sum(tf$square((tf$expand_dims(x, axis = 2L) -
     ##                                              tf$transpose(y))), axis = 1L))
-    ## b <- tf$reshape(dst, shape = c(1L, -1L))
-    ## exponent <- if(length(bandwidth) == 1) {
-    ##                 tf$multiply(1 / (2 * bandwidth), b)
-    ##             } else {
-    ##                 tf$matmul(1 / (2 * tf$expand_dims(bandwidth, axis = 1L)), b = b)
-    ##             }
-    ## tf$reshape(tf$reduce_sum(tf$exp(-exponent), axis = 0L), shape = tf$shape(dst))
-    x.1 <- tf$expand_dims(x, axis = 2L) # (n, d, 1)-tensor
-    y.t <- tf$transpose(y) # (d, m)-tensor
-    dff2 <- tf$square(x.1 - y.t) # (n, d, m)-tensor with (i, k, j) element containing (x[i,k] - y[j,k])^2
-    dst2 <- tf$reduce_sum(dff2, axis = 1L) # (n, m)-matrix with (i, j) element containing sum_{k = 1}^d (x[i,k] - y[j,k])^2
-    dst2.vec <- tf$reshape(dst2, shape = c(1L, -1L)) # tensor dst2 reshaped into dim (1, -1), where -1 means that the 2nd dimension is determined automatically (here: based on the first argument of (1, -1) being 1) => create one (n * m)-long row vector
-    fctr.tf <- tf$convert_to_tensor(as.matrix(1 / (2 * bandwidth^2)), dtype = dst2.vec$dtype) # convert column vector (as.matrix()) to 1-column tensor (of float32/float64, as dst2.vec so that they can be multiplied without problems; note that training uses float32 whereas evaluation afterwards typically float64)
-    kernels <- tf$exp(-tf$matmul(fctr.tf, b = dst2.vec)) # exp(-(x - y)^2 / (2 * h^2)); matrix multiplication of (length(bandwidth), 1)-tensor with (1, n * m)-tensor => (length(bandwidth), n * m)-tensor
+    ## dst2.vec <- tf$reshape(dst2, shape = c(1L, -1L))
+    ## xpn <- if(length(bandwidth) == 1) {
+    ##            tf$multiply(1 / (2 * bandwidth^2), dst2.vec)
+    ##        } else {
+    ##            tf$matmul(1 / (2 * tf$expand_dims(bandwidth^2, axis = 1L)), b = dst2.vec)
+    ##        }
+    ## tf$reshape(tf$reduce_sum(tf$exp(-xpn), axis = 0L), shape = tf$shape(dst2))
+
+    ## Idea 2: Idea 1 but better explained.
+    ## x.1 <- tf$expand_dims(x, axis = 2L) # (n, d, 1)-tensor
+    ## y.t <- tf$transpose(y) # (d, m)-tensor
+    ## dff2 <- tf$square(x.1 - y.t) # (n, d, m)-tensor where [i, j, k] contains (x[i,j] - y[k,j])^2
+    ## dst2 <- tf$reduce_sum(dff2, axis = 1L) # (n, m)-matrix with (i, j) element containing sum_{k = 1}^d (x[i,k] - y[j,k])^2
+    ## dst2.vec <- tf$reshape(dst2, shape = c(1L, -1L)) # tensor dst2 reshaped into dim (1, -1), where -1 means that the 2nd dimension is determined automatically (here: based on the first argument of (1, -1) being 1) => create one (n * m)-long row vector
+    ## fctr.tf <- tf$convert_to_tensor(as.matrix(1 / (2 * bandwidth^2)), dtype = dst2.vec$dtype) # convert column vector (as.matrix()) to 1-column tensor (of float32/float64, as dst2.vec so that they can be multiplied without problems; note that training uses float32 whereas evaluation afterwards typically float64)
+    ## kernels <- tf$exp(-tf$matmul(fctr.tf, b = dst2.vec)) # exp(-(x - y)^2 / (2 * h^2)); matrix multiplication of (length(bandwidth), 1)-tensor with (1, n * m)-tensor => (length(bandwidth), n * m)-tensor
+    ## tf$reshape(tf$reduce_mean(kernels, axis = 0L), # reduce (= apply) over dimension 1 (axis = 0; cols), so compute colMeans() => (1, n * m)-tensor
+    ##            shape = tf$shape(dst2)) # reshape into the original (n, m) shape
+
+    ## Idea 3: Clearer broadcasting (arithmetic operations on an (1, n, d)-
+    ##         and a (m, 1, d)-tensor produce a (m, n, d)-tensor (containing
+    ##         all 'm' and 'n' combinations, so all combinations of rows)
+    x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor (orthogonal to x-axis)
+    y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor (orthogonal to y-axis)
+    dff2 <- tf$square(x. - y.) # (n, m, d)-tensor, where [i, k, j] contains (x[i,j] - y[k,j])^2
+    dst2 <- tf$reduce_sum(dff2, axis = 2L) # (n, m)-matrix with (i, k) element containing sum_{j = 1}^d (x[i,j] - y[k,j])^2
+    dst2.vec <- tf$reshape(dst2, shape = c(1L, -1L)) # tensor dst2 reshaped into dim (1, -1) => create (1, n * m)-tensor
+    fctr <- tf$convert_to_tensor(as.matrix(1 / (2 * bandwidth^2)), dtype = dst2.vec$dtype) # (length(bandwidth), 1)-tensor; as.matrix() is required for the case of length(bandwidth) = 1
+    kernels <- tf$exp(-tf$matmul(fctr, b = dst2.vec)) # exp(-(x - y)^2 / (2 * h^2)); matrix multiplication of (length(bandwidth), 1)-tensor with (1, n * m)-tensor => (length(bandwidth), n * m)-tensor
     tf$reshape(tf$reduce_mean(kernels, axis = 0L), # reduce (= apply) over dimension 1 (axis = 0; cols), so compute colMeans() => (1, n * m)-tensor
                shape = tf$shape(dst2)) # reshape into the original (n, m) shape
 }
+
+##' @title Similarity Function Used in the Two-sample Cramer--von Mises Statistic
+##'        of Remillard, Scaillet (2009, "Testing for equality between two copulas")
+##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
+##'        dataset)
+##' @param y (m, d)-tensor (for training typically m = n)
+##' @return 0d tensor containing the two-sample CvM statistic
+##' @author Marius Hofert
+##' @note - Broadcasting idea (turning arrays of different shapes into compatible ones); see
+##'         https://stackoverflow.com/questions/43534057/evaluate-all-pair-combinations-of-rows-of-two-tensors-in-tensorflow
+##'       - The line applying tf$maximum does the trick:
+##'         Arithmetic operations on an (1, n, d)- and a (m, 1, d)-tensor produce
+##'         a (m, n, d)-tensor (containing all 'm' and 'n' combinations, so all
+##'         combination of rows)
+CvM_similarity <- function(x, y)
+{
+    ## Idea 1: Simply convert the tensors x and y to R arrays, then call
+    ##         copulas' gofT2stat() for computing CvM2() directly and convert
+    ##         the result back to a tensor via tf$convert_to_tensor(, dtype = x$dtype):
+    ##         tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
+    ##         => ... but this idea fails because as.array() fails due to
+    ##            disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
+    ##         => need a tensor version.
+
+    ## Idea 2: Via tf$stack(), but hopelessly slow (also slow, but not tried: tf$map_fn)
+    ## n <- nrow(x)
+    ## m <- nrow(y)
+    ## tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
+    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
+    ##         tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
+    ##     }))) })))
+
+    ## Idea 3: Broadcasting trick
+    x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor (orthogonal to x-axis)
+    y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor (orthogonal to y-axis)
+    mx. <- tf$maximum(x., y.) # (n, m, d)-tensor, where [i, k, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
+    mx <- tf$reshape(mx., c(-1L, 2L)) # (n * m, d)-tensor
+    prd <- tf$reduce_prod(1-mx, axis = 1L) # (n * m, 1)-tensor
+    tf$reduce_sum(prd) # sum all elements
+}
+
+
+### Loss functions #############################################################
 
 ##' @title Maximum Mean Discrepancy (MMD)
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
@@ -71,11 +130,18 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
 ##' @author Marius Hofert
 ##' @note For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
 MMD <- function(x, y, ...)
+{
+    ## For when called manually with R objects
+    if(!tf$is_tensor(x)) x <- tf$convert_to_tensor(x, dtype = "float64")
+    if(!tf$is_tensor(y)) y <- tf$convert_to_tensor(y, dtype = "float64")
+
+    ## Main
     tf$sqrt(    tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
                 tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
             2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
+}
 
-##' @title Two-sample Cramer--von Mises statistic of Remillard, Scaillet (2009,
+##' @title Two-sample Cramer--von Mises Statistic of Remillard, Scaillet (2009,
 ##'        "Testing for equality between two copulas")
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
 ##'        dataset)
@@ -95,72 +161,21 @@ MMD <- function(x, y, ...)
 ##'       gnn:::CvM2(x, y) # same
 CvM2 <- function(x, y)
 {
-    ## Idea 1: Simply convert the tensors x and y to R arrays, then call
-    ##         copulas' gofT2stat() and convert result back to a tensor
-    ##         via tf$convert_to_tensor(, dtype = x$dtype).
-    ##         tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
-    ##         => ... but this idea fails because as.array() fails due to
-    ##         disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
-    ##         => need a tensor version.
+    ## For when called manually with R objects
+    if(!tf$is_tensor(x)) x <- tf$convert_to_tensor(x, dtype = "float64")
+    if(!tf$is_tensor(y)) y <- tf$convert_to_tensor(y, dtype = "float64")
 
-    ## Idea 2: tensorflow version but hopelessly slow:
-    ## n <- nrow(x)
-    ## m <- nrow(y)
-    ## ## Part 1: x with x
-    ## res1 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
-    ##     tf$reduce_sum(tf$stack(lapply(seq_len(n), function(k) {
-    ##         tf$reduce_prod(1-tf$maximum(x[i,], x[k,]))
-    ##     }))) })))
-    ## ## Part 2: x with y
-    ## res2 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
-    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
-    ##         tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
-    ##     }))) })))
-    ## ## Part 3: y with y
-    ## res3 <- tf$reduce_sum(tf$stack(lapply(seq_len(m), function(i) {
-    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
-    ##         tf$reduce_prod(1-tf$maximum(y[i,], y[k,]))
-    ##     }))) })))
-    ## ## Return
-    ## (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
-
-    ## Idea 3: Via tf.map_fn(), but it's said to be general and rather slow, too.
-
-    ## Idea 4: Broadcasting by expanding the dimensions; see
-    ##         https://stackoverflow.com/questions/43534057/evaluate-all-pair-combinations-of-rows-of-two-tensors-in-tensorflow
-
-    ## Part 1: x with x
-    x1 <- tf$expand_dims(x, 0L) # convert (n, d)-tensor to (1, n, d)-tensor
-    x2 <- tf$expand_dims(x, 1L) # convert (n, d)-tensor to (n, 1, d)-tensor
-    m1 <- tf$maximum(x1, x2)
-    l1 <- tf$reshape(m1, c(-1L, 2L))
-    p1 <- tf$reduce_prod(1-l1, axis = 1L)
-    res1 <- tf$reduce_sum(p1)
-
-    ## Part 2: x with y
-    x. <- tf$expand_dims(x, 0L) # convert (n, d)-tensor to (1, n, d)-tensor
-    y. <- tf$expand_dims(y, 1L) # convert (m, d)-tensor to (m, 1, d)-tensor
-    m2 <- tf$maximum(x., y.) # (m, n, d)-tensor, where [k, i, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
-    l2 <- tf$reshape(m2, c(-1L, 2L)) # (m * n, d)-tensor
-    p2 <- tf$reduce_prod(1-l2, axis = 1L) # (m * n, 1)-tensor
-    res2 <- tf$reduce_sum(p2) # sum all elements
-
-    ## Part 3: y with y
-    y1 <- tf$expand_dims(y, 0L) # convert (m, d)-tensor to (1, m, d)-tensor
-    y2 <- tf$expand_dims(y, 1L) # convert (m, d)-tensor to (m, 1, d)-tensor
-    m3 <- tf$maximum(y1, y2)
-    l3 <- tf$reshape(m3, c(-1L, 2L))
-    p3 <- tf$reduce_prod(1-l3, axis = 1L)
-    res3 <- tf$reduce_sum(p3)
-
-    ## Result
+    ## Main
+    res1 <- CvM_similarity(x, x) # x with x
+    res2 <- CvM_similarity(x, y) # x with y
+    res3 <- CvM_similarity(y, y) # y with y
     n <- nrow(x)
     m <- nrow(y)
     (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
 }
 
 
-### Main loss function #########################################################
+### Main loss function wrapper #################################################
 
 ##' @title Loss Function to Measure Statistical Discrepancy between Two Datasets
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
