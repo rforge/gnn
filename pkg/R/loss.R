@@ -1,4 +1,4 @@
-### Auxiliaries ################################################################
+### Loss functions #############################################################
 
 ##' @title Radial Basis Function Kernel (Similarity Measure between two Samples)
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
@@ -61,8 +61,71 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
                shape = tf$shape(dst2)) # reshape into the original (n, m) shape
 }
 
+##' @title Maximum Mean Discrepancy (MMD)
+##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
+##'        dataset)
+##' @param y (m, d)-tensor (for training typically m = n)
+##' @param ... additional arguments passed to the underlying
+##'        radial_basis_function_kernel(), most notably 'bandwidth'
+##' @return 0d tensor containing the MMD
+##' @author Marius Hofert
+##' @note For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
+MMD <- function(x, y, ...)
+    tf$sqrt(    tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
+                tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
+            2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
 
-### Loss function ##############################################################
+##' @title Two-sample Cramer--von Mises statistic of Remillard, Scaillet (2009,
+##'        "Testing for equality between two copulas")
+##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
+##'        dataset)
+##' @param y (m, d)-tensor (for training typically m = n)
+##' @return 0d tensor containing the two-sample CvM statistic
+##' @author Marius Hofert
+##' @note MWE:
+##'       n <- 3
+##'       m <- 4
+##'       d <- 3
+##'       x.R <- matrix(as.numeric(1:(n * d)), ncol = d) # dummy R object
+##'       y.R <- matrix(as.numeric(1:(m * d)), ncol = d)
+##'       copula::gofT2stat(x.R, y.R) # 40.09524
+##'       library(tensorflow)
+##'       x <- tf$convert_to_tensor(x.R, dtype = "float64")
+##'       y <- tf$convert_to_tensor(y.R, dtype = "float64")
+##'       gnn:::CvM2(x, y) # same
+##'       STILL, THE FOLLOWING CODE IS HOPELESSLY SLOW FOR TRAINING
+## CvM2 <- function(x, y)
+## {
+##     ## Idea: Simply convert the tensors x and y to R arrays, then call
+##     ##       copulas' gofT2stat() and convert result back to a tensor
+##     ##       via tf$convert_to_tensor(, dtype = x$dtype).
+##     ## tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
+##     ##       => ... but this idea fails because as.array() fails due to
+##     ##       disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
+##     ##       => need a tensor version
+##     n <- nrow(x)
+##     m <- nrow(y)
+##     ## Part 1: x with x
+##     res1 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
+##         tf$reduce_sum(tf$stack(lapply(seq_len(n), function(k) {
+##             tf$reduce_prod(1-tf$maximum(x[i,], x[k,]))
+##         }))) })))
+##     ## Part 2: x with y
+##     res2 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
+##         tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
+##             tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
+##         }))) })))
+##     ## Part 3: y with y
+##     res3 <- tf$reduce_sum(tf$stack(lapply(seq_len(m), function(i) {
+##         tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
+##             tf$reduce_prod(1-tf$maximum(y[i,], y[k,]))
+##         }))) })))
+##     ## Return
+##     (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
+## }
+
+
+### Main loss function #########################################################
 
 ##' @title Loss Function to Measure Statistical Discrepancy between Two Datasets
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
@@ -72,25 +135,23 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
 ##'        "MMD": (kernel) maximum mean discrepancy
 ##'        "MSE": mean squared error
 ##'        "BCE": binary cross entropy
-##' @param ... additional arguments passed to the underlying functions;
-##'        at the moment, this is only affects "MMD" for which "bandwidth" can
-##'        be provided.
+##' @param ... additional arguments passed to the underlying functions.
 ##' @return 0d tensor containing the reconstruction loss
 ##' @author Marius Hofert and Avinash Prasad
-##' @note For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
 loss <- function(x, y, type = c("MMD", "MSE", "BCE"), ...)
 {
     type <- match.arg(type)
     switch(type,
            "MMD" = { # (theoretically) most suitable for measuring statistical discrepancy
-               tf$sqrt(    tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
-                           tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
-                       2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...)))
+               MMD(x, y = y, ...)
            },
-           "MSE" = { # requires nrow(x) == nrow(y)
+           ## "CvM" = { # hopelessly slow
+           ##     CvM2(x, y = y)
+           ## },
+           "MSE" = { # from keras; requires nrow(x) == nrow(y)
                loss_mean_squared_error(x, y) # default for calculating the reconstruction error between two observations
            },
-           "BCE" = { # requires nrow(x) == nrow(y)
+           "BCE" = { # from keras; requires nrow(x) == nrow(y)
                loss_binary_crossentropy(x, y) # useful for black-white images where we can interpret each pixel
            },
            stop("Wrong 'type'"))

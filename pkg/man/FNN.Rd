@@ -113,19 +113,16 @@ plot(X.[1:m,], xlab = expression(X[1]), ylab = expression(X[2])) # plot |X|
 U <- apply(X., 2, rank) / (ntrn + 1) # pseudo-observations of |X|
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 
-## Define the models
-NN <- FNN(c(d, 300, d), loss.fun = "MSE") # define a basic NN
-GMMN <- FNN(c(d, 300, d)) # Feedforward NN with MMD loss (a GMMN; random weights)
+## Model 1: A basic feedforward neural network (FNN) with MSE loss function
+NN <- FNN(c(d, 300, d), loss.fun = "MSE") # define the FNN
+NN <- fitGNN(NN, data = U, n.epoch = 40) # train with batch optimization
+plot_loss(NN) # plot the loss after each epoch
 
-## For a fair comparison in training, we use batch optimization (all 'm' data points)
-## for training NN and 40 epochs, and mini-batch optimization based on
-## 500 samples (25% = 4 gradient steps/epoch) for 10 epochs for GMMN.
-
-## Train the NN
-NN <- fitGNN(NN, data = U, n.epoch = 40) # uses batch.size = nrow(U)
-stopifnot(is.trained(NN))
-
-## Train the GMMN
+## Model 2: A GMMN (FNN with MMD loss function)
+GMMN <- FNN(c(d, 300, d)) # define the GMMN (initialized with random weights)
+## For training we need to use a mini-batch optimization (batch size < nrow(U)).
+## For a fair comparison (same number of gradient steps) to NN, we use 500
+## samples (25% = 4 gradient steps/epoch) for 10 epochs for GMMN.
 library(keras) # for callback_early_stopping()
 ## We monitor the loss function and stop earlier if the loss function
 ## over the last patience-many epochs has changed by less than min_delta
@@ -135,13 +132,13 @@ GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 10,
                callbacks = callback_early_stopping(monitor = "loss",
                                                    min_delta = 1e-3, patience = 3,
                                                    restore_best_weights = TRUE))
-stopifnot(is.trained(GMMN)) # check if trained
+plot_loss(GMMN) # plot the loss after each epoch
 ## Note:
 ## - Obviously, in a real-world application, batch.size and n.epoch
 ##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
-## - The above training is not reproducible (due to keras).
+## - Training is not reproducible (due to keras).
 
-## Generate from the two FNNs
+## Generate from the two models
 set.seed(271)
 V.NN <- rGNN(NN, size = m)
 set.seed(271)
@@ -163,10 +160,6 @@ plot(V.NN.,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 plot(V.GMMN.,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 layout(1)
 par(opar)
-
-## Plot the loss function values after each epoch
-plot_loss(NN)
-plot_loss(GMMN)
 }
 }
 \keyword{models}

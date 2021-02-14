@@ -14,8 +14,9 @@ loss(x, y, type = c("MMD", "MSE", "BCE"), ...)
   \item{type}{\code{\link{character}} string indicating the type of
     loss used. Currently available are the
     (kernel) maximum mean discrepancy (\code{"MMD"}),
-    the mean squared error (\code{"MSE"}) and the binary cross entropy
-    (\code{"BCE"}).}
+    % the Cramer-von Mises statistc (\code{"CvM"}),
+    the mean squared error (\code{"MSE"})
+    and the binary cross entropy (\code{"BCE"}).}
   \item{\dots}{additional arguments passed to the underlying loss function,
     e.g. \code{bandwidth}.}
 }
