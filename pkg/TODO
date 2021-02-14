@@ -1,4 +1,5 @@
 ## Short-term
+- Fix: Paper citations from arXiv (once published)
 
 ## Medium-term
 - implement and export constructor for superclass gnn_Model (slots model and type)
@@ -7,7 +8,6 @@
 
 ## Long-term
 - plot method: what to use as 'low' and 'up' values to evaluate NN at (low,...,low,up,low,...,low)?
-- Fix: Paper citations (2019 on arXiv or the real publication if published)
 - KL(): If an analytical (differentiable) form exits for K-L divergence
         between copulas, we could propose an interesting extension.
         (Simpler) extensions to consider first: encoder maps to non-diagonal
