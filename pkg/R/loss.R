@@ -85,44 +85,79 @@ MMD <- function(x, y, ...)
 ##' @note MWE:
 ##'       n <- 3
 ##'       m <- 4
-##'       d <- 3
+##'       d <- 2
 ##'       x.R <- matrix(as.numeric(1:(n * d)), ncol = d) # dummy R object
 ##'       y.R <- matrix(as.numeric(1:(m * d)), ncol = d)
-##'       copula::gofT2stat(x.R, y.R) # 40.09524
+##'       copula::gofT2stat(x.R, y.R) # -2.404762 (res1 = 62; res2 = 133; res3 = 222)
 ##'       library(tensorflow)
 ##'       x <- tf$convert_to_tensor(x.R, dtype = "float64")
 ##'       y <- tf$convert_to_tensor(y.R, dtype = "float64")
 ##'       gnn:::CvM2(x, y) # same
-##'       STILL, THE FOLLOWING CODE IS HOPELESSLY SLOW FOR TRAINING
-## CvM2 <- function(x, y)
-## {
-##     ## Idea: Simply convert the tensors x and y to R arrays, then call
-##     ##       copulas' gofT2stat() and convert result back to a tensor
-##     ##       via tf$convert_to_tensor(, dtype = x$dtype).
-##     ## tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
-##     ##       => ... but this idea fails because as.array() fails due to
-##     ##       disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
-##     ##       => need a tensor version
-##     n <- nrow(x)
-##     m <- nrow(y)
-##     ## Part 1: x with x
-##     res1 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
-##         tf$reduce_sum(tf$stack(lapply(seq_len(n), function(k) {
-##             tf$reduce_prod(1-tf$maximum(x[i,], x[k,]))
-##         }))) })))
-##     ## Part 2: x with y
-##     res2 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
-##         tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
-##             tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
-##         }))) })))
-##     ## Part 3: y with y
-##     res3 <- tf$reduce_sum(tf$stack(lapply(seq_len(m), function(i) {
-##         tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
-##             tf$reduce_prod(1-tf$maximum(y[i,], y[k,]))
-##         }))) })))
-##     ## Return
-##     (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
-## }
+CvM2 <- function(x, y)
+{
+    ## Idea 1: Simply convert the tensors x and y to R arrays, then call
+    ##         copulas' gofT2stat() and convert result back to a tensor
+    ##         via tf$convert_to_tensor(, dtype = x$dtype).
+    ##         tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
+    ##         => ... but this idea fails because as.array() fails due to
+    ##         disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
+    ##         => need a tensor version.
+
+    ## Idea 2: tensorflow version but hopelessly slow:
+    ## n <- nrow(x)
+    ## m <- nrow(y)
+    ## ## Part 1: x with x
+    ## res1 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
+    ##     tf$reduce_sum(tf$stack(lapply(seq_len(n), function(k) {
+    ##         tf$reduce_prod(1-tf$maximum(x[i,], x[k,]))
+    ##     }))) })))
+    ## ## Part 2: x with y
+    ## res2 <- tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
+    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
+    ##         tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
+    ##     }))) })))
+    ## ## Part 3: y with y
+    ## res3 <- tf$reduce_sum(tf$stack(lapply(seq_len(m), function(i) {
+    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
+    ##         tf$reduce_prod(1-tf$maximum(y[i,], y[k,]))
+    ##     }))) })))
+    ## ## Return
+    ## (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
+
+    ## Idea 3: Via tf.map_fn(), but it's said to be general and rather slow, too.
+
+    ## Idea 4: Broadcasting by expanding the dimensions; see
+    ##         https://stackoverflow.com/questions/43534057/evaluate-all-pair-combinations-of-rows-of-two-tensors-in-tensorflow
+
+    ## Part 1: x with x
+    x1 <- tf$expand_dims(x, 0L) # convert (n, d)-tensor to (1, n, d)-tensor
+    x2 <- tf$expand_dims(x, 1L) # convert (n, d)-tensor to (n, 1, d)-tensor
+    m1 <- tf$maximum(x1, x2)
+    l1 <- tf$reshape(m1, c(-1L, 2L))
+    p1 <- tf$reduce_prod(1-l1, axis = 1L)
+    res1 <- tf$reduce_sum(p1)
+
+    ## Part 2: x with y
+    x. <- tf$expand_dims(x, 0L) # convert (n, d)-tensor to (1, n, d)-tensor
+    y. <- tf$expand_dims(y, 1L) # convert (m, d)-tensor to (m, 1, d)-tensor
+    m2 <- tf$maximum(x., y.) # (m, n, d)-tensor, where [k, i, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
+    l2 <- tf$reshape(m2, c(-1L, 2L)) # (m * n, d)-tensor
+    p2 <- tf$reduce_prod(1-l2, axis = 1L) # (m * n, 1)-tensor
+    res2 <- tf$reduce_sum(p2) # sum all elements
+
+    ## Part 3: y with y
+    y1 <- tf$expand_dims(y, 0L) # convert (m, d)-tensor to (1, m, d)-tensor
+    y2 <- tf$expand_dims(y, 1L) # convert (m, d)-tensor to (m, 1, d)-tensor
+    m3 <- tf$maximum(y1, y2)
+    l3 <- tf$reshape(m3, c(-1L, 2L))
+    p3 <- tf$reduce_prod(1-l3, axis = 1L)
+    res3 <- tf$reduce_sum(p3)
+
+    ## Result
+    n <- nrow(x)
+    m <- nrow(y)
+    (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
+}
 
 
 ### Main loss function #########################################################
@@ -133,21 +168,23 @@ MMD <- function(x, y, ...)
 ##' @param y (m, d)-tensor (for training typically m = n)
 ##' @param type type of reconstruction loss function. Currently available are:
 ##'        "MMD": (kernel) maximum mean discrepancy
+##'        "CvM": Cramer-von Mises statistic of Remillard, Scaillet (2009,
+##'               "Testing for equality between two copulas")
 ##'        "MSE": mean squared error
 ##'        "BCE": binary cross entropy
 ##' @param ... additional arguments passed to the underlying functions.
 ##' @return 0d tensor containing the reconstruction loss
 ##' @author Marius Hofert and Avinash Prasad
-loss <- function(x, y, type = c("MMD", "MSE", "BCE"), ...)
+loss <- function(x, y, type = c("MMD", "CvM", "MSE", "BCE"), ...)
 {
     type <- match.arg(type)
     switch(type,
            "MMD" = { # (theoretically) most suitable for measuring statistical discrepancy
                MMD(x, y = y, ...)
            },
-           ## "CvM" = { # hopelessly slow
-           ##     CvM2(x, y = y)
-           ## },
+           "CvM" = {
+               CvM2(x, y = y)
+           },
            "MSE" = { # from keras; requires nrow(x) == nrow(y)
                loss_mean_squared_error(x, y) # default for calculating the reconstruction error between two observations
            },

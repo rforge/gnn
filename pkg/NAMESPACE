@@ -43,7 +43,7 @@ importFrom("qrng",
            "sobol")
 
 importFrom("copula",
-           "rCopula", "cCopula", "indepCopula", "pobs", "gofT2stat")
+           "rCopula", "cCopula", "indepCopula", "pobs")
 
 
 ### Exports ####################################################################
