@@ -1,6 +1,6 @@
 ### GNN sampling generic #######################################################
 
-rGNN <- function(x, ...)  UseMethod("rGNN")
+rGNN <- function(x, ...)  UseMethod("rGNN") # generic
 
 
 ### GNN sampling method ########################################################

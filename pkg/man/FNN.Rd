@@ -116,7 +116,7 @@ plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2])) # visual check
 ## Model 1: A basic feedforward neural network (FNN) with MSE loss function
 NN <- FNN(c(d, 300, d), loss.fun = "MSE") # define the FNN
 NN <- fitGNN(NN, data = U, n.epoch = 40) # train with batch optimization
-plot_loss(NN) # plot the loss after each epoch
+plot(NN, plot.type = "loss") # plot the loss after each epoch
 
 ## Model 2: A GMMN (FNN with MMD loss function)
 GMMN <- FNN(c(d, 300, d)) # define the GMMN (initialized with random weights)
@@ -132,7 +132,7 @@ GMMN <- fitGNN(GMMN, data = U, batch.size = 500, n.epoch = 10,
                callbacks = callback_early_stopping(monitor = "loss",
                                                    min_delta = 1e-3, patience = 3,
                                                    restore_best_weights = TRUE))
-plot_loss(GMMN) # plot the loss after each epoch
+plot(GMMN, plot.type = "loss") # plot the loss after each epoch
 ## Note:
 ## - Obviously, in a real-world application, batch.size and n.epoch
 ##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).

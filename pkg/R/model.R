@@ -11,23 +11,26 @@ Model <- function(name, ...)
 {
     model <- do.call(name, args = list(...))
     res <- if(inherits(model, "Copula")) {
-        structure(list(model = model,
-	               type = "Copula",
-		       n.param = nParam(model),
-		       method = NA_character_,
-		       n.train = NA_integer_,
-		       time = system.time(NULL)),
-                  class = c(as.vector(class(model)), "copula", "gnn_Model"))
-    } else if(inherits(model, "gnn_GNN")) {
-        ## 'model' already has the right (S3) structure and inherits from 'gnn_Model'
-	stopifnot("gnn_Model" %in% class(model)) # check
-        model
-    } else stop("Wrong 'model'")
+               param <- catch(nParam(model))$value
+               structure(list(model = model,
+                              type = "Copula",
+                              n.param = if(is.null(param)) NA_integer_ else param, # NA for those copulas for which nParam() fails
+                              method = NA_character_,
+                              n.train = NA_integer_,
+                              time = system.time(NULL)),
+                         class = c(as.vector(class(model)), "copula", "gnn_Model"))
+           } else if(inherits(model, "gnn_GNN")) {
+               ## 'model' already has the right (S3) structure and inherits from 'gnn_Model'
+               stopifnot("gnn_Model" %in% class(model)) # check
+               model
+           } else stop("Wrong 'model'")
     res
 }
 
 
 ### Super-class random number generation #######################################
+
+rModel <- function(x, ...)  UseMethod("rModel") # generic
 
 ##' @title Sampling Method for Objects of Class "gnn_Model"
 ##' @param x object of S3 class "gnn_Model" to be sampled from
@@ -38,7 +41,7 @@ Model <- function(name, ...)
 ##' @param ... additional arguments passed to the underlying functions
 ##' @return Sample from the model
 ##' @author Marius Hofert
-rModel <- function(x, size, prior = NULL, pobs = FALSE, ...)
+rModel.gnn_Model <- function(x, size, prior = NULL, pobs = FALSE, ...)
 {
     stopifnot(inherits(x, "gnn_Model"), size >= 0)
     switch(x[["type"]],
@@ -49,7 +52,13 @@ rModel <- function(x, size, prior = NULL, pobs = FALSE, ...)
                res <- if(is.null(prior)) {
                           rCopula(size, copula = x[["model"]], ...)
                       } else { # if 'prior' is provided, compute the inverse Rosenblatt transform
-                          cCopula(prior, copula = x[["model"]], inverse = TRUE, ...)
+                          copula <- x[["model"]]
+                          if(!inherits(copula, "indepCopula") && # those having an inverse Rosenblatt transform
+                             !inherits(copula, "claytonCopula") &&
+                             !inherits(copula, "normalCopula") &&
+                             !inherits(copula, "tCopula"))
+                              stop("For prior != NULL, x[[\"model\"]] must currently be an independence, Clayton, normal or t copula.")
+                          cCopula(prior, copula = copula, inverse = TRUE, ...)
                       }
                if(pobs) pobs(res) else res
            },

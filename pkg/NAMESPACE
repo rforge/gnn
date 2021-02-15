@@ -55,7 +55,6 @@ export("saveGNN", "loadGNN")
 export("catch", "TensorFlow_available", # use via if(!TensorFlow_available()) q()
        "rm_ext")
 export("rPrior")
-export("plot_loss")
 export("as.human", "human.time")
 
 ## Constructors
@@ -85,4 +84,5 @@ S3method("as.raw",     "gnn_GNN")
 S3method("as.keras",   "gnn_GNN")
 S3method("time",       "gnn_GNN")
 S3method("print",      "gnn_proc_time")
+S3method("plot",       "gnn_GNN")
 

@@ -1,17 +1,19 @@
 \name{plot}
-\alias{plot_loss}
+\alias{plot}
+\alias{plot.gnn_GNN}
 \title{Functions for Plotting}
 \description{
   Functions for plotting.
 }
 \usage{
-plot_loss(x, type = "l", xlab = "Epoch",
-          ylab = paste0("Loss (",x[["loss.type"]],")"),
-          y2lab = NULL, ...)
+\method{plot}{gnn_GNN}(x, plot.type = "loss", type = "l", xlab = "Epoch",
+    ylab = paste0("Loss (",x[["loss.type"]],")"),
+    y2lab = NULL, ...)
 }
 \arguments{
   \item{x}{trained object of class \code{"gnn_GNN"}
     whose loss function (loss per epoch of training) is to be plotted.}
+  \item{plot.type}{\code{\link{character}()} indicating the type of plot.}
   \item{type}{line type; see \code{\link{plot}()}.}
   \item{xlab}{x-axis label; see \code{\link{plot}()}.}
   \item{ylab}{y-axis label; see \code{\link{plot}()}.}
@@ -20,7 +22,7 @@ plot_loss(x, type = "l", xlab = "Epoch",
     \code{\link{plot}()}.}
 }
 \value{
-  Invisibly the losses per epoch.
+  Invisible (plot by side-effect).
 }
 \author{Marius Hofert}
 \seealso{
