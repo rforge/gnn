@@ -9,11 +9,11 @@ rGNN <- function(x, ...)  UseMethod("rGNN")
 ##' @param x object of S3 class "gnn_GNN" to be sampled from (input layer is
 ##'        d-dimensional)
 ##' @param size sample size
-##' @param data NULL (in which case N(0,1)^d is pseudo-sampled via rPrior())
+##' @param prior NULL (in which case N(0,1)^d is pseudo-sampled via rPrior())
 ##'        or a (size, d)-matrix of prior samples.
 ##' @param pobs logical indicating whether pobs() is applied to the output
 ##'        before returning
-##' @param ... additional arguments passed to rPrior() if data = NULL
+##' @param ... additional arguments passed to rPrior() if prior = NULL
 ##' @return Sample from the GNN 'x' (feedforwarded prior sample)
 ##' @author Marius Hofert
 ##' @note rGNN.numeric <- function(n, x, prior, ...) would have been another
