@@ -40,18 +40,18 @@ Model <- function(name, ...)
 ##' @author Marius Hofert
 rModel <- function(x, size, prior = NULL, pobs = FALSE, ...)
 {
-        stopifnot(n >= 0, inherits(object, "gnn_Model"))
-	switch(model[["type"]],
-	"FNN" = {
-	     rGNN(x, size = size, prior = prior, pobs = pobs, ...)
-        },
-        "Copula" = {
-            res <- if(is.null(prior)) {
-                       rCopula(size, copula = x[["model"]], ...)
-                   } else { # if 'prior' is provided, compute the inverse Rosenblatt transform
-                       cCopula(prior, copula = x[["model"]], inverse = TRUE, ...)
-                   }
-            if(pobs) pobs(res) else res
-        },
-        stop("Wrong 'type'"))
+    stopifnot(inherits(x, "gnn_Model"), size >= 0)
+    switch(x[["type"]],
+           "FNN" = {
+               rGNN(x, size = size, prior = prior, pobs = pobs, ...)
+           },
+           "Copula" = {
+               res <- if(is.null(prior)) {
+                          rCopula(size, copula = x[["model"]], ...)
+                      } else { # if 'prior' is provided, compute the inverse Rosenblatt transform
+                          cCopula(prior, copula = x[["model"]], inverse = TRUE, ...)
+                      }
+               if(pobs) pobs(res) else res
+           },
+           stop("Wrong 'type'"))
 }
