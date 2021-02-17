@@ -73,7 +73,8 @@ is.trained <- function(x) UseMethod("is.trained")
 ##' @param batch.size number of samples per stochastic gradient step
 ##' @param n.epoch number of epochs (one epoch equals one pass through the complete
 ##'        training dataset while updating the GNN's parameters)
-##' @param prior (n, d)-matrix of prior samples
+##' @param prior (n, d)-matrix of prior samples (if NULL, iid N(0,1) data)
+##' @param max.n.prior maximum number of prior samples stored in x
 ##' @param verbose choices are:
 ##'        0 = silent
 ##'        1 = progress bar
@@ -86,7 +87,7 @@ is.trained <- function(x) UseMethod("is.trained")
 ##' @return trained GNN
 ##' @author Marius Hofert
 fitGNN.gnn_GNN <- function(x, data, batch.size = nrow(data), n.epoch = 100, prior = NULL,
-                           verbose = 2, ...)
+                           max.n.prior = 5000, verbose = 2, ...)
 {
     ## Checks
     if(!is.matrix(data))
@@ -126,6 +127,14 @@ fitGNN.gnn_GNN <- function(x, data, batch.size = nrow(data), n.epoch = 100, prio
                dots <- list(...)
                if(has.callbacks) dots$callbacks <- NULL # remove callbacks from '...'
                tm <- system.time(history <- do.call(fit, args = c(args, dots)))
+
+               ## Update slots of 'x'
+               x[["n.train"]] <- dim.train[1]
+               x[["batch.size"]] <- batch.size
+               x[["n.epoch"]] <- n.epoch
+               x[["loss"]] <- history[["metrics"]][["loss"]] # (only interesting component in there)
+               x[["time"]] <- tm
+               x[["prior"]] <- prior[seq_len(min(nrow(prior), max.n.prior)),] # grab out at most max.n.prior samples
            },
            ## "VAE" = {
            ##     ## Note:
@@ -135,13 +144,6 @@ fitGNN.gnn_GNN <- function(x, data, batch.size = nrow(data), n.epoch = 100, prio
            ##         batch_size = batch.size, epochs = n.epoch, verbose = 0, ...)
            ## },
            stop("Wrong 'type'"))
-
-    ## Update slots of 'x'
-    x[["n.train"]] <- dim.train[1]
-    x[["batch.size"]] <- batch.size
-    x[["n.epoch"]] <- n.epoch
-    x[["loss"]] <- history[["metrics"]][["loss"]] # (only interesting component in there)
-    x[["time"]] <- tm
 
     ## Return trained GNN
     x

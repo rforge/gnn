@@ -37,6 +37,8 @@ print.gnn_GNN <- function(x, ...)
         fmt <- paste0("%.",dgts,"f")
         res[["loss"]] <- noquote(paste(paste(sprintf(fmt, res[["loss"]][1:7]), collapse = " "), "..."))
     }
+    dm <- dim(res[["prior"]])
+    res[["prior"]] <- noquote(paste0("(",dm[1],", ",dm[2],")-matrix of prior samples"))
     res <- unclass(res) # see 'note' above
     print(res)
 }
@@ -67,9 +69,10 @@ str.gnn_GNN <- function(object, ...)
 summary.gnn_GNN <- function(object, ...)
 {
     stopifnot(inherits(object, "gnn_GNN"))
-    summ <- summary(unclass(object)) # calls summary.default() on the list unclass(object)
-    summ[,"Class"] <- c(summ["model", "Class"], sapply(object[names(object) != "model"], class)) # fix classes
-    summ
+    smm <- summary(unclass(object)) # calls summary.default() on the list unclass(object)
+    smm[,"Class"] <- c(smm["model", "Class"], # fix "Class" column
+                       sapply(object[names(object) != "model"], function(x) class(x)[1]))
+    smm
 }
 
 ##' @title Dim Method for Objects of Class "gnn_GNN"

@@ -2,12 +2,12 @@
 - Fix: Paper citations from arXiv (once published)
 
 ## Medium-term
-- non-exported ./R/model.R:
+- export (very small doc) ./R/model.R classes and methods:
   + implement and export methods rModel, fitModel, save/load, print, etc.
   + incorporate S4 methods of 'copula' as S3 methods in gnn (objects, rCopula, fitCopula)
 
 ## Long-term ideas
-- plot method: what to use as 'low' and 'up' values to evaluate NN at (low,...,low,up,low,...,low)?
+- Would be good to incorporate LSTMs ("gnn_LSTM", "gnn_GNN", "gnn_Model") based on keras
 - KL(): If an analytical (differentiable) form exits for K-L divergence
         between copulas, we could propose an interesting extension.
         (Simpler) extensions to consider first: encoder maps to non-diagonal

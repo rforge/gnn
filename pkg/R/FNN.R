@@ -132,7 +132,8 @@ FNN <- function(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sig
         batch.size = NA_integer_, # integer(1) specifying the batch size used for training (or NA if not trained)
         n.epoch = NA_integer_, # integer(1) specifying the number of epochs used for training (or NA if not trained)
         loss = NA_real_, # numeric(n.epoch) containing the loss function values per epoch of training (or NA if not trained)
-        time = system.time(NULL)), # object of class "proc_time" (for training time)
+        time = system.time(NULL), # object of class "proc_time" (for training time)
+        prior = matrix(, nrow = 1, ncol = dim[1])), # for a (sub-)sample of the prior (e.g. for plot())
         ## Class (part of structure())
         class = c("gnn_FNN", "gnn_GNN", "gnn_Model"))
 }

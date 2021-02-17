@@ -62,6 +62,8 @@ FNN(dim = c(2, 2), activation = c(rep("relu", length(dim) - 2), "sigmoid"),
       loss function values per epoch.}
     \item{\code{time}}{object of S3 class \code{"proc_time"}
       containing the training time (if trained).}
+    \item{\code{prior}}{\code{\link{matrix}} containing a (sub-)sample
+      of the prior (if trained).}
   }
 }
 \details{
@@ -156,8 +158,8 @@ library(qrng) # for sobol()
 V.NN.   <- rGNN(NN,   size = m, method = "sobol", randomize = "Owen")
 V.GMMN. <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
-plot(V.NN.,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
-plot(V.GMMN.,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.NN.,   xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+plot(V.GMMN., xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
 layout(1)
 par(opar)
 }

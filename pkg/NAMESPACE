@@ -37,7 +37,7 @@ importFrom("tools",
            "file_path_sans_ext")
 
 importFrom("graphics",
-           "mtext")
+           "pairs", "mtext")
 
 importFrom("qrng",
            "sobol")

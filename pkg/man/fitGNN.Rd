@@ -12,7 +12,7 @@
 }
 \usage{
 \method{fitGNN}{gnn_GNN}(x, data, batch.size = nrow(data), n.epoch = 100,
-    prior = NULL, verbose = 2, ...)
+    prior = NULL, max.n.prior = 5000, verbose = 2, ...)
 \method{fitGNNonce}{gnn_GNN}(x, data, batch.size = nrow(data), n.epoch = 100,
     prior = NULL, verbose = 2, file = NULL, name = NULL, ...)
 \method{is.trained}{gnn_GNN}(x)
@@ -36,6 +36,8 @@
   \item{prior}{\eqn{(n, d)}-matrix of prior samples; see also
     \code{\link{rPrior}()}. If \code{prior = NULL} a sample of
     independent N(0,1) random variates is generated.}
+  \item{max.n.prior}{maximum number of prior samples stored in \code{x}
+    after training.}
   \item{verbose}{\code{\link{integer}} verbose level. Choices are:
     \describe{
       \item{0}{silent (no output).}
