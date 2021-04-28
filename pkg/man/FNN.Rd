@@ -140,26 +140,47 @@ plot(GMMN, plot.type = "loss") # plot the loss after each epoch
 ##   should be (much) larger (e.g., batch.size = 5000, n.epoch = 300).
 ## - Training is not reproducible (due to keras).
 
-## Generate from the two models
+## Model 3: A FNN with CvM loss function
+FN <- FNN(c(d, 300, d), loss.fun = "CvM")
+FN <- fitGNN(FN, data = U, batch.size = 500, n.epoch = 10,
+             callbacks = callback_early_stopping(monitor = "loss",
+                                                 min_delta = 1e-3, patience = 3,
+                                                 restore_best_weights = TRUE))
+plot(FN, plot.type = "loss") # plot the loss after each epoch
+
+## Sample from the different models
 set.seed(271)
 V.NN <- rGNN(NN, size = m)
 set.seed(271)
 V.GMMN <- rGNN(GMMN, size = m)
+set.seed(271)
+V.FN <- rGNN(FN, size = m)
 
 ## Joint plot of training subsample with GMMN PRNs. Clearly, the MSE
 ## cannot be used to learn the distribution correctly.
-layout(t(1:3))
+layout(matrix(1:4, ncol = 2, byrow = TRUE))
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
+mtext("Training subsample", side = 4, line = 0.4, adj = 0)
 plot(V.NN,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+mtext("Trained NN with MSE loss", side = 4, line = 0.4, adj = 0)
 plot(V.GMMN,  xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+mtext("Trained NN with MMD loss", side = 4, line = 0.4, adj = 0)
+plot(V.FN,    xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+mtext("Trained NN with CvM loss", side = 4, line = 0.4, adj = 0)
 
 ## Joint plot of training subsample with GMMN QRNs
 library(qrng) # for sobol()
 V.NN.   <- rGNN(NN,   size = m, method = "sobol", randomize = "Owen")
 V.GMMN. <- rGNN(GMMN, size = m, method = "sobol", randomize = "Owen")
+V.FN.   <- rGNN(FN,   size = m, method = "sobol", randomize = "Owen")
 plot(U[1:m,], xlab = expression(U[1]), ylab = expression(U[2]), cex = 0.2)
+mtext("Training subsample", side = 4, line = 0.4, adj = 0)
 plot(V.NN.,   xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+mtext("Trained NN with MSE loss", side = 4, line = 0.4, adj = 0)
 plot(V.GMMN., xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+mtext("Trained NN with MMD loss", side = 4, line = 0.4, adj = 0)
+plot(V.FN.,   xlab = expression(V[1]), ylab = expression(V[2]), cex = 0.2)
+mtext("Trained NN with CvM loss", side = 4, line = 0.4, adj = 0)
 layout(1)
 par(opar)
 }
