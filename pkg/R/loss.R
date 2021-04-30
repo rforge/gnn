@@ -112,7 +112,7 @@ CvM_similarity <- function(x, y)
     x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor
     y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor
     mx. <- tf$maximum(x., y.) # (n, m, d)-tensor, where [i, k, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
-    mx <- tf$reshape(mx., shape = c(nrow(x) * nrow(y), ncol(x))) # (n * m, d)-tensor
+    mx <- tf$reshape(mx., shape = c(-1L, ncol(x))) # (n * m, d)-tensor
     prd <- tf$reduce_prod(1-mx, axis = 1L) # (n * m, 1)-tensor
     tf$reduce_sum(prd) # sum all elements
 }
