@@ -109,8 +109,8 @@ CvM_similarity <- function(x, y)
     ##     }))) })))
 
     ## Idea 3: Broadcasting trick
-    x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor (orthogonal to x-axis)
-    y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor (orthogonal to y-axis)
+    x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor
+    y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor
     mx. <- tf$maximum(x., y.) # (n, m, d)-tensor, where [i, k, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
     mx <- tf$reshape(mx., c(-1L, 2L)) # (n * m, d)-tensor
     prd <- tf$reduce_prod(1-mx, axis = 1L) # (n * m, 1)-tensor
@@ -155,12 +155,15 @@ MMD <- function(x, y, ...)
 ##'       n <- 3
 ##'       m <- 4
 ##'       d <- 2
-##'       x.R <- matrix(as.numeric(1:(n * d)), ncol = d) # dummy R object
-##'       y.R <- matrix(as.numeric(1:(m * d)), ncol = d)
-##'       copula::gofT2stat(x.R, y.R) # -2.404762 (res1 = 62; res2 = 133; res3 = 222)
+##'       library(copula)
+##'       set.seed(271)
+##'       U <- pobs(matrix(runif(n * d), ncol = d)) # dummy sample 1
+##'       V <- pobs(matrix(runif(m * d), ncol = d)) # dummy sample 2
+##'       gofT2stat(U, V) 0.03761905
+##'       gofT2stat(U, V, useR = TRUE) # same
 ##'       library(tensorflow)
-##'       x <- tf$convert_to_tensor(x.R, dtype = "float64")
-##'       y <- tf$convert_to_tensor(y.R, dtype = "float64")
+##'       x <- tf$convert_to_tensor(U, dtype = "float64")
+##'       y <- tf$convert_to_tensor(V, dtype = "float64")
 ##'       gnn:::CvM(x, y) # same
 CvM <- function(x, y)
 {
