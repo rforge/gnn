@@ -159,7 +159,7 @@ MMD <- function(x, y, ...)
 ##'       set.seed(271)
 ##'       U <- pobs(matrix(runif(n * d), ncol = d)) # dummy sample 1
 ##'       V <- pobs(matrix(runif(m * d), ncol = d)) # dummy sample 2
-##'       gofT2stat(U, V) 0.03761905
+##'       gofT2stat(U, V) # 0.03761905
 ##'       gofT2stat(U, V, useR = TRUE) # same
 ##'       library(tensorflow)
 ##'       x <- tf$convert_to_tensor(U, dtype = "float64")
