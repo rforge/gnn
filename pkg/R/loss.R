@@ -164,24 +164,33 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
 ##'        dataset)
 ##' @param y (m, d)-tensor (for training typically m = n)
+##' # @param method string indicating the method to be used to evaluate the MMD
 ##' @param ... additional arguments passed to the underlying
 ##'        radial_basis_function_kernel(), most notably 'bandwidth'
 ##' @return 0d tensor containing the MMD
 ##' @author Marius Hofert
-##' @note For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
-MMD <- function(x, y, ...)
+##' @note - For "MMD", one has O(1/n) if x d= y and O(1) if x !d= y
+##'       - (Almost) no checking done for efficiency reasons
+MMD <- function(x, y, ...) # method = c("tensorflow", "C"), ...)
 {
-    ## For when called manually with R objects
-    is.R.x <- !tf$is_tensor(x)
-    is.R.y <- !tf$is_tensor(y)
-    if(is.R.x) x <- tf$convert_to_tensor(x, dtype = "float64")
-    if(is.R.y) y <- tf$convert_to_tensor(y, dtype = "float64")
-    ## Main
-    res <- tf$sqrt(tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
-                   tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
-               2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
-    ## Return
-    if(is.R.x || is.R.y) as.numeric(res) else res
+    ## if(method == "C") { # exact match
+    ##     if(!hasArg("bandwidth"))
+    ##         bandwidth <- 10^c(-3/2, -1, -1/2, -1/4, -1/8, -1/16)
+    ##     ## <could add .Call() here>
+    ##     stop("method = \"C\" is currently not implemented")
+    ## } else {
+        ## For when called manually with R objects # and method = "tensorflow"
+        is.R.x <- !tf$is_tensor(x)
+        is.R.y <- !tf$is_tensor(y)
+        if(is.R.x) x <- tf$convert_to_tensor(x, dtype = "float64")
+        if(is.R.y) y <- tf$convert_to_tensor(y, dtype = "float64")
+        ## Main
+        res <- tf$sqrt(tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
+                       tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
+                       2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
+        ## Return
+        if(is.R.x || is.R.y) as.numeric(res) else res
+    ## }
 }
 
 
