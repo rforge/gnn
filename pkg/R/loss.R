@@ -1,4 +1,87 @@
-### Similarity measures used in loss functions #################################
+### Two-sample Cramer-von-Mises statistic ######################################
+
+##' @title Similarity Function Used in the Two-sample Cramer--von Mises Statistic
+##'        of Remillard, Scaillet (2009, "Testing for equality between two copulas")
+##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
+##'        dataset)
+##' @param y (m, d)-tensor (for training typically m = n)
+##' @return 0d tensor containing the two-sample CvM statistic
+##' @author Marius Hofert
+##' @note - Broadcasting idea (turning arrays of different shapes into compatible ones); see
+##'         https://stackoverflow.com/questions/43534057/evaluate-all-pair-combinations-of-rows-of-two-tensors-in-tensorflow
+##'       - The line applying tf$maximum does the trick:
+##'         Arithmetic operations on an (1, n, d)- and a (m, 1, d)-tensor produce
+##'         a (m, n, d)-tensor (containing all 'm' and 'n' combinations, so all
+##'         combination of rows)
+CvM_similarity <- function(x, y)
+{
+    ## Idea 1: Simply convert the tensors x and y to R arrays, then call
+    ##         copulas' gofT2stat() for computing CvM() directly and convert
+    ##         the result back to a tensor via tf$convert_to_tensor(, dtype = x$dtype):
+    ##         tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
+    ##         => ... but this idea fails because as.array() fails due to
+    ##            disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
+    ##         => need a tensor version.
+
+    ## Idea 2: Via tf$stack(), but hopelessly slow (also slow, but not tried: tf$map_fn)
+    ## n <- nrow(x)
+    ## m <- nrow(y)
+    ## tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
+    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
+    ##         tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
+    ##     }))) })))
+
+    ## Idea 3: Broadcasting trick
+    x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor
+    y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor
+    mx. <- tf$maximum(x., y.) # (n, m, d)-tensor, where [i, k, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
+    mx <- tf$reshape(mx., shape = c(-1L, ncol(x))) # (n * m, d)-tensor
+    prd <- tf$reduce_prod(1-mx, axis = 1L) # (n * m, 1)-tensor
+    tf$reduce_sum(prd) # sum all elements
+}
+
+
+##' @title Two-sample Cramer--von Mises Statistic of Remillard, Scaillet (2009,
+##'        "Testing for equality between two copulas")
+##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
+##'        dataset)
+##' @param y (m, d)-tensor (for training typically m = n)
+##' @return 0d tensor containing the two-sample CvM statistic
+##' @author Marius Hofert
+##' @note MWE:
+##'       n <- 3
+##'       m <- 4
+##'       d <- 2
+##'       library(copula)
+##'       set.seed(271)
+##'       U <- pobs(matrix(runif(n * d), ncol = d)) # dummy sample 1
+##'       V <- pobs(matrix(runif(m * d), ncol = d)) # dummy sample 2
+##'       gofT2stat(U, V) # 0.03761905
+##'       gofT2stat(U, V, useR = TRUE) # same
+##'       library(tensorflow)
+##'       x <- tf$convert_to_tensor(U, dtype = "float64")
+##'       y <- tf$convert_to_tensor(V, dtype = "float64")
+##'       gnn:::CvM(x, y) # same
+CvM <- function(x, y)
+{
+    ## For when called manually with R objects
+    is.R.x <- !tf$is_tensor(x)
+    is.R.y <- !tf$is_tensor(y)
+    if(is.R.x) x <- tf$convert_to_tensor(x, dtype = "float64")
+    if(is.R.y) y <- tf$convert_to_tensor(y, dtype = "float64")
+    ## Main
+    res1 <- CvM_similarity(x, x) # x with x
+    res2 <- CvM_similarity(x, y) # x with y
+    res3 <- CvM_similarity(y, y) # y with y
+    n <- nrow(x)
+    m <- nrow(y)
+    res <- (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
+    ## Return
+    if(is.R.x || is.R.y) as.numeric(res) else res
+}
+
+
+### MMD ########################################################################
 
 ##' @title Radial Basis Function Kernel (Similarity Measure between two Samples
 ##'        Used in the MMD)
@@ -77,49 +160,6 @@ radial_basis_function_kernel <- function(x, y, bandwidth = 10^c(-3/2, -1, -1/2, 
                shape = tf$shape(dst2)) # reshape into the original (n, m) shape
 }
 
-##' @title Similarity Function Used in the Two-sample Cramer--von Mises Statistic
-##'        of Remillard, Scaillet (2009, "Testing for equality between two copulas")
-##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
-##'        dataset)
-##' @param y (m, d)-tensor (for training typically m = n)
-##' @return 0d tensor containing the two-sample CvM statistic
-##' @author Marius Hofert
-##' @note - Broadcasting idea (turning arrays of different shapes into compatible ones); see
-##'         https://stackoverflow.com/questions/43534057/evaluate-all-pair-combinations-of-rows-of-two-tensors-in-tensorflow
-##'       - The line applying tf$maximum does the trick:
-##'         Arithmetic operations on an (1, n, d)- and a (m, 1, d)-tensor produce
-##'         a (m, n, d)-tensor (containing all 'm' and 'n' combinations, so all
-##'         combination of rows)
-CvM_similarity <- function(x, y)
-{
-    ## Idea 1: Simply convert the tensors x and y to R arrays, then call
-    ##         copulas' gofT2stat() for computing CvM() directly and convert
-    ##         the result back to a tensor via tf$convert_to_tensor(, dtype = x$dtype):
-    ##         tf$convert_to_tensor(gofT2stat(as.array(x), as.array(y)), dtype = x$dtype)
-    ##         => ... but this idea fails because as.array() fails due to
-    ##            disabled eager execution during training; see https://stackoverflow.com/questions/66190567/how-to-convert-a-tensor-to-an-r-array-in-a-loss-function-so-without-eager-exec
-    ##         => need a tensor version.
-
-    ## Idea 2: Via tf$stack(), but hopelessly slow (also slow, but not tried: tf$map_fn)
-    ## n <- nrow(x)
-    ## m <- nrow(y)
-    ## tf$reduce_sum(tf$stack(lapply(seq_len(n), function(i) {
-    ##     tf$reduce_sum(tf$stack(lapply(seq_len(m), function(k) {
-    ##         tf$reduce_prod(1-tf$maximum(x[i,], y[k,]))
-    ##     }))) })))
-
-    ## Idea 3: Broadcasting trick
-    x. <- tf$expand_dims(x, axis = 1L) # convert (n, d)-tensor to (n, 1, d)-tensor
-    y. <- tf$expand_dims(y, axis = 0L) # convert (m, d)-tensor to (1, m, d)-tensor
-    mx. <- tf$maximum(x., y.) # (n, m, d)-tensor, where [i, k, j] contains max(x[i,j], y[k,j]); check via k <- 1, i <- 2, j <- 2
-    mx <- tf$reshape(mx., shape = c(-1L, ncol(x))) # (n * m, d)-tensor
-    prd <- tf$reduce_prod(1-mx, axis = 1L) # (n * m, 1)-tensor
-    tf$reduce_sum(prd) # sum all elements
-}
-
-
-### Loss functions #############################################################
-
 ##' @title Maximum Mean Discrepancy (MMD)
 ##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
 ##'        dataset)
@@ -140,45 +180,6 @@ MMD <- function(x, y, ...)
     res <- tf$sqrt(tf$reduce_mean(radial_basis_function_kernel(x, y = x, ...)) +
                    tf$reduce_mean(radial_basis_function_kernel(y, y = y, ...)) -
                2 * tf$reduce_mean(radial_basis_function_kernel(x, y = y, ...))) # tf.Tensor(, shape=(), dtype=float64)
-    ## Return
-    if(is.R.x || is.R.y) as.numeric(res) else res
-}
-
-##' @title Two-sample Cramer--von Mises Statistic of Remillard, Scaillet (2009,
-##'        "Testing for equality between two copulas")
-##' @param x (n, d)-tensor (for training: n = batch size, d = dimension of input
-##'        dataset)
-##' @param y (m, d)-tensor (for training typically m = n)
-##' @return 0d tensor containing the two-sample CvM statistic
-##' @author Marius Hofert
-##' @note MWE:
-##'       n <- 3
-##'       m <- 4
-##'       d <- 2
-##'       library(copula)
-##'       set.seed(271)
-##'       U <- pobs(matrix(runif(n * d), ncol = d)) # dummy sample 1
-##'       V <- pobs(matrix(runif(m * d), ncol = d)) # dummy sample 2
-##'       gofT2stat(U, V) # 0.03761905
-##'       gofT2stat(U, V, useR = TRUE) # same
-##'       library(tensorflow)
-##'       x <- tf$convert_to_tensor(U, dtype = "float64")
-##'       y <- tf$convert_to_tensor(V, dtype = "float64")
-##'       gnn:::CvM(x, y) # same
-CvM <- function(x, y)
-{
-    ## For when called manually with R objects
-    is.R.x <- !tf$is_tensor(x)
-    is.R.y <- !tf$is_tensor(y)
-    if(is.R.x) x <- tf$convert_to_tensor(x, dtype = "float64")
-    if(is.R.y) y <- tf$convert_to_tensor(y, dtype = "float64")
-    ## Main
-    res1 <- CvM_similarity(x, x) # x with x
-    res2 <- CvM_similarity(x, y) # x with y
-    res3 <- CvM_similarity(y, y) # y with y
-    n <- nrow(x)
-    m <- nrow(y)
-    res <- (res1/n^2 - 2*res2/(n*m) + res3/m^2) / (1/n + 1/m) # tf.Tensor(, shape=(), dtype=float64)
     ## Return
     if(is.R.x || is.R.y) as.numeric(res) else res
 }
