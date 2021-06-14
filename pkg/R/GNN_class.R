@@ -1,4 +1,4 @@
-### GNN basic generics #########################################################
+### Generics ###################################################################
 
 ## Note: - print(), str(), summary(), for example, are already generics, so
 ##         don't need to be defined as such. Also note that dim() is already a
@@ -16,7 +16,7 @@ is.GNN <- function(x) UseMethod("is.GNN")
 print.as.human <- function(x) UseMethod("print.as.human")
 
 
-### GNN basic methods ##########################################################
+### Methods ####################################################################
 
 ##' @title Print Method for Objects of Class "gnn_GNN"
 ##' @param x object of class "gnn_GNN"
