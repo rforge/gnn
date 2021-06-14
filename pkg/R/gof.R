@@ -58,7 +58,7 @@ gof2sample <- function(x, y, B = 1000, method = c("MMD", "CvM"), progress = TRUE
                        stop("Wrong 'method'"))
         ## Progress and return
         if(progress && (b %% div) == 0)
-            cat(sprintf("%3d%% done\n", b/B * 100))
+            cat(sprintf("%3d%% done\n", ceiling(b/B * 100)))
         res.
     })
 
